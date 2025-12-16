@@ -56,55 +56,61 @@ export function PropertyCard({
   };
 
   return (
-    <Link href={`/properties/${property._id}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow pt-0">
-        <div className="relative aspect-4/3">
-          <Image
-            src={property.images[0] || "/placeholder.jpg"}
-            alt={property.title}
-            fill
-            className="object-cover"
-          />
-          {user && (
-            <Button
-              variant="secondary"
-              size="icon"
-              className="absolute top-2 right-2 rounded-full"
-              onClick={toggleWishlist}
-              disabled={isPending}
-            >
-              <Heart
-                className={`h-5 w-5 transition-colors ${
-                  inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
-                }`}
-              />
-            </Button>
-          )}
-          <Badge className="absolute bottom-2 left-2">
-            {property.privacyType.replace("_", " ")}
-          </Badge>
-        </div>
+    <Card className="group relative overflow-hidden hover:shadow-lg transition-shadow pt-0">
+      <div className="relative aspect-4/3">
+        <Image
+          src={property.images[0] || "/placeholder.jpg"}
+          alt={property.title}
+          fill
+          className="object-cover"
+        />
+        <Badge className="absolute bottom-2 left-2">
+          {property.privacyType.replace("_", " ")}
+        </Badge>
+      </div>
 
-        <CardContent>
-          <div className="space-y-2">
-            <h3 className="font-semibold truncate">{property.title}</h3>
-            <p className="text-sm text-muted-foreground">
-              {property.location.city}, {property.location.country}
-            </p>
-            <div className="flex items-baseline gap-1">
-              <span className="font-bold">${property.pricePerNight}</span>
-              <span className="text-sm text-muted-foreground">/ night</span>
-            </div>
-            <div className="flex gap-2 text-xs text-muted-foreground">
-              <span>{property.maxGuests} guests</span>
-              <span>•</span>
-              <span>{property.bedrooms} bedrooms</span>
-              <span>•</span>
-              <span>{property.beds} beds</span>
-            </div>
+      <CardContent>
+        <div className="space-y-2">
+          <h3 className="font-semibold truncate">{property.title}</h3>
+          <p className="text-sm text-muted-foreground">
+            {property.location.city}, {property.location.country}
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="font-bold">${property.pricePerNight}</span>
+            <span className="text-sm text-muted-foreground">/ night</span>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+          <div className="flex gap-2 text-xs text-muted-foreground">
+            <span>{property.maxGuests} guests</span>
+            <span>•</span>
+            <span>{property.bedrooms} bedrooms</span>
+            <span>•</span>
+            <span>{property.beds} beds</span>
+          </div>
+        </div>
+      </CardContent>
+
+      <Link
+        href={`/properties/${property._id}`}
+        className="absolute inset-0 z-10"
+      >
+        <span className="sr-only">View {property.title}</span>
+      </Link>
+
+      {user && (
+        <Button
+          variant="secondary"
+          size="icon"
+          className="absolute top-2 right-2 z-20 rounded-full"
+          onClick={toggleWishlist}
+          disabled={isPending}
+        >
+          <Heart
+            className={`h-5 w-5 transition-colors ${
+              inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
+            }`}
+          />
+        </Button>
+      )}
+    </Card>
   );
 }
