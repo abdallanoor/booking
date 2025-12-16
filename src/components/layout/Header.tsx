@@ -17,16 +17,24 @@ import {
   Calendar,
   Heart,
   LayoutDashboard,
-  PlusCircle,
   LogOut,
   LogIn,
   UserPlus,
   User,
+  type LucideIcon,
 } from "lucide-react";
 import { useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { useRouter } from "nextjs-toploader/app";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+// Types wrapper to ensure type safety with minimal noise
+interface HeaderUser {
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+}
 
 const emptySubscribe = () => () => {};
 
@@ -35,7 +43,7 @@ export function Header() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  // Modern hydration mismatch handling without useEffect
+  // Modern hydration mismatch handling
   const isClient = useSyncExternalStore(
     emptySubscribe,
     () => true,
@@ -55,171 +63,200 @@ export function Header() {
     });
   };
 
-  // Prevent hydration mismatch by deferring user-specific rendering
-  if (!isClient) {
-    return (
-      <header className="border-b bg-card">
-        <div className="container py-2">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              Booking
-            </Link>
-            <div className="flex items-center gap-4">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 rounded-full border p-1 pl-3 hover:shadow-md transition-shadow h-auto"
-              >
-                <Menu />
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-    );
-  }
+  if (!isClient) return <HeaderSkeleton />;
 
   return (
     <header className="border-b bg-card">
-      <div className="container py-2">
+      <div className="container py-2.5">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-primary">
-            Booking
-          </Link>
-
-          {/* Right side - Menu */}
-          <div className="flex items-center gap-4">
-            {/* Become a Host Button */}
-            {user && user.role === "Guest" && (
-              <Link href="/become-host" className="hidden md:block">
-                <Button variant="ghost" size="sm" className="rounded-full">
-                  Become a Host
-                </Button>
-              </Link>
-            )}
-
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2 rounded-full border p-1 pl-3 hover:shadow-md transition-shadow h-auto ml-1"
-                >
-                  <Menu />
-                  <Avatar className="h-8 w-8">
-                    {user?.avatar && <AvatarImage src={user.avatar} />}
-                    <AvatarFallback className="bg-muted">
-                      {user ? (
-                        user.name[0].toUpperCase()
-                      ) : (
-                        <User className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 mt-2 rounded-xl shadow-xl"
-              >
-                {user ? (
-                  <>
-                    <div className="px-2 py-1.5 focus:bg-accent focus:text-accent-foreground outline-none">
-                      <p className="font-semibold truncate">{user.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {user.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1 capitalize">
-                        {user.role}
-                      </p>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard/profile">
-                        <User />
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/bookings">
-                        <Calendar />
-                        My Bookings
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/wishlist">
-                        <Heart />
-                        Wishlist
-                      </Link>
-                    </DropdownMenuItem>
-                    {user.role === "Admin" && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/dashboard/properties">
-                            <LayoutDashboard />
-                            Admin Panel
-                          </Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    {user.role === "Host" && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem asChild>
-                          <Link href="/dashboard">
-                            <LayoutDashboard />
-                            Host Dashboard
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/dashboard/properties">
-                            <PlusCircle />
-                            My Properties
-                          </Link>
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                    <DropdownMenuSeparator />
-                    <ThemeToggle />
-
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      disabled={isPending}
-                    >
-                      <LogOut />
-                      {isPending ? "Logging out..." : "Logout"}
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link href="/auth/login">
-                        <LogIn />
-                        Login
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/auth/register">
-                        <UserPlus />
-                        Sign up
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <ThemeToggle />
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          <Logo />
+          <div className="flex items-center gap-3">
+            <NavActions user={user as HeaderUser | null} />
+            <UserProfileLink user={user as HeaderUser | null} />
+            <UserMenu
+              user={user as HeaderUser | null}
+              isPending={isPending}
+              onLogout={handleLogout}
+            />
           </div>
         </div>
       </div>
     </header>
+  );
+}
+
+function Logo() {
+  return (
+    <Link href="/" className="text-2xl font-bold text-primary">
+      Booking
+    </Link>
+  );
+}
+
+function HeaderSkeleton() {
+  return (
+    <header className="border-b bg-card">
+      <div className="container py-2.5">
+        <div className="flex items-center justify-between">
+          <Logo />
+          <div className="flex items-center gap-4">
+            <Button variant="secondary" size="icon" className="rounded-full">
+              <Menu />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function NavActions({ user }: { user: HeaderUser | null }) {
+  if (!user) return null;
+
+  if (user.role === "Admin" || user.role === "Host") {
+    return (
+      <Link href="/dashboard" className="hidden md:block">
+        <Button variant="ghost" size="sm" className="rounded-full">
+          Dashboard
+        </Button>
+      </Link>
+    );
+  }
+
+  if (user.role === "Guest") {
+    return (
+      <Link href="/become-host" className="hidden md:block">
+        <Button variant="ghost" size="sm" className="rounded-full">
+          Become a Host
+        </Button>
+      </Link>
+    );
+  }
+
+  return null;
+}
+
+function UserProfileLink({ user }: { user: HeaderUser | null }) {
+  if (!user) return null;
+
+  return (
+    <Link href="/profile">
+      <Avatar className="size-8 hover:opacity-80 transition-opacity">
+        {user.avatar && <AvatarImage src={user.avatar} />}
+        <AvatarFallback className="bg-muted">
+          {user.name?.[0]?.toUpperCase() ?? "U"}
+        </AvatarFallback>
+      </Avatar>
+    </Link>
+  );
+}
+
+function UserMenu({
+  user,
+  isPending,
+  onLogout,
+}: {
+  user: HeaderUser | null;
+  isPending: boolean;
+  onLogout: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="secondary" size="icon" className="rounded-full">
+          <Menu />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 mt-2.5">
+        {user ? (
+          <AuthenticatedMenu
+            user={user}
+            isPending={isPending}
+            onLogout={onLogout}
+          />
+        ) : (
+          <GuestMenu />
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function AuthenticatedMenu({
+  user,
+  isPending,
+  onLogout,
+}: {
+  user: HeaderUser;
+  isPending: boolean;
+  onLogout: () => void;
+}) {
+  const showDashboard = user.role === "Admin" || user.role === "Host";
+
+  return (
+    <>
+      <div className="px-2 py-1.5 focus:bg-accent focus:text-accent-foreground outline-none">
+        <p className="font-semibold truncate">{user.name}</p>
+        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+        <p className="text-xs text-muted-foreground mt-1 capitalize">
+          {user.role}
+        </p>
+      </div>
+      <DropdownMenuSeparator />
+
+      <MenuItem href="/profile" icon={User} label="Profile" />
+      <MenuItem href="/bookings" icon={Calendar} label="My Bookings" />
+      <MenuItem href="/wishlist" icon={Heart} label="Wishlist" />
+
+      {showDashboard && (
+        <>
+          <DropdownMenuSeparator />
+          <MenuItem
+            href="/dashboard"
+            icon={LayoutDashboard}
+            label="Dashboard"
+          />
+        </>
+      )}
+
+      <DropdownMenuSeparator />
+      <ThemeToggle />
+      <DropdownMenuSeparator />
+
+      <DropdownMenuItem onClick={onLogout} disabled={isPending}>
+        <LogOut />
+        {isPending ? "Logging out..." : "Logout"}
+      </DropdownMenuItem>
+    </>
+  );
+}
+
+function GuestMenu() {
+  return (
+    <>
+      <MenuItem href="/auth/login" icon={LogIn} label="Login" />
+      <MenuItem href="/auth/register" icon={UserPlus} label="Sign up" />
+      <DropdownMenuSeparator />
+      <ThemeToggle />
+    </>
+  );
+}
+
+function MenuItem({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+}) {
+  return (
+    <DropdownMenuItem asChild>
+      <Link href={href}>
+        <Icon />
+        {label}
+      </Link>
+    </DropdownMenuItem>
   );
 }
