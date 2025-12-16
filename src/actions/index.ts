@@ -1,0 +1,151 @@
+"use server";
+
+import { revalidateTag, revalidatePath } from "next/cache";
+import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
+import type { Property, Booking, DashboardStats } from "@/types";
+
+// Re-export DashboardStats for convenience
+export type { DashboardStats };
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function revalidateProperties() {
+  revalidateTag("properties", "max");
+  revalidateTag("host-properties", "max");
+  revalidatePath("/dashboard/properties", "page");
+}
+
+function revalidateBookings() {
+  revalidateTag("bookings", "max");
+  revalidatePath("/bookings", "page");
+  revalidatePath("/dashboard/bookings", "page");
+}
+
+function revalidateWishlist() {
+  revalidateTag("wishlist", "max");
+  revalidatePath("/wishlist", "page");
+}
+
+// ============================================================================
+// PROPERTY ACTIONS
+// ============================================================================
+
+export async function getPropertiesAction() {
+  return await apiGet<{ data: { properties: Property[] } }>(
+    "/properties?dashboard=true",
+    {
+      cache: "no-store",
+      tags: ["properties"],
+    }
+  );
+}
+
+export async function createPropertyAction(data: unknown) {
+  const result = await apiPost("/properties", data);
+  revalidateProperties();
+  return result;
+}
+
+export async function updatePropertyAction(id: string, data: unknown) {
+  const result = await apiPut(`/properties/${id}`, data);
+  revalidateProperties();
+  revalidateTag(`property-${id}`, "max");
+  return result;
+}
+
+export async function updatePropertyStatusAction(
+  id: string,
+  status: "approved" | "rejected"
+) {
+  const result = await apiPatch(`/properties/${id}`, { status });
+  revalidateProperties();
+  return result;
+}
+
+export async function deletePropertyAction(id: string) {
+  const result = await apiDelete(`/properties/${id}`);
+  revalidateProperties();
+  return result;
+}
+
+// ============================================================================
+// BOOKING ACTIONS
+// ============================================================================
+
+export async function createBookingAction(data: unknown) {
+  const result = await apiPost("/bookings", data);
+  revalidateBookings();
+  return result;
+}
+
+export async function cancelBookingAction(id: string) {
+  const result = await apiPatch(`/bookings/${id}`, { status: "cancelled" });
+  revalidateBookings();
+  revalidateTag(`booking-${id}`, "max");
+  return result;
+}
+
+// ============================================================================
+// WISHLIST ACTIONS
+// ============================================================================
+
+export async function addToWishlistAction(propertyId: string) {
+  const result = await apiPost("/wishlist", { propertyId });
+  revalidateWishlist();
+  return result;
+}
+
+export async function removeFromWishlistAction(propertyId: string) {
+  const result = await apiDelete(`/wishlist/${propertyId}`);
+  revalidateWishlist();
+  return result;
+}
+
+// ============================================================================
+// DASHBOARD ACTIONS
+// ============================================================================
+
+export async function getDashboardStatsAction(): Promise<DashboardStats> {
+  // Parallel fetch for optimized dashboard loading
+  const [propertiesRes, bookingsRes] = await Promise.all([
+    apiGet<{ data: { properties: Property[] } }>("/properties?dashboard=true", {
+      revalidate: 0,
+      tags: ["properties"],
+    }),
+    apiGet<{ data: { bookings: Booking[] } }>("/bookings", {
+      revalidate: 0,
+      tags: ["bookings"],
+    }),
+  ]);
+
+  const properties = propertiesRes.data.properties;
+  const bookings = bookingsRes.data.bookings;
+
+  // Calculate stats
+  const totalProperties = properties.length;
+  const totalBookings = bookings.length;
+  const totalRevenue = bookings
+    .filter((b) => b.status === "confirmed")
+    .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+  const pendingProperties = properties.filter(
+    (p) => p.status === "pending"
+  ).length;
+
+  return {
+    totalProperties,
+    totalBookings,
+    totalRevenue,
+    pendingProperties,
+  };
+}
+
+// ============================================================================
+// AUTH ACTIONS
+// ============================================================================
+
+export async function logoutAction() {
+  await apiPost("/auth/logout", {});
+  revalidatePath("/", "layout");
+}
