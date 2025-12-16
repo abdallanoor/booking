@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import NextImage from "next/image";
 import { createPropertyAction, updatePropertyAction } from "@/actions";
 import { Button } from "@/components/ui/button";

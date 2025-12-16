@@ -8,7 +8,7 @@ import { LayoutDashboard, Building2, CalendarDays, LogOut } from "lucide-react";
 import { logoutAction } from "@/actions";
 import { startTransition } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 export function Sidebar() {
   const pathname = usePathname();

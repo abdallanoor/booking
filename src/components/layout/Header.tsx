@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const emptySubscribe = () => () => {};

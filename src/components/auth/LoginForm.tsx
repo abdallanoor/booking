@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { GoogleLoginBtn } from "./GoogleLoginBtn";
+import { useRouter } from "nextjs-toploader/app";
 
 export function LoginForm() {
   const router = useRouter();

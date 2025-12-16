@@ -2,8 +2,8 @@
 
 import { ClientLayout } from "@/components/layout/ClientLayout";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "nextjs-toploader/app";
 
 export default function BecomeHostPage() {
   const router = useRouter();
