@@ -65,7 +65,7 @@ Ensure you have the following installed:
     GOOGLE_CLIENT_ID=your_google_client_id
 
     # Cloudinary
-    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+    CLOUDINARY_CLOUD_NAME=your_cloud_name
     CLOUDINARY_API_KEY=your_api_key
     CLOUDINARY_API_SECRET=your_api_secret
 
