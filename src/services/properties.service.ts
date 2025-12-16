@@ -20,7 +20,7 @@ export async function getProperties(
   const response = await apiGet<{ data: { properties: Property[] } }>(
     `/properties${query ? `?${query}` : ""}`,
     {
-      revalidate: 60, // Cache for 60 seconds
+      revalidate: 0, // No cache
       tags: ["properties"],
     }
   );
