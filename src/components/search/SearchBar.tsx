@@ -49,10 +49,10 @@ export function SearchBar() {
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
-      <div className="flex flex-col md:flex-row items-center bg-card rounded-2xl md:rounded-full border shadow-lg hover:shadow-xl transition-shadow duration-300 divide-y md:divide-y-0 md:divide-x p-1 overflow-hidden md:overflow-visible">
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="flex flex-col md:flex-row h-auto md:h-16 bg-card rounded-2xl md:rounded-full border shadow-lg hover:shadow-xl duration-300 divide-y md:divide-y-0 overflow-hidden md:overflow-visible">
         {/* Location Input */}
-        <div className="relative flex-1 px-6 py-3 hover:bg-muted rounded-xl md:rounded-full cursor-pointer transition w-full md:w-auto group">
+        <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto group flex flex-col justify-center md:h-full peer/loc">
           <label className="block text-xs font-bold text-foreground mb-0.5 group-hover:text-foreground/80">
             Where
           </label>
@@ -69,8 +69,9 @@ export function SearchBar() {
         {/* Dates (Unified) */}
         <Popover>
           <PopoverTrigger asChild>
-            <div className="relative flex-[1.5] px-6 py-3 hover:bg-muted rounded-xl md:rounded-full cursor-pointer transition w-full md:w-auto text-left group">
-              <label className="block text-xs font-bold text-foreground mb-0.5 group-hover:text-foreground/80">
+            <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto text-left group/dates flex flex-col justify-center md:h-full peer/dates peer-hover/loc:[&>.search-separator]:hidden">
+              <div className="search-separator hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/dates:hidden" />
+              <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/dates:text-foreground/80">
                 Dates
               </label>
               <div
@@ -94,25 +95,24 @@ export function SearchBar() {
               </div>
             </div>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="center">
+          <PopoverContent className="w-auto p-0" align="start">
             <Calendar
-              initialFocus
               mode="range"
               defaultMonth={date?.from}
               selected={date}
               onSelect={setDate}
-              numberOfMonths={2}
               disabled={(date) => date < new Date()}
             />
           </PopoverContent>
         </Popover>
 
         {/* Guests & Search Button */}
-        <div className="relative flex-[0.8] pl-6 pr-2 py-2 hover:bg-muted rounded-xl md:rounded-full cursor-pointer transition flex items-center justify-between w-full md:w-auto group">
+        <div className="relative flex-[1.2] pr-2 py-2 md:py-0 hover:bg-muted md:rounded-full cursor-pointer flex items-center justify-between w-full md:w-auto group/guests md:h-full peer-hover/dates:[&>.search-separator]:hidden">
+          <div className="search-separator hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/guests:hidden" />
           <Popover>
             <PopoverTrigger asChild>
-              <div className="flex-1 text-left">
-                <label className="block text-xs font-bold text-foreground mb-0.5 group-hover:text-foreground/80">
+              <div className="flex-1 text-left pl-6 h-full flex flex-col justify-center">
+                <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/guests:text-foreground/80">
                   Who
                 </label>
                 <div
@@ -127,7 +127,7 @@ export function SearchBar() {
                 </div>
               </div>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="end">
+            <PopoverContent className="w-72" align="start" side="bottom">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold text-foreground">Adults</div>
@@ -163,7 +163,7 @@ export function SearchBar() {
 
           <Button
             size="icon"
-            className="rounded-full h-12 w-12 shrink-0 ml-2 shadow-md hover:scale-105 transition-transform"
+            className="rounded-full h-12 w-12 shrink-0 ml-2 shadow-md hover:scale-105-transform"
             onClick={handleSearch}
           >
             <SearchIcon className="h-5 w-5" />
