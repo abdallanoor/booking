@@ -168,7 +168,7 @@ function NavActions({ user }: { user: HeaderUser | null }) {
     return (
       <Link href="/dashboard" className="hidden md:block">
         <Button variant="ghost" size="sm" className="rounded-full">
-          Switch to hosting
+          {user.role === "Admin" ? "Switch to dashboard" : "Switch to hosting"}
         </Button>
       </Link>
     );
@@ -269,7 +269,11 @@ function AuthenticatedMenu({
             <MenuItem
               href="/dashboard"
               icon={LayoutDashboard}
-              label="Switch to hosting"
+              label={
+                user.role === "Admin"
+                  ? "Switch to dashboard"
+                  : "Switch to hosting"
+              }
             />
           )}
         </>
