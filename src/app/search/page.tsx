@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import { ClientLayout } from "@/components/layout/ClientLayout";
-import { SearchBar } from "@/components/search/SearchBar";
+import { DynamicSearchBar } from "@/components/search/DynamicSearchBar";
 import { PropertiesGrid } from "@/components/property/PropertiesGrid";
 import { searchProperties } from "@/services/search.service";
 import { getWishlist } from "@/services/wishlist.service";
 import { Card, CardContent } from "@/components/ui/card";
+import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
 
 export const dynamic = "force-dynamic";
 
@@ -41,12 +42,8 @@ export default async function SearchPage({
       <main className="container py-8">
         <div className="space-y-8">
           {/* Search Bar */}
-          <Suspense
-            fallback={
-              <div className="w-full h-16 bg-muted/20 rounded-full animate-pulse max-w-5xl mx-auto" />
-            }
-          >
-            <SearchBar />
+          <Suspense fallback={<SearchBarSkeleton />}>
+            <DynamicSearchBar />
           </Suspense>
 
           {/* Results */}

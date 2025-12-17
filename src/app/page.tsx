@@ -5,6 +5,8 @@ import { DynamicSearchBar } from "@/components/search/DynamicSearchBar";
 import { getProperties } from "@/services/properties.service";
 import { getWishlist } from "@/services/wishlist.service";
 
+import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
+
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -36,11 +38,7 @@ export default async function Home() {
             </p> */}
 
             {/* Search Bar */}
-            <Suspense
-              fallback={
-                <div className="w-full h-16 bg-muted/20 rounded-full animate-pulse max-w-5xl mx-auto" />
-              }
-            >
+            <Suspense fallback={<SearchBarSkeleton />}>
               <DynamicSearchBar />
             </Suspense>
           </div>
