@@ -16,7 +16,7 @@ export async function uploadToCloudinary(file: File): Promise<string> {
     cloudinary.uploader
       .upload_stream(
         {
-          folder: "booking-properties",
+          folder: "booking-app",
           resource_type: "auto",
         },
         (error, result) => {
@@ -36,35 +36,21 @@ export async function deleteImageFromCloudinary(
 ): Promise<void> {
   try {
     // Extract public_id from URL
-    // URL format: https://res.cloudinary.com/[cloud_name]/image/upload/v[version]/[folder]/[id].[extension]
-    // We want: [folder]/[id]
+    // Regex to capture the public ID part:
+    // Matches everything after 'upload/' and optionally a version 'v12345/'
+    // until the last dot (extension)
+    const regex = /\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/;
+    const match = imageUrl.match(regex);
 
-    // Split by '/'
-    const parts = imageUrl.split("/");
+    if (!match || !match[1]) {
+      return;
+    }
 
-    // Find 'upload' index
-    const uploadIndex = parts.indexOf("upload");
-    if (uploadIndex === -1) return;
-
-    // Everything after 'upload' and 'v[version]' roughly, but easier:
-    // Cloudinary public IDs can be extracted more robustly:
-    // Get the part after the version number (which starts with v)
-    // Actually, usually it's sufficient to take everything after the version,
-    // and remove the extension.
-
-    // Standard approach:
-    const versionIndex = uploadIndex + 1;
-    // content starts after version
-    const contentParts = parts.slice(versionIndex + 1);
-    const filenameWithExt = contentParts.join("/");
-    const publicId = filenameWithExt.split(".")[0];
-
-    if (!publicId) return;
+    const publicId = match[1];
 
     return new Promise((resolve, reject) => {
-      cloudinary.uploader.destroy(publicId, (error, result) => {
+      cloudinary.uploader.destroy(publicId, { invalidate: true }, (error) => {
         if (error) {
-          console.error("Cloudinary delete error:", error);
           reject(error);
         } else {
           resolve();

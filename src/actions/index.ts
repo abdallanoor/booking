@@ -2,7 +2,14 @@
 
 import { revalidateTag, revalidatePath } from "next/cache";
 import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
-import type { Property, Booking, DashboardStats } from "@/types";
+import type {
+  Property,
+  Booking,
+  DashboardStats,
+  ApiResponse,
+  User,
+} from "@/types";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 // Re-export DashboardStats for convenience
 export type { DashboardStats };
@@ -145,7 +152,42 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
 // AUTH ACTIONS
 // ============================================================================
 
+export async function updateUserAction(data: {
+  name: string;
+  avatar?: string;
+}) {
+  // SECURITY: Explicitly select only allowed fields to prevent Mass Assignment attacks.
+  // This ensures that even if 'role' or other sensitive fields are injected into 'data',
+  // they are stripped out before being sent to the API.
+  const safePayload = {
+    name: data.name,
+    avatar: data.avatar,
+  };
+
+  const result = await apiPut<ApiResponse<{ user: User; message?: string }>>(
+    "/auth/me",
+    safePayload
+  );
+  revalidatePath("/", "layout");
+  return result;
+}
+
 export async function logoutAction() {
   await apiPost("/auth/logout", {});
   revalidatePath("/", "layout");
+}
+
+export async function uploadAvatarAction(formData: FormData) {
+  const file = formData.get("file") as File;
+  if (!file) {
+    return { success: false, message: "No file provided" };
+  }
+
+  try {
+    const imageUrl = await uploadToCloudinary(file);
+    return { success: true, url: imageUrl };
+  } catch (error) {
+    console.error("Avatar upload failed:", error);
+    return { success: false, message: "Failed to upload avatar" };
+  }
 }

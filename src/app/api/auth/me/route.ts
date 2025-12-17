@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth/middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { deleteImageFromCloudinary } from "@/lib/cloudinary";
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,12 +20,67 @@ export async function GET(req: NextRequest) {
         role: user.role,
         emailVerified: user.emailVerified,
         avatar: user.avatar,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
     });
   } catch (error) {
     console.error("Get current user error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to get user";
+    return errorResponse(message, 500);
+  }
+}
+
+
+export async function PUT(req: NextRequest) {
+  try {
+    const user = await getCurrentUser(req);
+
+    if (!user) {
+      return errorResponse("Not authenticated", 401);
+    }
+
+    const body = await req.json();
+    const { name, avatar } = body;
+
+    if (!name) {
+      return errorResponse("Name is required", 400);
+    }
+
+    // Handle avatar update cleanup
+    if (avatar !== undefined && avatar !== user.avatar) {
+      if (user.avatar) {
+        try {
+          await deleteImageFromCloudinary(user.avatar);
+        } catch (error) {
+          console.error("Failed to delete old avatar:", error);
+        }
+      }
+      user.avatar = avatar;
+    }
+
+    user.name = name;
+
+    await user.save();
+
+    return successResponse({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        emailVerified: user.emailVerified,
+        avatar: user.avatar,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      message: "Profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    const message =
+      error instanceof Error ? error.message : "Failed to update profile";
     return errorResponse(message, 500);
   }
 }
