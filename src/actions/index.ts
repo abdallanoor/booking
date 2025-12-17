@@ -121,7 +121,7 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
       revalidate: 0,
       tags: ["properties"],
     }),
-    apiGet<{ data: { bookings: Booking[] } }>("/bookings", {
+    apiGet<{ data: { bookings: Booking[] } }>("/bookings?view=host", {
       revalidate: 0,
       tags: ["bookings"],
     }),
@@ -160,10 +160,13 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
 }
 
 export async function getAllBookingsAction() {
-  return await apiGet<{ data: { bookings: Booking[] } }>("/bookings", {
-    cache: "no-store",
-    tags: ["bookings"],
-  });
+  return await apiGet<{ data: { bookings: Booking[] } }>(
+    "/bookings?view=host",
+    {
+      cache: "no-store",
+      tags: ["bookings"],
+    }
+  );
 }
 
 // ============================================================================

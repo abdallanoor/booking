@@ -14,7 +14,7 @@ export default async function DashboardBookingsPage() {
 
   // Fetch bookings (Unified API handles role-based filtering)
   const response = await apiGet<{ data: { bookings: Booking[] } }>(
-    "/bookings",
+    "/bookings?view=host",
     {
       revalidate: 0,
       tags: ["bookings"],

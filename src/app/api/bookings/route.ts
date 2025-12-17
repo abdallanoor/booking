@@ -11,18 +11,37 @@ export async function GET(req: NextRequest) {
     const user = await requireAuth(req);
     await dbConnect();
 
+    const searchParams = req.nextUrl.searchParams;
+    const view = searchParams.get("view"); // "guest" or "host"
+
     let query = {};
-    if (user.role === "Admin") {
-      // Admin sees all bookings
-      query = {};
+
+    if (view === "guest") {
+      // User sees only bookings they created
+      query = { guest: user._id };
+    } else if (view === "host") {
+      if (user.role === "Admin") {
+        // Admin sees all bookings
+        query = {};
+      } else {
+        // Host sees bookings for their properties
+        const propertyIds = await Property.find({ host: user._id }).distinct(
+          "_id"
+        );
+        query = { property: { $in: propertyIds } };
+      }
     } else {
-      // Host sees bookings for their properties, Guest sees their own bookings
-      const propertyIds = await Property.find({ host: user._id }).distinct(
-        "_id"
-      );
-      query = {
-        $or: [{ guest: user._id }, { property: { $in: propertyIds } }],
-      };
+      // Default behavior (legacy/fallback): Mix of both
+      if (user.role === "Admin") {
+        query = {};
+      } else {
+        const propertyIds = await Property.find({ host: user._id }).distinct(
+          "_id"
+        );
+        query = {
+          $or: [{ guest: user._id }, { property: { $in: propertyIds } }],
+        };
+      }
     }
 
     const bookings = await Booking.find(query)
