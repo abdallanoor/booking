@@ -32,7 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <NextTopLoader color="#E11D48" showSpinner={false} height={2} />
+        <NextTopLoader color="var(--primary)" showSpinner={false} height={2} />
         <ThemeProvider>
           <GoogleOAuthProvider
             clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
