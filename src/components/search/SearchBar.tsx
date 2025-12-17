@@ -127,7 +127,11 @@ export function SearchBar() {
                 </div>
               </div>
             </PopoverTrigger>
-            <PopoverContent className="w-72" align="start" side="bottom">
+            <PopoverContent
+              className="w-72 max-md:mt-3.5"
+              align="start"
+              side="bottom"
+            >
               <div className="flex items-center justify-between">
                 <div>
                   <div className="font-semibold text-foreground">Adults</div>
