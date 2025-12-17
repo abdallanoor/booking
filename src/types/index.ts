@@ -97,6 +97,7 @@ export interface DashboardStats {
   totalBookings: number;
   totalRevenue: number;
   pendingProperties?: number;
+  recentBookings?: Booking[];
 }
 
 // ============================================================================

@@ -140,11 +140,22 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
     (p) => p.status === "pending"
   ).length;
 
+  // Get recent bookings (last 5)
+  // detailed check to avoid "cannot read properties of null" on frontend
+  const recentBookings = [...bookings]
+    .filter((b) => b && b.property && b.guest && b.property._id && b.guest._id)
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    .slice(0, 5);
+
   return {
     totalProperties,
     totalBookings,
     totalRevenue,
     pendingProperties,
+    recentBookings,
   };
 }
 

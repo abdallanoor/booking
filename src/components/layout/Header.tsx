@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +24,7 @@ import {
   UserPlus,
   User,
   type LucideIcon,
+  Map,
 } from "lucide-react";
 import { useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -67,9 +70,10 @@ export function Header() {
 
   return (
     <header className="border-b bg-card">
-      <div className="container py-2.5">
+      <div className="container py-2.5 relative">
         <div className="flex items-center justify-between">
           <Logo />
+          <DashboardNavigation />
           <div className="flex items-center gap-3">
             <NavActions user={user as HeaderUser | null} />
             <UserProfileLink user={user as HeaderUser | null} />
@@ -110,14 +114,60 @@ function HeaderSkeleton() {
   );
 }
 
+function DashboardNavigation() {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith("/dashboard");
+
+  if (!isDashboard) return null;
+
+  const dashboardRoutes = [
+    { href: "/dashboard", label: "Overview" },
+    { href: "/dashboard/properties", label: "Properties" },
+    { href: "/dashboard/bookings", label: "Bookings" },
+  ];
+
+  return (
+    <nav className="hidden md:flex items-center gap-px absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      {dashboardRoutes.map((route) => (
+        <Link
+          key={route.href}
+          href={route.href}
+          className={cn(
+            "text-sm font-medium transition-colors hover:text-primary hover:bg-accent py-1.5 px-3 rounded-full leading-normal dark:hover:bg-accent/50",
+            pathname === route.href ||
+              (route.href !== "/dashboard" && pathname?.startsWith(route.href))
+              ? "text-primary bg-accent"
+              : "text-muted-foreground"
+          )}
+        >
+          {route.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 function NavActions({ user }: { user: HeaderUser | null }) {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith("/dashboard");
+
   if (!user) return null;
+
+  if (isDashboard) {
+    return (
+      <Link href="/" className="hidden md:block">
+        <Button variant="ghost" size="sm" className="rounded-full">
+          Switch to travelling
+        </Button>
+      </Link>
+    );
+  }
 
   if (user.role === "Admin" || user.role === "Host") {
     return (
       <Link href="/dashboard" className="hidden md:block">
         <Button variant="ghost" size="sm" className="rounded-full">
-          Dashboard
+          Switch to hosting
         </Button>
       </Link>
     );
@@ -191,6 +241,7 @@ function AuthenticatedMenu({
   isPending: boolean;
   onLogout: () => void;
 }) {
+  const pathname = usePathname();
   const showDashboard = user.role === "Admin" || user.role === "Host";
 
   return (
@@ -211,11 +262,15 @@ function AuthenticatedMenu({
       {showDashboard && (
         <>
           <DropdownMenuSeparator />
-          <MenuItem
-            href="/dashboard"
-            icon={LayoutDashboard}
-            label="Dashboard"
-          />
+          {pathname?.startsWith("/dashboard") ? (
+            <MenuItem href="/" icon={Map} label="Switch to travelling" />
+          ) : (
+            <MenuItem
+              href="/dashboard"
+              icon={LayoutDashboard}
+              label="Switch to hosting"
+            />
+          )}
         </>
       )}
 

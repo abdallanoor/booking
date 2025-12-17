@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Check, X, Trash2, Loader2, Plus, Edit, MapPin } from "lucide-react";
+import {
+  Check,
+  X,
+  Trash2,
+  Loader2,
+  Edit,
+  MapPin,
+  HousePlus,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -69,8 +77,8 @@ export function PropertiesList({
         <h2 className="text-3xl font-bold tracking-tight">Properties</h2>
         {!isAdmin && (
           <Link href="/dashboard/properties/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> Add Property
+            <Button className="rounded-full">
+              <HousePlus /> Add Property
             </Button>
           </Link>
         )}
@@ -172,7 +180,7 @@ function PropertyGrid({
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     {/* Admin Actions */}
                     {isAdmin && property.status === "pending" && (
                       <>
@@ -181,7 +189,7 @@ function PropertyGrid({
                           onClick={() => onAction(property._id, "approve")}
                           disabled={processingId === property._id}
                         >
-                          <Check className="h-4 w-4 mr-1" /> Approve
+                          <Check /> Approve
                         </Button>
                         <Button
                           size="sm"
@@ -189,7 +197,7 @@ function PropertyGrid({
                           onClick={() => onAction(property._id, "reject")}
                           disabled={processingId === property._id}
                         >
-                          <X className="h-4 w-4 mr-1" /> Reject
+                          <X /> Reject
                         </Button>
                       </>
                     )}
@@ -197,23 +205,27 @@ function PropertyGrid({
                     {/* Common Actions */}
                     {!isAdmin && (
                       <Link href={`/dashboard/properties/${property._id}/edit`}>
-                        <Button size="sm" variant="outline">
-                          <Edit className="h-4 w-4 mr-1" /> Edit
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="rounded-full"
+                        >
+                          <Edit /> Edit
                         </Button>
                       </Link>
                     )}
 
                     <Button
-                      size="sm"
+                      size="icon"
                       variant="outline"
-                      className="text-red-500 hover:text-red-600"
+                      className="text-red-500 hover:text-red-600 rounded-full"
                       onClick={() => onAction(property._id, "delete")}
                       disabled={processingId === property._id}
                     >
                       {processingId === property._id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 />
                       )}
                     </Button>
                   </div>
