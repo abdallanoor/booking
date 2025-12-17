@@ -62,7 +62,7 @@ Ensure you have the following installed:
     JWT_SECRET=your_jwt_secret_key
 
     # OAuth (Google)
-    GOOGLE_CLIENT_ID=your_google_client_id
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 
     # Cloudinary
     CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -70,10 +70,13 @@ Ensure you have the following installed:
     CLOUDINARY_API_SECRET=your_api_secret
 
     # Email (Nodemailer)
-    SMTP_HOST=smtp.example.com
-    SMTP_PORT=587
-    SMTP_USER=your_email_user
-    SMTP_PASSWORD=your_email_password
+    EMAIL_HOST=smtp.example.com
+    EMAIL_PORT=587
+    EMAIL_USER=your_email_user
+    EMAIL_PASS=your_email_password
+
+    # App
+    NEXT_PUBLIC_APP_URL=http://localhost:3000
     ```
 
 4.  **Run the development server:**
