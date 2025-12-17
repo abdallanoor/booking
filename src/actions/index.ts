@@ -159,6 +159,13 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
   };
 }
 
+export async function getAllBookingsAction() {
+  return await apiGet<{ data: { bookings: Booking[] } }>("/bookings", {
+    cache: "no-store",
+    tags: ["bookings"],
+  });
+}
+
 // ============================================================================
 // AUTH ACTIONS
 // ============================================================================

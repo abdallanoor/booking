@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Building2, Calendar } from "lucide-react";
+import { LayoutDashboard, Building2, Calendar, ListTodo } from "lucide-react";
 
 export function DashboardBottomNav() {
   const pathname = usePathname();
@@ -14,6 +14,12 @@ export function DashboardBottomNav() {
       label: "Overview",
       icon: LayoutDashboard,
       active: pathname === "/dashboard",
+    },
+    {
+      href: "/dashboard/today",
+      label: "Today",
+      icon: ListTodo,
+      active: pathname === "/dashboard/today",
     },
     {
       href: "/dashboard/properties",

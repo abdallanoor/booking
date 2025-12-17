@@ -79,6 +79,7 @@ export interface Booking {
     _id: string;
     name: string;
     email: string;
+    avatar?: string;
   };
   checkIn: string;
   checkOut: string;

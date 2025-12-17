@@ -122,6 +122,7 @@ function DashboardNavigation() {
 
   const dashboardRoutes = [
     { href: "/dashboard", label: "Overview" },
+    { href: "/dashboard/today", label: "Today" },
     { href: "/dashboard/properties", label: "Properties" },
     { href: "/dashboard/bookings", label: "Bookings" },
   ];
