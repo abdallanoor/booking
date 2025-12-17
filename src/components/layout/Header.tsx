@@ -191,7 +191,7 @@ function UserProfileLink({ user }: { user: HeaderUser | null }) {
 
   return (
     <Link href="/profile">
-      <Avatar className="size-8 hover:opacity-80 transition-opacity">
+      <Avatar className="size-9 hover:opacity-80 transition-opacity">
         {user.avatar && <AvatarImage src={user.avatar} />}
         <AvatarFallback className="bg-muted">
           {user.name?.[0]?.toUpperCase() ?? "U"}
