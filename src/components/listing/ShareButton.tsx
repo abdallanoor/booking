@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface ShareButtonProps {
-  propertyTitle: string;
+  listingTitle: string;
 }
 
-export function ShareButton({ propertyTitle }: ShareButtonProps) {
+export function ShareButton({ listingTitle }: ShareButtonProps) {
   const handleShare = async () => {
     const shareData = {
-      title: propertyTitle,
-      text: `Check out this property: ${propertyTitle}`,
+      title: listingTitle,
+      text: `Check out this listing: ${listingTitle}`,
       url: window.location.href,
     };
 
@@ -32,7 +32,7 @@ export function ShareButton({ propertyTitle }: ShareButtonProps) {
       try {
         await navigator.clipboard.writeText(window.location.href);
         toast.success("Link copied to clipboard");
-      } catch (error) {
+      } catch {
         toast.error("Failed to copy link");
       }
     }

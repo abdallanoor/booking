@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
-import Property from "@/models/Property";
+import Listing from "@/models/Listing";
 import { requireAuth } from "@/lib/auth/middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
@@ -15,18 +15,18 @@ export async function GET(
     const { id } = await params;
 
     const booking = await Booking.findById(id)
-      .populate("property")
+      .populate("listing")
       .populate("guest", "name email");
 
     if (!booking) {
       return errorResponse("Booking not found", 404);
     }
 
-    // Check if user is the guest or the property host
-    const property = await Property.findById(booking.property);
+    // Check if user is the guest or the listing host
+    const listing = await Listing.findById(booking.listing);
     if (
       booking.guest._id.toString() !== user._id.toString() &&
-      property?.host.toString() !== user._id.toString() &&
+      listing?.host.toString() !== user._id.toString() &&
       user.role !== "Admin"
     ) {
       return errorResponse("Forbidden", 403);

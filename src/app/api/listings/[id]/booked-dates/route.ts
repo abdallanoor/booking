@@ -11,9 +11,9 @@ export async function GET(
     await dbConnect();
     const { id } = await params;
 
-    // Fetch all confirmed/pending bookings for this property
+    // Fetch all confirmed/pending bookings for this listing
     const bookings = await Booking.find({
-      property: id,
+      listing: id,
       status: { $ne: "cancelled" },
     }).select("checkIn checkOut");
 

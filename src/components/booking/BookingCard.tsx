@@ -27,15 +27,15 @@ export function BookingCard({ booking }: BookingCardProps) {
     });
   };
 
-  if (!booking.property) {
+  if (!booking.listing) {
     return (
       <Card className="border-dashed bg-muted/50">
         <CardContent className="flex flex-col items-center justify-center p-6 text-center">
           <p className="font-semibold text-muted-foreground">
-            Property Unavailable
+            Listing Unavailable
           </p>
           <p className="text-sm text-muted-foreground mt-1">
-            The property for this booking is no longer available.
+            The listing for this booking is no longer available.
           </p>
           <div className="flex justify-between w-full max-w-sm mt-4 text-sm">
             <span>Check-in: {format(new Date(booking.checkIn), "PPP")}</span>
@@ -51,10 +51,10 @@ export function BookingCard({ booking }: BookingCardProps) {
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle>{booking.property.title}</CardTitle>
+            <CardTitle>{booking.listing.title}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {booking.property.location.city},{" "}
-              {booking.property.location.country}
+              {booking.listing.location.city},{" "}
+              {booking.listing.location.country}
             </p>
           </div>
           <Badge

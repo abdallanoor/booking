@@ -14,14 +14,14 @@ export interface User {
 }
 
 // ============================================================================
-// PROPERTY TYPES
+// LISTING TYPES
 // ============================================================================
 
-export interface Property {
+export interface Listing {
   _id: string;
   title: string;
   description: string;
-  propertyType: string;
+  listingType: string;
   location: {
     address: string;
     city: string;
@@ -51,7 +51,7 @@ export interface Property {
   updatedAt: string;
 }
 
-export interface PropertyFilters {
+export interface ListingFilters {
   city?: string;
   country?: string;
   minPrice?: number;
@@ -66,7 +66,7 @@ export interface PropertyFilters {
 
 export interface Booking {
   _id: string;
-  property: {
+  listing: {
     _id: string;
     title: string;
     images: string[];
@@ -94,10 +94,10 @@ export interface Booking {
 // ============================================================================
 
 export interface DashboardStats {
-  totalProperties: number;
+  totalListings: number;
   totalBookings: number;
   totalRevenue: number;
-  pendingProperties?: number;
+  pendingListings?: number;
   recentBookings?: Booking[];
 }
 

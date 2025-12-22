@@ -6,16 +6,16 @@ import { successResponse, errorResponse } from "@/lib/api-response";
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ propertyId: string }> }
+  { params }: { params: Promise<{ listingId: string }> }
 ) {
   try {
     const user = await requireAuth(req);
     await dbConnect();
-    const { propertyId } = await params;
+    const { listingId } = await params;
 
     const result = await Wishlist.findOneAndDelete({
       user: user._id,
-      property: propertyId,
+      listing: listingId,
     });
 
     if (!result) {

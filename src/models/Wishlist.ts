@@ -2,7 +2,7 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 
 export interface IWishlist extends Document {
   user: mongoose.Types.ObjectId;
-  property: mongoose.Types.ObjectId;
+  listing: mongoose.Types.ObjectId;
   createdAt: Date;
 }
 
@@ -13,9 +13,9 @@ const wishlistSchema = new Schema<IWishlist>(
       ref: "User",
       required: true,
     },
-    property: {
+    listing: {
       type: Schema.Types.ObjectId,
-      ref: "Property",
+      ref: "Listing",
       required: true,
     },
   },
@@ -25,7 +25,7 @@ const wishlistSchema = new Schema<IWishlist>(
 );
 
 // Compound unique index to prevent duplicate wishlist entries
-wishlistSchema.index({ user: 1, property: 1 }, { unique: true });
+wishlistSchema.index({ user: 1, listing: 1 }, { unique: true });
 
 const Wishlist: Model<IWishlist> =
   mongoose.models.Wishlist ||

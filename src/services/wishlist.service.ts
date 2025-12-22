@@ -1,10 +1,10 @@
 import { apiGet } from "@/lib/api";
-import type { Property } from "./properties.service";
+import type { Listing } from "./listings.service";
 
 export interface WishlistItem {
   _id: string;
   user: string;
-  property: Property;
+  listing: Listing;
   createdAt: string;
 }
 

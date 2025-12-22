@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
     const wishlistItems = await Wishlist.find({ user: user._id })
       .populate({
-        path: "property",
+        path: "listing",
         populate: { path: "host", select: "name avatar" },
       })
       .sort({ createdAt: -1 });
@@ -38,28 +38,28 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const { propertyId } = body;
+    const { listingId } = body;
 
-    if (!propertyId) {
-      return errorResponse("Property ID is required", 400);
+    if (!listingId) {
+      return errorResponse("Listing ID is required", 400);
     }
 
     // Check if already in wishlist
     const existing = await Wishlist.findOne({
       user: user._id,
-      property: propertyId,
+      listing: listingId,
     });
 
     if (existing) {
-      return errorResponse("Property already in wishlist", 400);
+      return errorResponse("Listing already in wishlist", 400);
     }
 
     const wishlistItem = await Wishlist.create({
       user: user._id,
-      property: propertyId,
+      listing: listingId,
     });
 
-    await wishlistItem.populate("property");
+    await wishlistItem.populate("listing");
 
     return successResponse({ wishlistItem }, "Added to wishlist", 201);
   } catch (error) {

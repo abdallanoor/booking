@@ -1,13 +1,13 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Property from "@/models/Property";
+import Listing from "@/models/Listing";
 import { requireRole, getCurrentUser } from "@/lib/auth/middleware";
-import { propertySchema } from "@/lib/validations/property";
+import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 export const dynamic = "force-dynamic";
 
-interface PropertyFilter {
+interface ListingFilter {
   "location.city"?: RegExp;
   "location.country"?: RegExp;
   pricePerNight?: { $gte?: number; $lte?: number };
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filter: PropertyFilter & { _id?: any } = {};
+    const filter: ListingFilter & { _id?: any } = {};
 
     // Date Availability Filtering
     if (checkIn && checkOut) {
@@ -55,15 +55,15 @@ export async function GET(req: NextRequest) {
               },
             ],
           })
-          .select("property")
+          .select("listing")
       );
 
-      const bookedPropertyIds = conflictingBookings.map((b) =>
-        b.property.toString()
+      const bookedListingIds = conflictingBookings.map((b) =>
+        b.listing.toString()
       );
 
-      if (bookedPropertyIds.length > 0) {
-        filter._id = { $nin: bookedPropertyIds };
+      if (bookedListingIds.length > 0) {
+        filter._id = { $nin: bookedListingIds };
       }
     }
 
@@ -102,15 +102,15 @@ export async function GET(req: NextRequest) {
     }
     if (guests) filter.maxGuests = { $gte: parseInt(guests) };
 
-    const properties = await Property.find(filter)
+    const listings = await Listing.find(filter)
       .populate("host", "name avatar")
       .sort({ createdAt: -1 });
 
-    return successResponse({ properties });
+    return successResponse({ listings });
   } catch (error) {
-    console.error("Get properties error:", error);
+    console.error("Get listings error:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to get properties";
+      error instanceof Error ? error.message : "Failed to get listings";
     return errorResponse(message, 500);
   }
 }
@@ -122,14 +122,14 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const validatedData = propertySchema.parse(body);
+    const validatedData = listingSchema.parse(body);
 
-    const property = await Property.create({
+    const listing = await Listing.create({
       ...validatedData,
       host: user._id,
     });
 
-    return successResponse({ property }, "Property created successfully", 201);
+    return successResponse({ listing }, "Listing created successfully", 201);
   } catch (error) {
     if (
       error &&
@@ -146,9 +146,9 @@ export async function POST(req: NextRequest) {
       console.error("Validation error details:", errorMessage);
       return errorResponse(`Validation error: ${errorMessage}`, 400, error);
     }
-    console.error("Create property error:", error);
+    console.error("Create listing error:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to create property";
+      error instanceof Error ? error.message : "Failed to create listing";
     return errorResponse(message, 500);
   }
 }

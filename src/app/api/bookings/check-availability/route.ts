@@ -8,9 +8,9 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const { propertyId, checkIn, checkOut } = body;
+    const { listingId, checkIn, checkOut } = body;
 
-    if (!propertyId || !checkIn || !checkOut) {
+    if (!listingId || !checkIn || !checkOut) {
       return errorResponse("Missing required fields", 400);
     }
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     // Check for overlapping bookings
     const overlappingBooking = await Booking.findOne({
-      property: propertyId,
+      listing: listingId,
       status: { $ne: "cancelled" },
       $or: [
         {
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       available: isAvailable,
       message: isAvailable
         ? "Dates are available"
-        : "Property is already booked for these dates",
+        : "Listing is already booked for these dates",
     });
   } catch (error) {
     console.error("Check availability error:", error);

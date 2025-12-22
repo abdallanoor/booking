@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
-import Property from "@/models/Property";
+import Listing from "@/models/Listing";
 import { requireAuth } from "@/lib/auth/middleware";
 import { bookingSchema } from "@/lib/validations/booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
@@ -24,28 +24,28 @@ export async function GET(req: NextRequest) {
         // Admin sees all bookings
         query = {};
       } else {
-        // Host sees bookings for their properties
-        const propertyIds = await Property.find({ host: user._id }).distinct(
+        // Host sees bookings for their listings
+        const listingIds = await Listing.find({ host: user._id }).distinct(
           "_id"
         );
-        query = { property: { $in: propertyIds } };
+        query = { listing: { $in: listingIds } };
       }
     } else {
       // Default behavior (legacy/fallback): Mix of both
       if (user.role === "Admin") {
         query = {};
       } else {
-        const propertyIds = await Property.find({ host: user._id }).distinct(
+        const listingIds = await Listing.find({ host: user._id }).distinct(
           "_id"
         );
         query = {
-          $or: [{ guest: user._id }, { property: { $in: propertyIds } }],
+          $or: [{ guest: user._id }, { listing: { $in: listingIds } }],
         };
       }
     }
 
     const bookings = await Booking.find(query)
-      .populate("property")
+      .populate("listing")
       .populate("guest", "name email")
       .sort({ createdAt: -1 });
 
@@ -66,16 +66,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = bookingSchema.parse(body);
 
-    const property = await Property.findById(validatedData.propertyId);
+    const listing = await Listing.findById(validatedData.listingId);
 
-    if (!property) {
-      return errorResponse("Property not found", 404);
+    if (!listing) {
+      return errorResponse("Listing not found", 404);
     }
 
-    // Check if property can accommodate guests
-    if (validatedData.guests > property.maxGuests) {
+    // Check if listing can accommodate guests
+    if (validatedData.guests > listing.maxGuests) {
       return errorResponse(
-        `Property can only accommodate ${property.maxGuests} guests`,
+        `Listing can only accommodate ${listing.maxGuests} guests`,
         400
       );
     }
@@ -87,10 +87,10 @@ export async function POST(req: NextRequest) {
     const nights = Math.ceil(
       (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
     );
-    const totalPrice = property.pricePerNight * nights;
+    const totalPrice = listing.pricePerNight * nights;
 
     const booking = await Booking.create({
-      property: property._id,
+      listing: listing._id,
       guest: user._id,
       checkIn: checkInDate,
       checkOut: checkOutDate,
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       status: "confirmed",
     });
 
-    await booking.populate("property");
+    await booking.populate("listing");
 
     return successResponse({ booking }, "Booking created successfully", 201);
   } catch (error) {

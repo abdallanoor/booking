@@ -39,18 +39,17 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Properties</CardTitle>
+          <CardTitle className="text-sm font-medium">Listings</CardTitle>
           <Building2 className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalProperties}</div>
-          {stats.pendingProperties !== undefined &&
-            stats.pendingProperties > 0 && (
-              <div className="mt-2 flex items-center text-xs text-orange-600 font-medium">
-                <AlertCircle className="mr-1 h-3 w-3" />
-                {stats.pendingProperties} pending approval
-              </div>
-            )}
+          <div className="text-2xl font-bold">{stats.totalListings}</div>
+          {stats.pendingListings !== undefined && stats.pendingListings > 0 && (
+            <div className="mt-2 flex items-center text-xs text-orange-600 font-medium">
+              <AlertCircle className="mr-1 h-3 w-3" />
+              {stats.pendingListings} pending approval
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -1,5 +1,5 @@
 import { apiGet } from "@/lib/api";
-import type { Property } from "./properties.service";
+import type { Listing } from "./listings.service";
 
 export interface SearchFilters {
   location?: string;
@@ -8,10 +8,10 @@ export interface SearchFilters {
   guests?: number;
 }
 
-// Search properties with minimal caching
-export async function searchProperties(
+// Search listings with minimal caching
+export async function searchListings(
   filters: SearchFilters
-): Promise<Property[]> {
+): Promise<Listing[]> {
   const params = new URLSearchParams();
   if (filters.location) params.append("location", filters.location);
   if (filters.checkIn) params.append("checkIn", filters.checkIn);
@@ -19,11 +19,11 @@ export async function searchProperties(
   if (filters.guests) params.append("guests", filters.guests.toString());
 
   const response = await apiGet<{
-    data: { properties: Property[]; count: number };
+    data: { listings: Listing[]; count: number };
   }>(`/search?${params.toString()}`, {
     revalidate: 30, // Short cache for search results
     tags: ["search"],
   });
 
-  return response.data.properties;
+  return response.data.listings;
 }

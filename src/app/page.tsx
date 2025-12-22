@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { ClientLayout } from "@/components/layout/ClientLayout";
-import { PropertiesGrid } from "@/components/property/PropertiesGrid";
+import { ListingsGrid } from "@/components/listing/ListingsGrid";
 import { DynamicSearchBar } from "@/components/search/DynamicSearchBar";
-import { getProperties } from "@/services/properties.service";
+import { getListings } from "@/services/listings.service";
 import { getWishlist } from "@/services/wishlist.service";
 
 import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
@@ -11,7 +11,7 @@ import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const properties = await getProperties();
+  const listings = await getListings();
 
   let wishlistIds = new Set<string>();
   const cookieStore = await cookies();
@@ -20,9 +20,9 @@ export default async function Home() {
   if (token) {
     try {
       const wishlist = await getWishlist();
-      // Filter out items with null properties
-      const validWishlist = wishlist.filter((item) => item.property !== null);
-      wishlistIds = new Set(validWishlist.map((item) => item.property._id));
+      // Filter out items with null listings
+      const validWishlist = wishlist.filter((item) => item.listing !== null);
+      wishlistIds = new Set(validWishlist.map((item) => item.listing._id));
     } catch (error) {
       console.log(
         "Wishlist fetch skipped:",
@@ -49,8 +49,8 @@ export default async function Home() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-semibold mb-4">Featured Properties</h2>
-            <PropertiesGrid properties={properties} wishlistIds={wishlistIds} />
+            <h2 className="text-2xl font-semibold mb-4">Featured Listings</h2>
+            <ListingsGrid listings={listings} wishlistIds={wishlistIds} />
           </div>
         </div>
       </main>

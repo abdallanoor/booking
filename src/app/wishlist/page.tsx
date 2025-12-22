@@ -1,6 +1,6 @@
 import { ClientLayout } from "@/components/layout/ClientLayout";
 import { getWishlist } from "@/services/wishlist.service";
-import { PropertyCard } from "@/components/property/PropertyCard";
+import { ListingCard } from "@/components/listing/ListingCard";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
@@ -28,8 +28,8 @@ export default async function WishlistPage() {
     );
   }
 
-  // Filter out items with deleted properties
-  const validWishlist = wishlist.filter((item) => item.property !== null);
+  // Filter out items with deleted listings
+  const validWishlist = wishlist.filter((item) => item.listing !== null);
 
   return (
     <ClientLayout>
@@ -40,16 +40,16 @@ export default async function WishlistPage() {
           <Card>
             <CardContent className="text-center">
               <p className="text-muted-foreground">
-                Your wishlist is empty. Start adding properties you love!
+                Your wishlist is empty. Start adding listings you love!
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {validWishlist.map((item) => (
-              <PropertyCard
+              <ListingCard
                 key={item._id}
-                property={item.property}
+                listing={item.listing}
                 isInWishlist={true}
               />
             ))}

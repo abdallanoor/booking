@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-export const propertySchema = z.object({
+export const listingSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  propertyType: z.string().min(1, "Property type is required"),
+  listingType: z.string().min(1, "Listing type is required"),
   location: z.object({
     address: z.string().min(1, "Address is required"),
     city: z.string().min(1, "City is required"),
@@ -28,4 +28,4 @@ export const propertySchema = z.object({
   }),
 });
 
-export type PropertyInput = z.infer<typeof propertySchema>;
+export type ListingInput = z.infer<typeof listingSchema>;

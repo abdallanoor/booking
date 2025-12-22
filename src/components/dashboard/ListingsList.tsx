@@ -19,20 +19,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { updatePropertyStatusAction, deletePropertyAction } from "@/actions";
-import type { Property } from "@/types";
+import { updateListingStatusAction, deleteListingAction } from "@/actions";
+import type { Listing } from "@/types";
 
-interface PropertiesListProps {
-  initialProperties: Property[];
+interface ListingsListProps {
+  initialListings: Listing[];
   userRole: "Admin" | "Host";
 }
 
-export function PropertiesList({
-  initialProperties,
-  userRole,
-}: PropertiesListProps) {
+export function ListingsList({ initialListings, userRole }: ListingsListProps) {
   const router = useRouter();
-  const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [listings, setListings] = useState<Listing[]>(initialListings);
   const [activeTab, setActiveTab] = useState("pending"); // Default for Admin
   const [processingId, setProcessingId] = useState<string | null>(null);
 
@@ -45,19 +42,19 @@ export function PropertiesList({
     setProcessingId(id);
     try {
       if (action === "delete") {
-        if (!confirm("Are you sure you want to delete this property?")) return;
-        await deletePropertyAction(id);
-        setProperties((prev) => prev.filter((p) => p._id !== id));
-        toast.success("Property deleted");
+        if (!confirm("Are you sure you want to delete this listing?")) return;
+        await deleteListingAction(id);
+        setListings((prev) => prev.filter((p) => p._id !== id));
+        toast.success("Listing deleted");
       } else {
         const status = action === "approve" ? "approved" : "rejected";
-        await updatePropertyStatusAction(id, status);
+        await updateListingStatusAction(id, status);
 
         // Update local state
-        setProperties((prev) =>
+        setListings((prev) =>
           prev.map((p) => (p._id === id ? { ...p, status } : p))
         );
-        toast.success(`Property ${status}`);
+        toast.success(`Listing ${status}`);
       }
       router.refresh();
     } catch {
@@ -67,18 +64,18 @@ export function PropertiesList({
     }
   };
 
-  const filteredProperties = isAdmin
-    ? properties.filter((p) => p.status === activeTab)
-    : properties; // Host sees all
+  const filteredListings = isAdmin
+    ? listings.filter((p) => p.status === activeTab)
+    : listings; // Host sees all
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Properties</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Listings</h2>
         {!isAdmin && (
-          <Link href="/dashboard/properties/new">
+          <Link href="/dashboard/listings/new">
             <Button className="rounded-full">
-              <HousePlus /> Add Property
+              <HousePlus /> Add Listing
             </Button>
           </Link>
         )}
@@ -93,8 +90,8 @@ export function PropertiesList({
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-6">
-            <PropertyGrid
-              properties={filteredProperties}
+            <ListingGrid
+              listings={filteredListings}
               isAdmin={isAdmin}
               processingId={processingId}
               onAction={handleAction}
@@ -102,8 +99,8 @@ export function PropertiesList({
           </TabsContent>
         </Tabs>
       ) : (
-        <PropertyGrid
-          properties={properties}
+        <ListingGrid
+          listings={listings}
           isAdmin={isAdmin}
           processingId={processingId}
           onAction={handleAction}
@@ -113,35 +110,35 @@ export function PropertiesList({
   );
 }
 
-function PropertyGrid({
-  properties,
+function ListingGrid({
+  listings,
   isAdmin,
   processingId,
   onAction,
 }: {
-  properties: Property[];
+  listings: Listing[];
   isAdmin: boolean;
   processingId: string | null;
   onAction: (id: string, action: "approve" | "reject" | "delete") => void;
 }) {
-  if (properties.length === 0) {
+  if (listings.length === 0) {
     return (
       <div className="text-center py-12 border rounded-lg bg-muted/10">
-        <p className="text-muted-foreground">No properties found.</p>
+        <p className="text-muted-foreground">No listings found.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {properties.map((property) => (
-        <Card key={property._id}>
+      {listings.map((listing) => (
+        <Card key={listing._id}>
           <CardContent>
             <div className="flex flex-col sm:flex-row gap-6">
               <div className="relative w-full sm:w-48 h-32 shrink-0">
                 <Image
-                  src={property.images[0] || "/placeholder.jpg"}
-                  alt={property.title}
+                  src={listing.images[0] || "/placeholder.jpg"}
+                  alt={listing.title}
                   fill
                   className="object-cover rounded-lg"
                 />
@@ -150,22 +147,22 @@ function PropertyGrid({
               <div className="flex-1 space-y-2">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="text-xl font-semibold">{property.title}</h3>
+                    <h3 className="text-xl font-semibold">{listing.title}</h3>
                     <div className="flex items-center text-sm text-muted-foreground mt-1">
                       <MapPin className="mr-1 h-3 w-3" />
-                      {property.location.city}, {property.location.country}
+                      {listing.location.city}, {listing.location.country}
                     </div>
                   </div>
                   <Badge
                     variant={
-                      property.status === "approved"
+                      listing.status === "approved"
                         ? "default"
-                        : property.status === "rejected"
+                        : listing.status === "rejected"
                         ? "destructive"
                         : "secondary"
                     }
                   >
-                    {property.status || "pending"}
+                    {listing.status || "pending"}
                   </Badge>
                 </div>
 
@@ -173,29 +170,31 @@ function PropertyGrid({
                   <div className="space-y-1">
                     <p className="text-sm">
                       <span className="font-semibold">Host:</span>{" "}
-                      {property.host?.name || "Unknown"}
+                      {listing.host?.name || "Unknown"}
                     </p>
                     <p className="text-lg font-bold">
-                      ${property.pricePerNight}/night
+                      ${listing.pricePerNight}/night
                     </p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     {/* Admin Actions */}
-                    {isAdmin && property.status === "pending" && (
+                    {isAdmin && listing.status === "pending" && (
                       <>
                         <Button
                           size="sm"
-                          onClick={() => onAction(property._id, "approve")}
-                          disabled={processingId === property._id}
+                          onClick={() => onAction(listing._id, "approve")}
+                          disabled={processingId === listing._id}
+                          className="rounded-full"
                         >
                           <Check /> Approve
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => onAction(property._id, "reject")}
-                          disabled={processingId === property._id}
+                          onClick={() => onAction(listing._id, "reject")}
+                          disabled={processingId === listing._id}
+                          className="rounded-full"
                         >
                           <X /> Reject
                         </Button>
@@ -204,7 +203,7 @@ function PropertyGrid({
 
                     {/* Common Actions */}
                     {!isAdmin && (
-                      <Link href={`/dashboard/properties/${property._id}/edit`}>
+                      <Link href={`/dashboard/listings/${listing._id}/edit`}>
                         <Button
                           size="sm"
                           variant="outline"
@@ -219,10 +218,10 @@ function PropertyGrid({
                       size="icon"
                       variant="outline"
                       className="text-red-500 hover:text-red-600 rounded-full"
-                      onClick={() => onAction(property._id, "delete")}
-                      disabled={processingId === property._id}
+                      onClick={() => onAction(listing._id, "delete")}
+                      disabled={processingId === listing._id}
                     >
-                      {processingId === property._id ? (
+                      {processingId === listing._id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <Trash2 />

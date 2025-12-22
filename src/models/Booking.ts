@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema, HydratedDocument } from "mongoose";
 
 export interface IBooking {
-  property: mongoose.Types.ObjectId;
+  listing: mongoose.Types.ObjectId;
   guest: mongoose.Types.ObjectId;
   checkIn: Date;
   checkOut: Date;
@@ -17,9 +17,9 @@ export interface IBookingDocument extends IBooking, Document {
 
 const bookingSchema = new Schema<IBookingDocument>(
   {
-    property: {
+    listing: {
       type: Schema.Types.ObjectId,
-      ref: "Property",
+      ref: "Listing",
       required: true,
     },
     guest: {
@@ -64,7 +64,7 @@ const bookingSchema = new Schema<IBookingDocument>(
 );
 
 // Compound index for availability queries
-bookingSchema.index({ property: 1, checkIn: 1, checkOut: 1 });
+bookingSchema.index({ listing: 1, checkIn: 1, checkOut: 1 });
 bookingSchema.index({ guest: 1 });
 bookingSchema.index({ status: 1 });
 
@@ -78,7 +78,7 @@ bookingSchema.pre("save", async function () {
   }
 
   const overlappingBooking = await mongoose.models.Booking.findOne({
-    property: booking.property,
+    listing: booking.listing,
     _id: { $ne: booking._id },
     status: { $ne: "cancelled" },
     $or: [
@@ -90,7 +90,7 @@ bookingSchema.pre("save", async function () {
   });
 
   if (overlappingBooking) {
-    throw new Error("Property is already booked for the selected dates");
+    throw new Error("Listing is already booked for the selected dates");
   }
 });
 

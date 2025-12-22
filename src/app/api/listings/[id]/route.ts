@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 import dbConnect from "@/lib/mongodb";
-import Property from "@/models/Property";
+import Listing from "@/models/Listing";
 import { requireAuth } from "@/lib/auth/middleware";
-import { propertySchema } from "@/lib/validations/property";
+import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { deleteImageFromCloudinary } from "@/lib/cloudinary";
 
@@ -15,20 +15,20 @@ export async function GET(
     await dbConnect();
     const { id } = await params;
 
-    const property = await Property.findById(id).populate(
+    const listing = await Listing.findById(id).populate(
       "host",
       "name avatar email createdAt"
     );
 
-    if (!property) {
-      return errorResponse("Property not found", 404);
+    if (!listing) {
+      return errorResponse("Listing not found", 404);
     }
 
-    return successResponse({ property });
+    return successResponse({ listing });
   } catch (error) {
-    console.error("Get property error:", error);
+    console.error("Get listing error:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to get property";
+      error instanceof Error ? error.message : "Failed to get listing";
     return errorResponse(message, 500);
   }
 }
@@ -43,26 +43,26 @@ export async function PUT(
     await dbConnect();
     const { id } = await params;
 
-    const property = await Property.findById(id);
+    const listing = await Listing.findById(id);
 
-    if (!property) {
-      return errorResponse("Property not found", 404);
+    if (!listing) {
+      return errorResponse("Listing not found", 404);
     }
 
     // Check permissions
     if (
-      property.host.toString() !== user._id.toString() &&
+      listing.host.toString() !== user._id.toString() &&
       user.role !== "Admin"
     ) {
       return errorResponse("Forbidden", 403);
     }
 
     const body = await req.json();
-    const validatedData = propertySchema.parse(body);
+    const validatedData = listingSchema.parse(body);
 
     // Identify images to delete
     if (validatedData.images) {
-      const oldImages = property.images || [];
+      const oldImages = listing.images || [];
       const newImages = validatedData.images;
 
       // Find images that are in oldImages but not in newImages
@@ -78,13 +78,13 @@ export async function PUT(
       }
     }
 
-    Object.assign(property, validatedData);
-    await property.save();
+    Object.assign(listing, validatedData);
+    await listing.save();
 
-    revalidateTag("properties", "max");
-    revalidateTag(`property-${id}`, "max");
+    revalidateTag("listings", "max");
+    revalidateTag(`listing-${id}`, "max");
 
-    return successResponse({ property }, "Property updated successfully");
+    return successResponse({ listing }, "Listing updated successfully");
   } catch (error) {
     if (
       error &&
@@ -94,9 +94,9 @@ export async function PUT(
     ) {
       return errorResponse("Validation error", 400, error);
     }
-    console.error("Update property error:", error);
+    console.error("Update listing error:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to update property";
+      error instanceof Error ? error.message : "Failed to update listing";
     return errorResponse(message, 500);
   }
 }
@@ -113,8 +113,8 @@ export async function PATCH(
     // We expect { status: ... } or other partial updates
     const body = await req.json();
 
-    const property = await Property.findById(id);
-    if (!property) return errorResponse("Property not found", 404);
+    const listing = await Listing.findById(id);
+    if (!listing) return errorResponse("Listing not found", 404);
 
     // Permission Logic
     if (body.status) {
@@ -130,28 +130,28 @@ export async function PATCH(
       // Other partial updates?
       // Ensure user is owner or admin
       if (
-        property.host.toString() !== user._id.toString() &&
+        listing.host.toString() !== user._id.toString() &&
         user.role !== "Admin"
       ) {
         return errorResponse("Forbidden", 403);
       }
     }
 
-    const updatedProperty = await Property.findByIdAndUpdate(id, body, {
+    const updatedListing = await Listing.findByIdAndUpdate(id, body, {
       new: true,
     }).populate("host", "name email");
 
-    revalidateTag("properties", "max");
-    revalidateTag(`property-${id}`, "max");
+    revalidateTag("listings", "max");
+    revalidateTag(`listing-${id}`, "max");
 
     return successResponse(
-      { property: updatedProperty },
-      "Property updated successfully"
+      { listing: updatedListing },
+      "Listing updated successfully"
     );
   } catch (error) {
-    console.error("Patch property error:", error);
+    console.error("Patch listing error:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to update property";
+      error instanceof Error ? error.message : "Failed to update listing";
     return errorResponse(message, 500);
   }
 }
@@ -165,37 +165,37 @@ export async function DELETE(
     await dbConnect();
     const { id } = await params;
 
-    const property = await Property.findById(id);
+    const listing = await Listing.findById(id);
 
-    if (!property) {
-      return errorResponse("Property not found", 404);
+    if (!listing) {
+      return errorResponse("Listing not found", 404);
     }
 
     // Check restrictions
     if (
-      property.host.toString() !== user._id.toString() &&
+      listing.host.toString() !== user._id.toString() &&
       user.role !== "Admin"
     ) {
       return errorResponse("Forbidden", 403);
     }
 
     // Delete all images from Cloudinary
-    if (property.images && property.images.length > 0) {
+    if (listing.images && listing.images.length > 0) {
       await Promise.all(
-        property.images.map((img) => deleteImageFromCloudinary(img))
+        listing.images.map((img) => deleteImageFromCloudinary(img))
       );
     }
 
-    await Property.findByIdAndDelete(id);
+    await Listing.findByIdAndDelete(id);
 
-    revalidateTag("properties", "max");
-    revalidateTag(`property-${id}`, "max");
+    revalidateTag("listings", "max");
+    revalidateTag(`listing-${id}`, "max");
 
-    return successResponse(null, "Property deleted successfully");
+    return successResponse(null, "Listing deleted successfully");
   } catch (error) {
-    console.error("Delete property error:", error);
+    console.error("Delete listing error:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to delete property";
+      error instanceof Error ? error.message : "Failed to delete listing";
     return errorResponse(message, 500);
   }
 }

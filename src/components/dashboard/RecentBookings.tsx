@@ -45,7 +45,7 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Guest</TableHead>
-              <TableHead>Property</TableHead>
+              <TableHead>Listing</TableHead>
               <TableHead>Dates</TableHead>
               <TableHead>Total</TableHead>
               <TableHead>Status</TableHead>
@@ -74,10 +74,10 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
                 </TableCell>
                 <TableCell>
                   <Link
-                    href={`/properties/${booking.property?._id}`}
+                    href={`/listings/${booking.listing?._id}`}
                     className="hover:underline"
                   >
-                    {booking.property?.title || "Unknown Property"}
+                    {booking.listing?.title || "Unknown Listing"}
                   </Link>
                 </TableCell>
                 <TableCell>

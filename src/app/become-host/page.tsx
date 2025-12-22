@@ -55,7 +55,7 @@ export default function BecomeHostPage() {
               <h3 className="font-semibold">How it works</h3>
               <ol className="space-y-2 text-muted-foreground list-decimal list-inside">
                 <li>Create a host account</li>
-                <li>List your property with photos and details</li>
+                <li>List your listing with photos and details</li>
                 <li>Set your price and availability</li>
                 <li>Welcome guests and start earning</li>
               </ol>

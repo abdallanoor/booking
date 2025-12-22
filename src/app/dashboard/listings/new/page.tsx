@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { PropertyForm } from "@/components/dashboard/PropertyForm";
+import { ListingForm } from "@/components/dashboard/ListingForm";
 
-export default async function NewPropertyPage() {
+export default async function NewListingPage() {
   const user = await getServerUser();
 
   if (!user) {
@@ -15,7 +15,7 @@ export default async function NewPropertyPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <PropertyForm mode="create" />
+      <ListingForm mode="create" />
     </div>
   );
 }

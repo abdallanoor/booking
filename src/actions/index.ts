@@ -3,7 +3,7 @@
 import { revalidateTag, revalidatePath } from "next/cache";
 import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
 import type {
-  Property,
+  Listing,
   Booking,
   DashboardStats,
   ApiResponse,
@@ -18,10 +18,10 @@ export type { DashboardStats };
 // HELPER FUNCTIONS
 // ============================================================================
 
-function revalidateProperties() {
-  revalidateTag("properties", "max");
-  revalidateTag("host-properties", "max");
-  revalidatePath("/dashboard/properties", "page");
+function revalidateListings() {
+  revalidateTag("listings", "max");
+  revalidateTag("host-listings", "max");
+  revalidatePath("/dashboard/listings", "page");
 }
 
 function revalidateBookings() {
@@ -36,44 +36,44 @@ function revalidateWishlist() {
 }
 
 // ============================================================================
-// PROPERTY ACTIONS
+// LISTING ACTIONS
 // ============================================================================
 
-export async function getPropertiesAction() {
-  return await apiGet<{ data: { properties: Property[] } }>(
-    "/properties?dashboard=true",
+export async function getListingsAction() {
+  return await apiGet<{ data: { listings: Listing[] } }>(
+    "/listings?dashboard=true",
     {
       cache: "no-store",
-      tags: ["properties"],
+      tags: ["listings"],
     }
   );
 }
 
-export async function createPropertyAction(data: unknown) {
-  const result = await apiPost("/properties", data);
-  revalidateProperties();
+export async function createListingAction(data: unknown) {
+  const result = await apiPost("/listings", data);
+  revalidateListings();
   return result;
 }
 
-export async function updatePropertyAction(id: string, data: unknown) {
-  const result = await apiPut(`/properties/${id}`, data);
-  revalidateProperties();
-  revalidateTag(`property-${id}`, "max");
+export async function updateListingAction(id: string, data: unknown) {
+  const result = await apiPut(`/listings/${id}`, data);
+  revalidateListings();
+  revalidateTag(`listing-${id}`, "max");
   return result;
 }
 
-export async function updatePropertyStatusAction(
+export async function updateListingStatusAction(
   id: string,
   status: "approved" | "rejected"
 ) {
-  const result = await apiPatch(`/properties/${id}`, { status });
-  revalidateProperties();
+  const result = await apiPatch(`/listings/${id}`, { status });
+  revalidateListings();
   return result;
 }
 
-export async function deletePropertyAction(id: string) {
-  const result = await apiDelete(`/properties/${id}`);
-  revalidateProperties();
+export async function deleteListingAction(id: string) {
+  const result = await apiDelete(`/listings/${id}`);
+  revalidateListings();
   return result;
 }
 
@@ -98,14 +98,14 @@ export async function cancelBookingAction(id: string) {
 // WISHLIST ACTIONS
 // ============================================================================
 
-export async function addToWishlistAction(propertyId: string) {
-  const result = await apiPost("/wishlist", { propertyId });
+export async function addToWishlistAction(listingId: string) {
+  const result = await apiPost("/wishlist", { listingId });
   revalidateWishlist();
   return result;
 }
 
-export async function removeFromWishlistAction(propertyId: string) {
-  const result = await apiDelete(`/wishlist/${propertyId}`);
+export async function removeFromWishlistAction(listingId: string) {
+  const result = await apiDelete(`/wishlist/${listingId}`);
   revalidateWishlist();
   return result;
 }
@@ -116,10 +116,10 @@ export async function removeFromWishlistAction(propertyId: string) {
 
 export async function getDashboardStatsAction(): Promise<DashboardStats> {
   // Parallel fetch for optimized dashboard loading
-  const [propertiesRes, bookingsRes] = await Promise.all([
-    apiGet<{ data: { properties: Property[] } }>("/properties?dashboard=true", {
+  const [listingsRes, bookingsRes] = await Promise.all([
+    apiGet<{ data: { listings: Listing[] } }>("/listings?dashboard=true", {
       revalidate: 0,
-      tags: ["properties"],
+      tags: ["listings"],
     }),
     apiGet<{ data: { bookings: Booking[] } }>("/bookings?view=host", {
       revalidate: 0,
@@ -127,23 +127,21 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
     }),
   ]);
 
-  const properties = propertiesRes.data.properties;
+  const listings = listingsRes.data.listings;
   const bookings = bookingsRes.data.bookings;
 
   // Calculate stats
-  const totalProperties = properties.length;
+  const totalListings = listings.length;
   const totalBookings = bookings.length;
   const totalRevenue = bookings
     .filter((b) => b.status === "confirmed")
     .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-  const pendingProperties = properties.filter(
-    (p) => p.status === "pending"
-  ).length;
+  const pendingListings = listings.filter((p) => p.status === "pending").length;
 
   // Get recent bookings (last 5)
-  // detailed check to avoid "cannot read properties of null" on frontend
+  // detailed check to avoid "cannot read listings of null" on frontend
   const recentBookings = [...bookings]
-    .filter((b) => b && b.property && b.guest && b.property._id && b.guest._id)
+    .filter((b) => b && b.listing && b.guest && b.listing._id && b.guest._id)
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -151,10 +149,10 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
     .slice(0, 5);
 
   return {
-    totalProperties,
+    totalListings,
     totalBookings,
     totalRevenue,
-    pendingProperties,
+    pendingListings,
     recentBookings,
   };
 }

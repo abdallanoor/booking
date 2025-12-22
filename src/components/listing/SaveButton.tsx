@@ -8,12 +8,12 @@ import { addToWishlistAction, removeFromWishlistAction } from "@/actions";
 import { toast } from "sonner";
 
 interface SaveButtonProps {
-  propertyId: string;
+  listingId: string;
   initialIsInWishlist?: boolean;
 }
 
 export function SaveButton({
-  propertyId,
+  listingId,
   initialIsInWishlist = false,
 }: SaveButtonProps) {
   const { user } = useAuth();
@@ -26,7 +26,7 @@ export function SaveButton({
 
   const toggleWishlist = () => {
     if (!user) {
-      toast.error("Please login to save this property");
+      toast.error("Please login to save this listing");
       return;
     }
 
@@ -36,10 +36,10 @@ export function SaveButton({
     startTransition(async () => {
       try {
         if (newState) {
-          await addToWishlistAction(propertyId);
+          await addToWishlistAction(listingId);
           toast.success("Added to wishlist");
         } else {
-          await removeFromWishlistAction(propertyId);
+          await removeFromWishlistAction(listingId);
           toast.success("Removed from wishlist");
         }
       } catch (error) {

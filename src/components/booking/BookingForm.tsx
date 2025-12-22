@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { createBookingAction } from "@/actions";
 import { toast } from "sonner";
-import type { Property } from "@/services/properties.service";
+import type { Listing } from "@/services/listings.service";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -20,11 +20,11 @@ import { Minus, Plus, ChevronDown } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
 interface BookingFormProps {
-  property: Property;
+  listing: Listing;
   bookedDates?: { from: string; to: string }[];
 }
 
-export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
+export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
   const { user } = useAuth();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -118,7 +118,7 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
     startTransition(async () => {
       try {
         await createBookingAction({
-          propertyId: property._id,
+          listingId: listing._id,
           checkIn: format(date.from!, "yyyy-MM-dd"),
           checkOut: format(date.to!, "yyyy-MM-dd"),
           guests: Number(guests),
@@ -140,7 +140,7 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
     <Card className="border shadow-xl rounded-xl overflow-hidden sticky top-24">
       <CardHeader>
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold">${property.pricePerNight}</span>
+          <span className="text-2xl font-bold">${listing.pricePerNight}</span>
           <span className="text-muted-foreground"> night</span>
         </div>
       </CardHeader>
@@ -268,16 +268,16 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
                         size="icon"
                         className="h-8 w-8 rounded-full"
                         onClick={() =>
-                          setGuests(Math.min(property.maxGuests, guests + 1))
+                          setGuests(Math.min(listing.maxGuests, guests + 1))
                         }
-                        disabled={guests >= property.maxGuests}
+                        disabled={guests >= listing.maxGuests}
                       >
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                   <div className="mt-2 text-xs text-muted-foreground text-center">
-                    Max guests: {property.maxGuests}
+                    Max guests: {listing.maxGuests}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -298,20 +298,20 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
           <div className="space-y-3 pt-4">
             <div className="flex justify-between text-muted-foreground">
               <span className="underline">
-                ${property.pricePerNight} x {nights} nights
+                ${listing.pricePerNight} x {nights} nights
               </span>
-              <span>${property.pricePerNight * nights}</span>
+              <span>${listing.pricePerNight * nights}</span>
             </div>
             <div className="pt-4 border-t flex justify-between font-semibold text-foreground text-lg">
               <span>Total</span>
-              <span>${property.pricePerNight * nights}</span>
+              <span>${listing.pricePerNight * nights}</span>
             </div>
           </div>
         )}
 
         {!user && (
           <p className="text-xs text-center text-rose-600 font-medium">
-            Please login to book this property
+            Please login to book this listing
           </p>
         )}
       </CardContent>

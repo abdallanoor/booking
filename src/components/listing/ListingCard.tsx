@@ -9,18 +9,18 @@ import { Heart } from "lucide-react";
 import { addToWishlistAction, removeFromWishlistAction } from "@/actions";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import type { Property } from "@/types";
+import type { Listing } from "@/types";
 import { toast } from "sonner";
 
-interface PropertyCardProps {
-  property: Property;
+interface ListingCardProps {
+  listing: Listing;
   isInWishlist?: boolean;
 }
 
-export function PropertyCard({
-  property,
+export function ListingCard({
+  listing,
   isInWishlist = false,
-}: PropertyCardProps) {
+}: ListingCardProps) {
   const { user } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [inWishlist, setInWishlist] = useState(isInWishlist);
@@ -32,7 +32,7 @@ export function PropertyCard({
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Please login to save this property");
+      toast.error("Please login to save this listing");
       return;
     }
 
@@ -42,10 +42,10 @@ export function PropertyCard({
     startTransition(async () => {
       try {
         if (newState) {
-          await addToWishlistAction(property._id);
+          await addToWishlistAction(listing._id);
           toast.success("Added to wishlist");
         } else {
-          await removeFromWishlistAction(property._id);
+          await removeFromWishlistAction(listing._id);
           toast.success("Removed from wishlist");
         }
       } catch (error) {
@@ -59,41 +59,38 @@ export function PropertyCard({
     <Card className="group relative overflow-hidden hover:shadow-lg transition-shadow pt-0">
       <div className="relative aspect-4/3">
         <Image
-          src={property.images[0] || "/placeholder.jpg"}
-          alt={property.title}
+          src={listing.images[0] || "/placeholder.jpg"}
+          alt={listing.title}
           fill
           className="object-cover"
         />
         <Badge className="absolute bottom-2 left-2">
-          {property.privacyType.replace("_", " ")}
+          {listing.privacyType.replace("_", " ")}
         </Badge>
       </div>
 
       <CardContent>
         <div className="space-y-2">
-          <h3 className="font-semibold truncate">{property.title}</h3>
+          <h3 className="font-semibold truncate">{listing.title}</h3>
           <p className="text-sm text-muted-foreground">
-            {property.location.city}, {property.location.country}
+            {listing.location.city}, {listing.location.country}
           </p>
           <div className="flex items-baseline gap-1">
-            <span className="font-bold">${property.pricePerNight}</span>
+            <span className="font-bold">${listing.pricePerNight}</span>
             <span className="text-sm text-muted-foreground">/ night</span>
           </div>
           <div className="flex gap-2 text-xs text-muted-foreground">
-            <span>{property.maxGuests} guests</span>
+            <span>{listing.maxGuests} guests</span>
             <span>•</span>
-            <span>{property.bedrooms} bedrooms</span>
+            <span>{listing.bedrooms} bedrooms</span>
             <span>•</span>
-            <span>{property.beds} beds</span>
+            <span>{listing.beds} beds</span>
           </div>
         </div>
       </CardContent>
 
-      <Link
-        href={`/properties/${property._id}`}
-        className="absolute inset-0 z-10"
-      >
-        <span className="sr-only">View {property.title}</span>
+      <Link href={`/listings/${listing._id}`} className="absolute inset-0 z-10">
+        <span className="sr-only">View {listing.title}</span>
       </Link>
 
       <Button

@@ -22,10 +22,10 @@ export function DashboardBottomNav() {
       active: pathname === "/dashboard/today",
     },
     {
-      href: "/dashboard/properties",
-      label: "Properties",
+      href: "/dashboard/listings",
+      label: "Listings",
       icon: Building2,
-      active: pathname.startsWith("/dashboard/properties"),
+      active: pathname.startsWith("/dashboard/listings"),
     },
     {
       href: "/dashboard/bookings",

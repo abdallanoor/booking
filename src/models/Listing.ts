@@ -1,9 +1,9 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
-export interface IProperty extends Document {
+export interface IListing extends Document {
   title: string;
   description: string;
-  propertyType: string;
+  listingType: string;
   location: {
     address: string;
     city: string;
@@ -27,7 +27,7 @@ export interface IProperty extends Document {
   createdAt: Date;
 }
 
-const propertySchema = new Schema<IProperty>(
+const listingSchema = new Schema<IListing>(
   {
     title: {
       type: String,
@@ -38,9 +38,9 @@ const propertySchema = new Schema<IProperty>(
       type: String,
       required: [true, "Description is required"],
     },
-    propertyType: {
+    listingType: {
       type: String,
-      required: [true, "Property type is required"],
+      required: [true, "Listing type is required"],
     },
     location: {
       address: {
@@ -130,13 +130,12 @@ const propertySchema = new Schema<IProperty>(
 );
 
 // Indexes
-propertySchema.index({ "location.city": 1 });
-propertySchema.index({ "location.country": 1 });
-propertySchema.index({ pricePerNight: 1 });
-propertySchema.index({ host: 1 });
+listingSchema.index({ "location.city": 1 });
+listingSchema.index({ "location.country": 1 });
+listingSchema.index({ pricePerNight: 1 });
+listingSchema.index({ host: 1 });
 
-const Property: Model<IProperty> =
-  mongoose.models.Property ||
-  mongoose.model<IProperty>("Property", propertySchema);
+const Listing: Model<IListing> =
+  mongoose.models.Listing || mongoose.model<IListing>("Listing", listingSchema);
 
-export default Property;
+export default Listing;

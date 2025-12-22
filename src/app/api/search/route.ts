@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Property from "@/models/Property";
+import Listing from "@/models/Listing";
 import Booking from "@/models/Booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
@@ -35,17 +35,14 @@ export async function GET(req: NextRequest) {
       filter.maxGuests = { $gte: parseInt(guests) };
     }
 
-    let properties = await Property.find(filter).populate(
-      "host",
-      "name avatar"
-    );
+    let listings = await Listing.find(filter).populate("host", "name avatar");
 
-    // Filter out properties that are already booked for the selected dates
+    // Filter out listings that are already booked for the selected dates
     if (checkIn && checkOut) {
       const checkInDate = new Date(checkIn);
       const checkOutDate = new Date(checkOut);
 
-      const bookedProperties = await Booking.find({
+      const bookedListings = await Booking.find({
         status: { $ne: "cancelled" },
         $or: [
           {
@@ -53,17 +50,17 @@ export async function GET(req: NextRequest) {
             checkOut: { $gte: checkInDate },
           },
         ],
-      }).distinct("property");
+      }).distinct("listing");
 
-      properties = properties.filter(
-        (property) =>
-          !bookedProperties.some(
-            (bookedId) => bookedId.toString() === property._id.toString()
+      listings = listings.filter(
+        (listing) =>
+          !bookedListings.some(
+            (bookedId) => bookedId.toString() === listing._id.toString()
           )
       );
     }
 
-    return successResponse({ properties, count: properties.length });
+    return successResponse({ listings, count: listings.length });
   } catch (error) {
     console.error("Search error:", error);
     const message = error instanceof Error ? error.message : "Search failed";

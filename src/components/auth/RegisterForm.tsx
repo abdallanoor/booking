@@ -47,7 +47,7 @@ export function RegisterForm() {
       <CardHeader>
         <CardTitle>Create Account</CardTitle>
         <CardDescription>
-          Sign up to start booking or hosting properties
+          Sign up to start booking or hosting listings
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,8 +98,8 @@ export function RegisterForm() {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="Guest">Book properties</TabsTrigger>
-                <TabsTrigger value="Host">List my property</TabsTrigger>
+                <TabsTrigger value="Guest">Book listings</TabsTrigger>
+                <TabsTrigger value="Host">List my listing</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>

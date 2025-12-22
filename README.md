@@ -1,6 +1,6 @@
 # Booking Application
 
-A modern, full-stack property booking application built with Next.js 16, MongoDB, and Tailwind CSS. This platform allows users to browse properties, make bookings, manage wishlists, and even become hosts to list their own properties.
+A modern, full-stack listing booking application built with Next.js 16, MongoDB, and Tailwind CSS. This platform allows users to browse listings, make bookings, manage wishlists, and even become hosts to list their own listings.
 
 ## 🚀 Tech Stack
 
@@ -15,12 +15,12 @@ A modern, full-stack property booking application built with Next.js 16, MongoDB
 
 ## ✨ Key Features
 
-- **Property Discovery:** Search and filter properties.
-- **Booking System:** select dates and book properties using an interactive calendar.
+- **Listing Discovery:** Search and filter listings.
+- **Booking System:** select dates and book listings using an interactive calendar.
 - **User Authentication:** Secure login/signup with email or Google.
 - **Host Dashboard:** Manage listings and view bookings.
-- **Wishlists:** Save favorite properties for later.
-- **Review System:** (Implied by typical booking apps) Leave reviews for properties.
+- **Wishlists:** Save favorite listings for later.
+- **Review System:** (Implied by typical booking apps) Leave reviews for listings.
 - **Responsive Design:** Fully optimized for mobile and desktop.
 
 ## 🛠️ Getting Started

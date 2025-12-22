@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getProperty } from "@/services/properties.service";
+import { getListing } from "@/services/listings.service";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { PropertyForm } from "@/components/dashboard/PropertyForm";
+import { ListingForm } from "@/components/dashboard/ListingForm";
 
-export default async function EditPropertyPage({
+export default async function EditListingPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -14,23 +14,23 @@ export default async function EditPropertyPage({
   }
 
   const { id } = await params;
-  const property = await getProperty(id);
+  const listing = await getListing(id);
 
-  if (!property) {
-    redirect("/dashboard/properties");
+  if (!listing) {
+    redirect("/dashboard/listings");
   }
 
   // Verify ownership
   if (
-    property.host._id.toString() !== user._id.toString() &&
+    listing.host._id.toString() !== user._id.toString() &&
     user.role !== "Admin"
   ) {
-    redirect("/dashboard/properties");
+    redirect("/dashboard/listings");
   }
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <PropertyForm property={property} mode="edit" />
+      <ListingForm listing={listing} mode="edit" />
     </div>
   );
 }

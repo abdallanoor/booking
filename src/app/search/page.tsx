@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { ClientLayout } from "@/components/layout/ClientLayout";
 import { DynamicSearchBar } from "@/components/search/DynamicSearchBar";
-import { PropertiesGrid } from "@/components/property/PropertiesGrid";
-import { searchProperties } from "@/services/search.service";
+import { ListingsGrid } from "@/components/listing/ListingsGrid";
+import { searchListings } from "@/services/search.service";
 import { getWishlist } from "@/services/wishlist.service";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
@@ -24,7 +24,7 @@ export default async function SearchPage({
     guests: params.guests ? parseInt(params.guests) : undefined,
   };
 
-  const properties = await searchProperties(filters);
+  const listings = await searchListings(filters);
 
   let wishlistIds = new Set<string>();
   const cookieStore = await cookies();
@@ -33,8 +33,8 @@ export default async function SearchPage({
   if (token) {
     try {
       const wishlist = await getWishlist();
-      const validWishlist = wishlist.filter((item) => item.property !== null);
-      wishlistIds = new Set(validWishlist.map((item) => item.property._id));
+      const validWishlist = wishlist.filter((item) => item.listing !== null);
+      wishlistIds = new Set(validWishlist.map((item) => item.listing._id));
     } catch (error) {
       console.log(
         "Wishlist fetch skipped:",
@@ -55,22 +55,19 @@ export default async function SearchPage({
           {/* Results */}
           <div>
             <h2 className="text-2xl font-semibold mb-4">
-              {properties.length} properties found
+              {listings.length} listings found
             </h2>
 
-            {properties.length === 0 ? (
+            {listings.length === 0 ? (
               <Card>
                 <CardContent className="text-center">
                   <p className="text-muted-foreground">
-                    No properties found. Try adjusting your search filters.
+                    No listings found. Try adjusting your search filters.
                   </p>
                 </CardContent>
               </Card>
             ) : (
-              <PropertiesGrid
-                properties={properties}
-                wishlistIds={wishlistIds}
-              />
+              <ListingsGrid listings={listings} wishlistIds={wishlistIds} />
             )}
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import NextImage from "next/image";
-import { createPropertyAction, updatePropertyAction } from "@/actions";
+import { createListingAction, updateListingAction } from "@/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,40 +18,40 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { Property } from "@/types";
+import type { Listing } from "@/types";
 
-interface PropertyFormProps {
-  property?: Property;
+interface ListingFormProps {
+  listing?: Listing;
   mode?: "create" | "edit";
 }
 
-export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
+export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const [formData, setFormData] = useState({
-    title: property?.title || "",
-    description: property?.description || "",
-    propertyType: property?.propertyType || "",
-    address: property?.location?.address || "",
-    city: property?.location?.city || "",
-    country: property?.location?.country || "",
-    pricePerNight: property?.pricePerNight?.toString() || "",
-    maxGuests: property?.maxGuests?.toString() || "",
-    bedrooms: property?.bedrooms?.toString() || "",
-    beds: property?.beds?.toString() || "",
-    bathrooms: property?.bathrooms?.toString() || "",
-    rooms: property?.rooms?.toString() || "",
-    privacyType: (property?.privacyType || "entire_place") as
+    title: listing?.title || "",
+    description: listing?.description || "",
+    listingType: listing?.listingType || "",
+    address: listing?.location?.address || "",
+    city: listing?.location?.city || "",
+    country: listing?.location?.country || "",
+    pricePerNight: listing?.pricePerNight?.toString() || "",
+    maxGuests: listing?.maxGuests?.toString() || "",
+    bedrooms: listing?.bedrooms?.toString() || "",
+    beds: listing?.beds?.toString() || "",
+    bathrooms: listing?.bathrooms?.toString() || "",
+    rooms: listing?.rooms?.toString() || "",
+    privacyType: (listing?.privacyType || "entire_place") as
       | "entire_place"
       | "private_room"
       | "shared_room",
-    amenities: property?.amenities?.join(", ") || "",
+    amenities: listing?.amenities?.join(", ") || "",
   });
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>(
-    property?.images || []
+    listing?.images || []
   );
   const [isUploading, setIsUploading] = useState(false);
 
@@ -99,10 +99,10 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
 
     startTransition(async () => {
       try {
-        const propertyData = {
+        const listingData = {
           title: formData.title,
           description: formData.description,
-          propertyType: formData.propertyType,
+          listingType: formData.listingType,
           location: {
             address: formData.address,
             city: formData.city,
@@ -122,19 +122,19 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
           privacyType: formData.privacyType,
         };
 
-        if (mode === "edit" && property?._id) {
-          await updatePropertyAction(property._id, propertyData);
-          toast.success("Property updated successfully");
+        if (mode === "edit" && listing?._id) {
+          await updateListingAction(listing._id, listingData);
+          toast.success("Listing updated successfully");
         } else {
-          await createPropertyAction(propertyData);
-          toast.success("Property created successfully");
+          await createListingAction(listingData);
+          toast.success("Listing created successfully");
         }
 
-        router.push("/dashboard/properties");
+        router.push("/dashboard/listings");
         router.refresh();
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : `Failed to ${mode} property`;
+          error instanceof Error ? error.message : `Failed to ${mode} listing`;
         toast.error(message);
       }
     });
@@ -148,7 +148,7 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
     <Card>
       <CardHeader>
         <CardTitle>
-          {mode === "edit" ? "Edit Property" : "List a New Property"}
+          {mode === "edit" ? "Edit Listing" : "List a New Listing"}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -158,7 +158,7 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
             <h3 className="font-semibold">Basic Information</h3>
 
             <div className="space-y-2">
-              <Label htmlFor="title">Property Title *</Label>
+              <Label htmlFor="title">Listing Title *</Label>
               <Input
                 id="title"
                 value={formData.title}
@@ -184,15 +184,15 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="propertyType">Property Type *</Label>
+                <Label htmlFor="listingType">Listing Type *</Label>
                 <Input
-                  id="propertyType"
+                  id="listingType"
                   placeholder="e.g., Apartment, House"
-                  value={formData.propertyType}
+                  value={formData.listingType}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      propertyType: e.target.value,
+                      listingType: e.target.value,
                     })
                   }
                   required
@@ -263,9 +263,9 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
             </div>
           </div>
 
-          {/* Property Details */}
+          {/* Listing Details */}
           <div className="space-y-4">
-            <h3 className="font-semibold">Property Details</h3>
+            <h3 className="font-semibold">Listing Details</h3>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-2">
@@ -462,9 +462,9 @@ export function PropertyForm({ property, mode = "create" }: PropertyFormProps) {
                   {mode === "edit" ? "Updating..." : "Creating..."}
                 </>
               ) : mode === "edit" ? (
-                "Update Property"
+                "Update Listing"
               ) : (
-                "Create Property"
+                "Create Listing"
               )}
             </Button>
           </div>

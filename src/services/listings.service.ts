@@ -1,13 +1,13 @@
 import { apiGet } from "@/lib/api";
-import type { Property, PropertyFilters } from "@/types";
+import type { Listing, ListingFilters } from "@/types";
 
 // Re-export types for backward compatibility
-export type { Property, PropertyFilters };
+export type { Listing, ListingFilters };
 
-// Get all properties with caching
-export async function getProperties(
-  filters?: PropertyFilters
-): Promise<Property[]> {
+// Get all listings with caching
+export async function getListings(
+  filters?: ListingFilters
+): Promise<Listing[]> {
   const params = new URLSearchParams();
   if (filters?.city) params.append("city", filters.city);
   if (filters?.country) params.append("country", filters.country);
@@ -17,39 +17,39 @@ export async function getProperties(
   if (filters?.hostId) params.append("hostId", filters.hostId);
 
   const query = params.toString();
-  const response = await apiGet<{ data: { properties: Property[] } }>(
-    `/properties${query ? `?${query}` : ""}`,
+  const response = await apiGet<{ data: { listings: Listing[] } }>(
+    `/listings${query ? `?${query}` : ""}`,
     {
       revalidate: 0, // No cache
-      tags: ["properties"],
+      tags: ["listings"],
     }
   );
 
-  return response.data.properties;
+  return response.data.listings;
 }
 
-// Get single property with caching
-export async function getProperty(id: string): Promise<Property> {
-  const response = await apiGet<{ data: { property: Property } }>(
-    `/properties/${id}`,
+// Get single listing with caching
+export async function getListing(id: string): Promise<Listing> {
+  const response = await apiGet<{ data: { listing: Listing } }>(
+    `/listings/${id}`,
     {
       revalidate: 0, // No cache
-      tags: [`property-${id}`, "properties"],
+      tags: [`listing-${id}`, "listings"],
     }
   );
 
-  return response.data.property;
+  return response.data.listing;
 }
 
-// Get booked dates for a property
-export async function getPropertyBookedDates(
+// Get booked dates for a listing
+export async function getListingBookedDates(
   id: string
 ): Promise<{ from: string; to: string }[]> {
   const response = await apiGet<{
     data: { bookedDates: { from: string; to: string }[] };
-  }>(`/properties/${id}/booked-dates`, {
+  }>(`/listings/${id}/booked-dates`, {
     revalidate: 0, // No cache, always fresh
-    tags: [`property-${id}-bookings`, "bookings"],
+    tags: [`listing-${id}-bookings`, "bookings"],
   });
 
   return response.data.bookedDates;

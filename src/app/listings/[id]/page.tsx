@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { ClientLayout } from "@/components/layout/ClientLayout";
 import {
-  getProperty,
-  getPropertyBookedDates,
-  Property,
-} from "@/services/properties.service";
+  getListing,
+  getListingBookedDates,
+  Listing,
+} from "@/services/listings.service";
 import { getWishlist } from "@/services/wishlist.service";
 import { BookingForm } from "@/components/booking/BookingForm";
 import { notFound } from "next/navigation";
@@ -17,30 +17,30 @@ import {
 } from "@/components/ui/carousel";
 import { MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ShareButton } from "@/components/property/ShareButton";
-import { SaveButton } from "@/components/property/SaveButton";
+import { ShareButton } from "@/components/listing/ShareButton";
+import { SaveButton } from "@/components/listing/SaveButton";
 
-export default async function PropertyDetailPage({
+export default async function ListingDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
 
-  let property: Property;
+  let listing: Listing;
   let bookedDates: { from: string; to: string }[] = [];
   let isInWishlist = false;
 
   try {
-    property = await getProperty(id);
-    bookedDates = await getPropertyBookedDates(id);
+    listing = await getListing(id);
+    bookedDates = await getListingBookedDates(id);
 
     // Check wishlist using the same approach as home page
     try {
       const wishlist = await getWishlist();
-      const validWishlist = wishlist.filter((item) => item.property !== null);
+      const validWishlist = wishlist.filter((item) => item.listing !== null);
       isInWishlist = validWishlist.some(
-        (item) => item.property._id === property._id
+        (item) => item.listing._id === listing._id
       );
     } catch {
       // User not logged in - wishlist check skipped
@@ -57,12 +57,12 @@ export default async function PropertyDetailPage({
         <div className="mb-6">
           <div className="flex justify-between items-start">
             <h1 className="text-2xl font-semibold text-foreground">
-              {property.title}
+              {listing.title}
             </h1>
             <div className="flex gap-2">
-              <ShareButton propertyTitle={property.title} />
+              <ShareButton listingTitle={listing.title} />
               <SaveButton
-                propertyId={property._id}
+                listingId={listing._id}
                 initialIsInWishlist={isInWishlist}
               />
             </div>
@@ -73,7 +73,7 @@ export default async function PropertyDetailPage({
         <div className="mb-8 rounded-xl overflow-hidden relative group">
           <Carousel className="w-full">
             <CarouselContent>
-              {property.images.map((image, index) => (
+              {listing.images.map((image, index) => (
                 <CarouselItem
                   key={index}
                   className="sm:basis-1/2 lg:basis-1/2 cursor-pointer z-40"
@@ -81,7 +81,7 @@ export default async function PropertyDetailPage({
                   <div className="relative aspect-4/3 sm:aspect-video w-full">
                     <Image
                       src={image}
-                      alt={`${property.title} - Image ${index + 1}`}
+                      alt={`${listing.title} - Image ${index + 1}`}
                       fill
                       className="object-cover hover:opacity-95 transition-opacity"
                     />
@@ -100,40 +100,40 @@ export default async function PropertyDetailPage({
             {/* Title & Stats */}
             <div className="border-b pb-6">
               <h2 className="text-xl font-semibold mb-1">
-                {property.privacyType === "entire_place"
+                {listing.privacyType === "entire_place"
                   ? "Entire home"
-                  : property.privacyType === "private_room"
+                  : listing.privacyType === "private_room"
                   ? "Private room"
                   : "Shared room"}{" "}
-                in {property.location.city}, {property.location.country}
+                in {listing.location.city}, {listing.location.country}
               </h2>
               <div className="flex gap-1 text-sm text-muted-foreground">
-                <span>{property.maxGuests} guests</span>
+                <span>{listing.maxGuests} guests</span>
                 <span>·</span>
-                <span>{property.bedrooms} bedrooms</span>
+                <span>{listing.bedrooms} bedrooms</span>
                 <span>·</span>
-                <span>{property.beds} beds</span>
+                <span>{listing.beds} beds</span>
                 <span>·</span>
-                <span>{property.bathrooms} baths</span>
+                <span>{listing.bathrooms} baths</span>
               </div>
             </div>
 
             {/* Host Section */}
             <div className="border-b pb-6 flex items-center gap-4">
               <Avatar className="w-12 h-12">
-                <AvatarImage src={property.host.avatar} />
+                <AvatarImage src={listing.host.avatar} />
                 <AvatarFallback>
-                  {property.host.name[0].toUpperCase()}
+                  {listing.host.name[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
                 <span className="font-semibold text-base">
-                  Hosted by {property.host.name}
+                  Hosted by {listing.host.name}
                 </span>
-                {property.host.createdAt && (
+                {listing.host.createdAt && (
                   <span className="text-muted-foreground text-sm">
                     Joined{" "}
-                    {new Date(property.host.createdAt).toLocaleDateString(
+                    {new Date(listing.host.createdAt).toLocaleDateString(
                       "en-US",
                       {
                         month: "long",
@@ -154,7 +154,7 @@ export default async function PropertyDetailPage({
                 <div>
                   <h3 className="font-semibold">Great location</h3>
                   <p className="text-muted-foreground text-sm">
-                    Guests love the location of this property.
+                    Guests love the location of this listing.
                   </p>
                 </div>
               </div>
@@ -164,7 +164,7 @@ export default async function PropertyDetailPage({
             <div className="border-b pb-6">
               {/* <h2 className="text-xl font-semibold mb-4">About this place</h2> */}
               <p className="leading-relaxed text-muted-foreground whitespace-pre-line">
-                {property.description}
+                {listing.description}
               </p>
             </div>
 
@@ -173,9 +173,9 @@ export default async function PropertyDetailPage({
               <h2 className="text-xl font-semibold mb-4">
                 What this place offers
               </h2>
-              {property.amenities.length > 0 ? (
+              {listing.amenities.length > 0 ? (
                 <div className="grid grid-cols-2 gap-y-3">
-                  {property.amenities.map((amenity) => (
+                  {listing.amenities.map((amenity) => (
                     <div
                       key={amenity}
                       className="flex items-center gap-3 text-muted-foreground"
@@ -197,7 +197,7 @@ export default async function PropertyDetailPage({
           {/* Right Column: Sticky Booking Card */}
           <div className="relative">
             <div className="sticky top-24">
-              <BookingForm property={property} bookedDates={bookedDates} />
+              <BookingForm listing={listing} bookedDates={bookedDates} />
             </div>
           </div>
         </div>

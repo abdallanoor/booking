@@ -44,7 +44,7 @@ export default async function DashboardBookingsPage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-lg">
-                        {booking.property?.title || "Unknown Property"}
+                        {booking.listing?.title || "Unknown Listing"}
                       </h3>
                       <Badge
                         variant={
