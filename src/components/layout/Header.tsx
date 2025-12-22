@@ -76,6 +76,7 @@ export function Header() {
           <DashboardNavigation />
           <div className="flex items-center gap-3">
             <NavActions user={user as HeaderUser | null} />
+            <AuthNavigation user={user as HeaderUser | null} />
             <UserProfileLink user={user as HeaderUser | null} />
             <UserMenu
               user={user as HeaderUser | null}
@@ -145,6 +146,18 @@ function DashboardNavigation() {
         </Link>
       ))}
     </nav>
+  );
+}
+
+function AuthNavigation({ user }: { user: HeaderUser | null }) {
+  if (user) return null;
+
+  return (
+    <Link href="/auth/login">
+      <Button size="sm" className="rounded-full" variant="ghost">
+        Log in
+      </Button>
+    </Link>
   );
 }
 

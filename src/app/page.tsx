@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import { ClientLayout } from "@/components/layout/ClientLayout";
 import { PropertiesGrid } from "@/components/property/PropertiesGrid";
 import { DynamicSearchBar } from "@/components/search/DynamicSearchBar";
@@ -13,17 +14,21 @@ export default async function Home() {
   const properties = await getProperties();
 
   let wishlistIds = new Set<string>();
-  try {
-    const wishlist = await getWishlist();
-    // Filter out items with null properties
-    const validWishlist = wishlist.filter((item) => item.property !== null);
-    wishlistIds = new Set(validWishlist.map((item) => item.property._id));
-  } catch (error) {
-    // User not logged in - wishlist will be empty
-    console.log(
-      "Wishlist fetch skipped:",
-      error instanceof Error ? error.message : "Not authenticated"
-    );
+  const cookieStore = await cookies();
+  const token = cookieStore.get("auth_token");
+
+  if (token) {
+    try {
+      const wishlist = await getWishlist();
+      // Filter out items with null properties
+      const validWishlist = wishlist.filter((item) => item.property !== null);
+      wishlistIds = new Set(validWishlist.map((item) => item.property._id));
+    } catch (error) {
+      console.log(
+        "Wishlist fetch skipped:",
+        error instanceof Error ? error.message : "Not authenticated"
+      );
+    }
   }
 
   return (

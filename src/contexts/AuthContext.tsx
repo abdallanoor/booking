@@ -92,13 +92,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const becomeHost = async () => {
-    // This would typically call an API to upgrade user role
-    // For now, we'll re-register or update the user's role
-    if (user) {
-      // In a real app, you'd have an API endpoint to update user role
-      // For demonstration, we'll just update the local state
-      window.location.href = "/dashboard";
+    const res = await fetch("/api/auth/become-host", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || "Failed to become host");
     }
+
+    setUser(data.data.user);
   };
 
   const refreshUser = async () => {

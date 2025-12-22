@@ -3,13 +3,14 @@ import { getCurrentUser } from "@/lib/auth/middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { deleteImageFromCloudinary } from "@/lib/cloudinary";
 
-
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser(req);
 
     if (!user) {
-      return errorResponse("Not authenticated", 401);
+      const response = errorResponse("Not authenticated", 401);
+      response.cookies.delete("auth_token");
+      return response;
     }
 
     return successResponse({
@@ -31,7 +32,6 @@ export async function GET(req: NextRequest) {
     return errorResponse(message, 500);
   }
 }
-
 
 export async function PUT(req: NextRequest) {
   try {

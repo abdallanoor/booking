@@ -4,16 +4,30 @@ import { ClientLayout } from "@/components/layout/ClientLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "nextjs-toploader/app";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function BecomeHostPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, becomeHost } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleBecomeHost = () => {
+  const handleBecomeHost = async () => {
     if (!user) {
-      router.push("/auth/register");
-    } else {
-      router.push("/auth/register");
+      router.push("/auth/register?role=Host");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await becomeHost();
+      toast.success("You are now a host!");
+      router.push("/dashboard");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to become a host. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,16 +61,14 @@ export default function BecomeHostPage() {
               </ol>
             </div>
 
-            <Button onClick={handleBecomeHost} className="w-full" size="lg">
-              Get Started
+            <Button
+              onClick={handleBecomeHost}
+              className="w-full"
+              size="lg"
+              disabled={isLoading}
+            >
+              {isLoading ? "Processing..." : "Get Started"}
             </Button>
-
-            {user && user.role === "Guest" && (
-              <p className="text-sm text-center text-muted-foreground">
-                Note: You&apos;ll need to create a new account with the Host
-                role
-              </p>
-            )}
           </div>
         </div>
       </main>

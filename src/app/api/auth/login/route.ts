@@ -19,6 +19,14 @@ export async function POST(req: NextRequest) {
       return errorResponse("Invalid email or password", 401);
     }
 
+    // Check if user is Google user without password
+    if (user.provider === "google" && !user.password) {
+      return errorResponse(
+        "This email is associated with a Google account. Please use Google Sign-In or use the Sign Up page to add a password.",
+        400
+      );
+    }
+
     // Check password
     const isValidPassword = await user.comparePassword(validatedData.password);
     if (!isValidPassword) {

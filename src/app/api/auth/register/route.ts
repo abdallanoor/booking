@@ -25,6 +25,35 @@ export async function POST(req: NextRequest) {
     // Check if user already exists
     const existingUser = await User.findOne({ email: validatedData.email });
     if (existingUser) {
+      if (existingUser.provider === "google" && !existingUser.password) {
+        // Link account: Add password to existing Google account
+        existingUser.password = validatedData.password;
+        await existingUser.save();
+
+        // Generate JWT token
+        const token = generateToken(
+          existingUser._id.toString(),
+          existingUser.email,
+          existingUser.role
+        );
+
+        // Set HTTP-only cookie
+        await setAuthCookie(token);
+
+        return successResponse(
+          {
+            user: {
+              id: existingUser._id,
+              name: existingUser.name,
+              email: existingUser.email,
+              role: existingUser.role,
+              emailVerified: existingUser.emailVerified,
+            },
+          },
+          "Account linked successfully. You can now login with password or Google.",
+          200
+        );
+      }
       return errorResponse("Email already registered", 400);
     }
 

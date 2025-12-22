@@ -32,7 +32,7 @@ export function PropertyCard({
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Please login to add to wishlist");
+      toast.error("Please login to save this property");
       return;
     }
 
@@ -96,21 +96,19 @@ export function PropertyCard({
         <span className="sr-only">View {property.title}</span>
       </Link>
 
-      {user && (
-        <Button
-          variant="secondary"
-          size="icon"
-          className="absolute top-2 right-2 z-20 rounded-full"
-          onClick={toggleWishlist}
-          disabled={isPending}
-        >
-          <Heart
-            className={`h-5 w-5 transition-colors ${
-              inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
-            }`}
-          />
-        </Button>
-      )}
+      <Button
+        variant="secondary"
+        size="icon"
+        className="absolute top-2 right-2 z-20 rounded-full"
+        onClick={toggleWishlist}
+        disabled={isPending}
+      >
+        <Heart
+          className={`h-5 w-5 transition-colors ${
+            inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
+          }`}
+        />
+      </Button>
     </Card>
   );
 }

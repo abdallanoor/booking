@@ -27,6 +27,8 @@ export async function GET(req: NextRequest) {
     const maxPrice = searchParams.get("maxPrice");
     const guests = searchParams.get("guests");
     const hostId = searchParams.get("hostId");
+    const checkIn = searchParams.get("checkIn");
+    const checkOut = searchParams.get("checkOut");
 
     // Dashboard unification parameters
     const isDashboard = searchParams.get("dashboard") === "true";
@@ -37,7 +39,33 @@ export async function GET(req: NextRequest) {
       user = await getCurrentUser(req);
     }
 
-    const filter: PropertyFilter = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filter: PropertyFilter & { _id?: any } = {};
+
+    // Date Availability Filtering
+    if (checkIn && checkOut) {
+      const conflictingBookings = await import("@/models/Booking").then((mod) =>
+        mod.default
+          .find({
+            status: { $ne: "cancelled" },
+            $or: [
+              {
+                checkIn: { $lt: new Date(checkOut) },
+                checkOut: { $gt: new Date(checkIn) },
+              },
+            ],
+          })
+          .select("property")
+      );
+
+      const bookedPropertyIds = conflictingBookings.map((b) =>
+        b.property.toString()
+      );
+
+      if (bookedPropertyIds.length > 0) {
+        filter._id = { $nin: bookedPropertyIds };
+      }
+    }
 
     if (isDashboard) {
       if (!user) {

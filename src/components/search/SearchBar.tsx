@@ -38,6 +38,23 @@ export function SearchBar() {
     parseInt(searchParams.get("guests") || "1")
   );
 
+  const handleDateSelect = (selectedRange: DateRange | undefined) => {
+    if (!selectedRange) {
+      setDate(undefined);
+      return;
+    }
+
+    if (
+      selectedRange.from &&
+      selectedRange.to &&
+      selectedRange.from.getTime() === selectedRange.to.getTime()
+    ) {
+      selectedRange.to = undefined;
+    }
+
+    setDate(selectedRange);
+  };
+
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (location) params.append("location", location);
@@ -100,7 +117,7 @@ export function SearchBar() {
               mode="range"
               defaultMonth={date?.from}
               selected={date}
-              onSelect={setDate}
+              onSelect={handleDateSelect}
               disabled={(date) => date < new Date()}
             />
           </PopoverContent>

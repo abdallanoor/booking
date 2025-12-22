@@ -39,31 +39,42 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
     setMounted(true);
   }, []);
 
-  // Helper function to check if a date is booked
-  const isDateBooked = (day: Date): boolean => {
+  // Helper to parse "YYYY-MM-DD" string to local date safely
+  const parseDate = (dateStr: string) => {
+    if (!dateStr) return undefined;
+    const parts = dateStr.split("T")[0].split("-");
+    return new Date(
+      parseInt(parts[0]),
+      parseInt(parts[1]) - 1,
+      parseInt(parts[2])
+    );
+  };
+
+  // Helper function to check if a date is disabled (middle of a booking)
+  // This is for visual disabling in the calendar.
+  const isDateDisabled = (day: Date): boolean => {
     return bookedDates.some((booking) => {
-      const bookingStart = new Date(booking.from);
-      bookingStart.setHours(0, 0, 0, 0);
-      const bookingEnd = new Date(booking.to);
-      bookingEnd.setHours(0, 0, 0, 0);
-      return day >= bookingStart && day <= bookingEnd;
+      const bookingStart = parseDate(booking.from);
+      const bookingEnd = parseDate(booking.to);
+      if (!bookingStart || !bookingEnd) return false;
+
+      // Disable dates strictly BETWEEN start and end
+      // This allows checking in on a checkout day and vice versa
+      return day > bookingStart && day < bookingEnd;
     });
   };
 
-  // Helper function to check if a range contains any booked dates
-  const rangeContainsBookedDates = (from: Date, to: Date): boolean => {
-    const current = new Date(from);
-    current.setHours(0, 0, 0, 0);
-    const end = new Date(to);
-    end.setHours(0, 0, 0, 0);
+  // Helper function to check if a range contains any booked dates (Validation)
+  // This must checks for any overlap of nights.
+  const rangeOverlapsBooking = (start: Date, end: Date): boolean => {
+    return bookedDates.some((booking) => {
+      const bookingStart = parseDate(booking.from);
+      const bookingEnd = parseDate(booking.to);
+      if (!bookingStart || !bookingEnd) return false;
 
-    while (current <= end) {
-      if (isDateBooked(current)) {
-        return true;
-      }
-      current.setDate(current.getDate() + 1);
-    }
-    return false;
+      // Overlap condition: (StartA < EndB) and (EndA > StartB)
+      return start < bookingEnd && bookingStart < end;
+    });
   };
 
   // Custom handler for date selection with validation
@@ -73,9 +84,18 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
       return;
     }
 
+    // Enforce 1-night minimum: if start === end, treat as just start selected
+    if (
+      selectedRange.from &&
+      selectedRange.to &&
+      selectedRange.from.getTime() === selectedRange.to.getTime()
+    ) {
+      selectedRange.to = undefined;
+    }
+
     // If both from and to are selected, validate the range
     if (selectedRange.from && selectedRange.to) {
-      if (rangeContainsBookedDates(selectedRange.from, selectedRange.to)) {
+      if (rangeOverlapsBooking(selectedRange.from, selectedRange.to)) {
         toast.error(
           "Selected date range includes already booked dates. Please choose different dates."
         );
@@ -191,24 +211,20 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="center">
                   <Calendar
-                    initialFocus
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
                     onSelect={handleDateSelect}
-                    numberOfMonths={2}
                     disabled={(day) => {
                       // Normalize to midnight for accurate comparison
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
-
                       // Disable past dates
                       if (day < today) {
                         return true;
                       }
-
                       // Check if the date is booked
-                      return isDateBooked(day);
+                      return isDateDisabled(day);
                     }}
                   />
                 </PopoverContent>
@@ -270,7 +286,7 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
         </div>
 
         <Button
-          className="w-full font-semibold text-lg py-6"
+          className="w-full font-semibold text-lg py-6 rounded-full"
           onClick={handleBooking}
           disabled={isPending || !date?.from || !date?.to}
           size="lg"
@@ -285,10 +301,6 @@ export function BookingForm({ property, bookedDates = [] }: BookingFormProps) {
                 ${property.pricePerNight} x {nights} nights
               </span>
               <span>${property.pricePerNight * nights}</span>
-            </div>
-            <div className="flex justify-between text-muted-foreground">
-              <span className="underline">Service fee</span>
-              <span>$0</span>
             </div>
             <div className="pt-4 border-t flex justify-between font-semibold text-foreground text-lg">
               <span>Total</span>

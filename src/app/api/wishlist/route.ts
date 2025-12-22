@@ -18,9 +18,16 @@ export async function GET(req: NextRequest) {
 
     return successResponse({ wishlist: wishlistItems });
   } catch (error) {
-    console.error("Get wishlist error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to get wishlist";
+
+    if (message === "Unauthorized") {
+      const response = errorResponse(message, 401);
+      response.cookies.delete("auth_token");
+      return response;
+    }
+
+    console.error("Get wishlist error:", error);
     return errorResponse(message, 500);
   }
 }
