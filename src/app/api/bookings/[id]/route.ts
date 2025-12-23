@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Listing from "@/models/Listing";
-import { requireAuth } from "@/lib/auth/middleware";
+import { requireAuth } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 export async function GET(

@@ -54,3 +54,27 @@ export async function getListingBookedDates(
 
   return response.data.bookedDates;
 }
+
+// Get all listings for admin
+export async function getAllListings(): Promise<Listing[]> {
+  const response = await apiGet<{ data: { listings: Listing[] } }>(
+    "/listings?dashboard=true",
+    {
+      revalidate: 0,
+      tags: ["listings", "admin-listings"],
+    }
+  );
+  return response.data.listings;
+}
+
+// Get listings for current host
+export async function getHostListings(): Promise<Listing[]> {
+  const response = await apiGet<{ data: { listings: Listing[] } }>(
+    "/listings?dashboard=true",
+    {
+      revalidate: 0,
+      tags: ["listings", "host-listings"],
+    }
+  );
+  return response.data.listings;
+}

@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Listing from "@/models/Listing";
-import { requireAuth } from "@/lib/auth/middleware";
+import { requireAuth } from "@/lib/auth/auth-middleware";
 import { bookingSchema } from "@/lib/validations/booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
@@ -20,21 +20,16 @@ export async function GET(req: NextRequest) {
       // User sees only bookings they created
       query = { guest: user._id };
     } else if (view === "host") {
-      if (user.role === "Admin") {
-        // Admin sees all bookings
-        query = {};
-      } else {
-        // Host sees bookings for their listings
-        const listingIds = await Listing.find({ host: user._id }).distinct(
-          "_id"
-        );
-        query = { listing: { $in: listingIds } };
-      }
+      // HOST VIEW: Strict personal scoping
+      // Even Admins should only see their own listings' bookings here
+      const listingIds = await Listing.find({ host: user._id }).distinct("_id");
+      query = { listing: { $in: listingIds } };
     } else {
-      // Default behavior (legacy/fallback): Mix of both
+      // GLOBAL/ADMIN VIEW (or legacy fallback)
       if (user.role === "Admin") {
         query = {};
       } else {
+        // Fallback for non-admin on generic view: show relevant stuff
         const listingIds = await Listing.find({ host: user._id }).distinct(
           "_id"
         );

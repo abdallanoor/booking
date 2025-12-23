@@ -2,17 +2,8 @@
 
 import { revalidateTag, revalidatePath } from "next/cache";
 import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
-import type {
-  Listing,
-  Booking,
-  DashboardStats,
-  ApiResponse,
-  User,
-} from "@/types";
+import type { Booking, ApiResponse, User } from "@/types";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-
-// Re-export DashboardStats for convenience
-export type { DashboardStats };
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -21,13 +12,15 @@ export type { DashboardStats };
 function revalidateListings() {
   revalidateTag("listings", "max");
   revalidateTag("host-listings", "max");
-  revalidatePath("/dashboard/listings", "page");
+  revalidatePath("/hosting/listings", "page");
+  revalidatePath("/admin/listings", "page");
 }
 
 function revalidateBookings() {
   revalidateTag("bookings", "max");
   revalidatePath("/bookings", "page");
-  revalidatePath("/dashboard/bookings", "page");
+  revalidatePath("/hosting/bookings", "page");
+  revalidatePath("/admin/bookings", "page");
 }
 
 function revalidateWishlist() {
@@ -38,16 +31,6 @@ function revalidateWishlist() {
 // ============================================================================
 // LISTING ACTIONS
 // ============================================================================
-
-export async function getListingsAction() {
-  return await apiGet<{ data: { listings: Listing[] } }>(
-    "/listings?dashboard=true",
-    {
-      cache: "no-store",
-      tags: ["listings"],
-    }
-  );
-}
 
 export async function createListingAction(data: unknown) {
   const result = await apiPost("/listings", data);
@@ -111,51 +94,8 @@ export async function removeFromWishlistAction(listingId: string) {
 }
 
 // ============================================================================
-// DASHBOARD ACTIONS
+// HOSTING ACTIONS
 // ============================================================================
-
-export async function getDashboardStatsAction(): Promise<DashboardStats> {
-  // Parallel fetch for optimized dashboard loading
-  const [listingsRes, bookingsRes] = await Promise.all([
-    apiGet<{ data: { listings: Listing[] } }>("/listings?dashboard=true", {
-      revalidate: 0,
-      tags: ["listings"],
-    }),
-    apiGet<{ data: { bookings: Booking[] } }>("/bookings?view=host", {
-      revalidate: 0,
-      tags: ["bookings"],
-    }),
-  ]);
-
-  const listings = listingsRes.data.listings;
-  const bookings = bookingsRes.data.bookings;
-
-  // Calculate stats
-  const totalListings = listings.length;
-  const totalBookings = bookings.length;
-  const totalRevenue = bookings
-    .filter((b) => b.status === "confirmed")
-    .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-  const pendingListings = listings.filter((p) => p.status === "pending").length;
-
-  // Get recent bookings (last 5)
-  // detailed check to avoid "cannot read listings of null" on frontend
-  const recentBookings = [...bookings]
-    .filter((b) => b && b.listing && b.guest && b.listing._id && b.guest._id)
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )
-    .slice(0, 5);
-
-  return {
-    totalListings,
-    totalBookings,
-    totalRevenue,
-    pendingListings,
-    recentBookings,
-  };
-}
 
 export async function getAllBookingsAction() {
   return await apiGet<{ data: { bookings: Booking[] } }>(
@@ -208,5 +148,21 @@ export async function uploadAvatarAction(formData: FormData) {
   } catch (error) {
     console.error("Avatar upload failed:", error);
     return { success: false, message: "Failed to upload avatar" };
+  }
+}
+
+export async function uploadListingImagesAction(formData: FormData) {
+  const files = formData.getAll("files") as File[];
+  if (!files || files.length === 0) {
+    return { success: false, message: "No files provided" };
+  }
+
+  try {
+    const uploadPromises = files.map((file) => uploadToCloudinary(file));
+    const urls = await Promise.all(uploadPromises);
+    return { success: true, urls };
+  } catch (error) {
+    console.error("Listing images upload failed:", error);
+    return { success: false, message: "Failed to upload images" };
   }
 }

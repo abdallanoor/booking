@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSection, type Section } from "@/contexts/SectionContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,13 +19,14 @@ import {
   Menu,
   Calendar,
   Heart,
-  LayoutDashboard,
   LogOut,
   LogIn,
   UserPlus,
   User,
   type LucideIcon,
+  Shield,
   Map,
+  Building2,
 } from "lucide-react";
 import { useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -41,8 +43,13 @@ interface HeaderUser {
 
 const emptySubscribe = () => () => {};
 
-export function Header() {
+interface HeaderProps {
+  links?: { href: string; label: string; icon?: LucideIcon }[];
+}
+
+export function Header({ links }: HeaderProps) {
   const { user, logout } = useAuth();
+  const section = useSection();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -73,13 +80,14 @@ export function Header() {
       <div className="container py-2.5 relative">
         <div className="flex items-center justify-between">
           <Logo />
-          <DashboardNavigation />
+          <SectionNavigation section={section} customLinks={links} />
           <div className="flex items-center gap-3">
-            <NavActions user={user as HeaderUser | null} />
+            <NavActions user={user as HeaderUser | null} section={section} />
             <AuthNavigation user={user as HeaderUser | null} />
             <UserProfileLink user={user as HeaderUser | null} />
             <UserMenu
               user={user as HeaderUser | null}
+              section={section}
               isPending={isPending}
               onLogout={handleLogout}
             />
@@ -115,29 +123,30 @@ function HeaderSkeleton() {
   );
 }
 
-function DashboardNavigation() {
+function SectionNavigation({
+  section,
+  customLinks,
+}: {
+  section: Section;
+  customLinks?: { href: string; label: string; icon?: LucideIcon }[];
+}) {
   const pathname = usePathname();
-  const isDashboard = pathname?.startsWith("/dashboard");
+  const routes = customLinks || [];
 
-  if (!isDashboard) return null;
+  if (routes.length === 0) return null;
 
-  const dashboardRoutes = [
-    { href: "/dashboard", label: "Overview" },
-    { href: "/dashboard/today", label: "Today" },
-    { href: "/dashboard/listings", label: "Listings" },
-    { href: "/dashboard/bookings", label: "Bookings" },
-  ];
+  const baseRoute = section === "hosting" ? "/hosting" : "/admin";
 
   return (
     <nav className="hidden md:flex items-center gap-px absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-      {dashboardRoutes.map((route) => (
+      {routes.map((route) => (
         <Link
           key={route.href}
           href={route.href}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary hover:bg-accent py-1.5 px-3 rounded-full leading-normal dark:hover:bg-accent/50",
             pathname === route.href ||
-              (route.href !== "/dashboard" && pathname?.startsWith(route.href))
+              (route.href !== baseRoute && pathname?.startsWith(route.href))
               ? "text-primary bg-accent"
               : "text-muted-foreground"
           )}
@@ -155,49 +164,63 @@ function AuthNavigation({ user }: { user: HeaderUser | null }) {
   return (
     <Link href="/auth/login">
       <Button size="sm" className="rounded-full" variant="ghost">
-        Log in
+        Login
       </Button>
     </Link>
   );
 }
 
-function NavActions({ user }: { user: HeaderUser | null }) {
-  const pathname = usePathname();
-  const isDashboard = pathname?.startsWith("/dashboard");
-
+function NavActions({
+  user,
+  section,
+}: {
+  user: HeaderUser | null;
+  section: Section;
+}) {
   if (!user) return null;
 
-  if (isDashboard) {
-    return (
-      <Link href="/" className="hidden md:block">
-        <Button variant="ghost" size="sm" className="rounded-full">
-          Switch to travelling
-        </Button>
-      </Link>
-    );
-  }
+  return (
+    <div className="hidden md:flex items-center gap-2">
+      {/* Admin specific header actions */}
+      {user.role === "Admin" && (
+        <>
+          {section === "guest" ? (
+            <>
+              <Link href="/admin">
+                <Button variant="ghost" size="sm" className="rounded-full">
+                  Switch to admin
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="rounded-full">
+                Switch to travelling
+              </Button>
+            </Link>
+          )}
+        </>
+      )}
 
-  if (user.role === "Admin" || user.role === "Host") {
-    return (
-      <Link href="/dashboard" className="hidden md:block">
-        <Button variant="ghost" size="sm" className="rounded-full">
-          {user.role === "Admin" ? "Switch to dashboard" : "Switch to hosting"}
-        </Button>
-      </Link>
-    );
-  }
+      {/* Host specific header actions */}
+      {user.role === "Host" && (
+        <Link href={section === "guest" ? "/hosting" : "/"}>
+          <Button variant="ghost" size="sm" className="rounded-full">
+            {section === "guest" ? "Switch to hosting" : "Switch to travelling"}
+          </Button>
+        </Link>
+      )}
 
-  if (user.role === "Guest") {
-    return (
-      <Link href="/become-host" className="hidden md:block">
-        <Button variant="ghost" size="sm" className="rounded-full">
-          Become a Host
-        </Button>
-      </Link>
-    );
-  }
-
-  return null;
+      {/* Guest specific header actions */}
+      {user.role === "Guest" && (
+        <Link href="/become-host">
+          <Button variant="ghost" size="sm" className="rounded-full">
+            Become a Host
+          </Button>
+        </Link>
+      )}
+    </div>
+  );
 }
 
 function UserProfileLink({ user }: { user: HeaderUser | null }) {
@@ -217,10 +240,12 @@ function UserProfileLink({ user }: { user: HeaderUser | null }) {
 
 function UserMenu({
   user,
+  section,
   isPending,
   onLogout,
 }: {
   user: HeaderUser | null;
+  section: Section;
   isPending: boolean;
   onLogout: () => void;
 }) {
@@ -235,6 +260,7 @@ function UserMenu({
         {user ? (
           <AuthenticatedMenu
             user={user}
+            section={section}
             isPending={isPending}
             onLogout={onLogout}
           />
@@ -248,16 +274,15 @@ function UserMenu({
 
 function AuthenticatedMenu({
   user,
+  section,
   isPending,
   onLogout,
 }: {
   user: HeaderUser;
+  section: Section;
   isPending: boolean;
   onLogout: () => void;
 }) {
-  const pathname = usePathname();
-  const showDashboard = user.role === "Admin" || user.role === "Host";
-
   return (
     <>
       <div className="px-2 py-1.5 focus:bg-accent focus:text-accent-foreground outline-none">
@@ -273,21 +298,50 @@ function AuthenticatedMenu({
       <MenuItem href="/bookings" icon={Calendar} label="My Bookings" />
       <MenuItem href="/wishlist" icon={Heart} label="Wishlist" />
 
-      {showDashboard && (
+      <DropdownMenuSeparator />
+
+      {/* Role and Section based context switches */}
+      {user.role === "Guest" && (
+        <MenuItem href="/become-host" icon={Building2} label="Become a Host" />
+      )}
+
+      {user.role === "Host" && (
+        <MenuItem
+          href={section === "hosting" ? "/" : "/hosting"}
+          icon={section === "hosting" ? Map : Building2}
+          label={
+            section === "hosting" ? "Switch to travelling" : "Switch to hosting"
+          }
+        />
+      )}
+
+      {user.role === "Admin" && (
         <>
-          <DropdownMenuSeparator />
-          {pathname?.startsWith("/dashboard") ? (
-            <MenuItem href="/" icon={Map} label="Switch to travelling" />
-          ) : (
-            <MenuItem
-              href="/dashboard"
-              icon={LayoutDashboard}
-              label={
-                user.role === "Admin"
-                  ? "Switch to dashboard"
-                  : "Switch to hosting"
-              }
-            />
+          {section === "guest" && (
+            <>
+              <MenuItem href="/admin" icon={Shield} label="Switch to admin" />
+              <MenuItem
+                href="/hosting"
+                icon={Building2}
+                label="Switch to hosting"
+              />
+            </>
+          )}
+          {section === "admin" && (
+            <>
+              <MenuItem href="/" icon={Map} label="Switch to travelling" />
+              <MenuItem
+                href="/hosting"
+                icon={Building2}
+                label="Switch to hosting"
+              />
+            </>
+          )}
+          {section === "hosting" && (
+            <>
+              <MenuItem href="/" icon={Map} label="Switch to travelling" />
+              <MenuItem href="/admin" icon={Shield} label="Switch to admin" />
+            </>
           )}
         </>
       )}
@@ -297,7 +351,7 @@ function AuthenticatedMenu({
       <DropdownMenuSeparator />
 
       <DropdownMenuItem onClick={onLogout} disabled={isPending}>
-        <LogOut />
+        <LogOut className="size-4" />
         {isPending ? "Logging out..." : "Logout"}
       </DropdownMenuItem>
     </>

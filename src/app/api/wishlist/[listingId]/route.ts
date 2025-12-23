@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Wishlist from "@/models/Wishlist";
-import { requireAuth } from "@/lib/auth/middleware";
+import { requireAuth } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 export async function DELETE(

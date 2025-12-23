@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
-import { requireAuth } from "@/lib/auth/middleware";
+import { requireAuth } from "@/lib/auth/auth-middleware";
 import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { deleteImageFromCloudinary } from "@/lib/cloudinary";

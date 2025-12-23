@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCurrentUser } from "@/lib/auth/middleware";
+import { getCurrentUser } from "@/lib/auth/auth-middleware";
 import { generateToken } from "@/lib/auth/jwt";
 import { setAuthCookie } from "@/lib/auth/cookies";
 import { successResponse, errorResponse } from "@/lib/api-response";

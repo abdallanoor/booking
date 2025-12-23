@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
-import { requireRole, getCurrentUser } from "@/lib/auth/middleware";
+import { requireRole, getCurrentUser } from "@/lib/auth/auth-middleware";
 import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
+    const view = searchParams.get("view"); // "admin" check
     const city = searchParams.get("city");
     const country = searchParams.get("country");
     const minPrice = searchParams.get("minPrice");
@@ -72,12 +73,24 @@ export async function GET(req: NextRequest) {
         return errorResponse("Unauthorized", 401);
       }
 
-      if (user.role === "Host") {
-        filter.host = user._id.toString(); // Host sees ONLY their own
-      } else if (user.role === "Admin") {
-        // Admin sees ALL (no Host restriction)
+      // STRICT HOSTING DASHBOARD SCOPE:
+      // Both Host and Admin users should only see THEIR own listings here.
+      // To see "All Listings" (Global Admin), they should use the Admin Console
+      // which should pass a different param (e.g., view=admin or just not use dashboard=true with host filter).
+
+      // Note: If you have a separate Admin Listings page that uses this endpoint,
+      // it should NOT pass `dashboard=true` or it should pass `view=admin`.
+      // Assuming Admin Dashboard listings might need a different flag if they use this.
+      // But for now, focusing on the User Requirement: Host Page = Own Data.
+
+      // HOST DASHBOARD SCOPE:
+      // By default, show only the user's own listings (Personal Host View).
+      // If user is Admin AND explicitly asks for 'admin' view, show all.
+      if (user.role === "Admin" && view === "admin") {
+        // GLOBAL ADMIN VIEW: See ALL listings (no host filter)
       } else {
-        return errorResponse("Forbidden", 403);
+        // HOST DASHBOARD VIEW: See ONLY own listings
+        filter.host = user._id.toString();
       }
 
       // Allow explicit status filtering (e.g. Host clicking "Pending" tab)

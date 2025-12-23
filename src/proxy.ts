@@ -13,7 +13,8 @@ export async function proxy(request: NextRequest) {
 
   // 2. Protect routes that require login
   const protectedRoutes = [
-    "/dashboard",
+    "/admin",
+    "/hosting",
     "/bookings",
     "/profile",
     "/become-host",
@@ -40,16 +41,20 @@ export async function proxy(request: NextRequest) {
         pathname.startsWith("/become-host") &&
         (role === "Host" || role === "Admin")
       ) {
-        return NextResponse.redirect(new URL("/dashboard", request.url));
+        const destination = role === "Admin" ? "/admin" : "/hosting";
+        return NextResponse.redirect(new URL(destination, request.url));
       }
 
-      // Role-based access control (Dashboard)
-      if (pathname.startsWith("/dashboard")) {
-        const isAllowed =
-          role === "Admin" ||
-          (role === "Host" && pathname.startsWith("/dashboard"));
+      // Role-based access control (Admin)
+      if (pathname.startsWith("/admin")) {
+        if (role !== "Admin") {
+          return NextResponse.redirect(new URL("/", request.url));
+        }
+      }
 
-        if (!isAllowed) {
+      // Role-based access control (Hosting)
+      if (pathname.startsWith("/hosting")) {
+        if (role !== "Host" && role !== "Admin") {
           return NextResponse.redirect(new URL("/", request.url));
         }
       }
@@ -64,7 +69,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
+    "/admin/:path*",
+    "/hosting/:path*",
     "/bookings/:path*",
     "/profile/:path*",
     "/become-host/:path*",
