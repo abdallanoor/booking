@@ -113,7 +113,7 @@ function HeaderSkeleton() {
         <div className="flex items-center justify-between">
           <Logo />
           <div className="flex items-center gap-4">
-            <Button variant="secondary" size="icon" className="rounded-full">
+            <Button variant="secondary" size="icon">
               <Menu />
             </Button>
           </div>
@@ -163,7 +163,7 @@ function AuthNavigation({ user }: { user: HeaderUser | null }) {
 
   return (
     <Link href="/auth/login">
-      <Button size="sm" className="rounded-full" variant="ghost">
+      <Button size="sm" variant="ghost">
         Login
       </Button>
     </Link>
@@ -187,14 +187,14 @@ function NavActions({
           {section === "guest" ? (
             <>
               <Link href="/admin">
-                <Button variant="ghost" size="sm" className="rounded-full">
+                <Button variant="ghost" size="sm">
                   Switch to admin
                 </Button>
               </Link>
             </>
           ) : (
             <Link href="/">
-              <Button variant="ghost" size="sm" className="rounded-full">
+              <Button variant="ghost" size="sm">
                 Switch to travelling
               </Button>
             </Link>
@@ -205,7 +205,7 @@ function NavActions({
       {/* Host specific header actions */}
       {user.role === "Host" && (
         <Link href={section === "guest" ? "/hosting" : "/"}>
-          <Button variant="ghost" size="sm" className="rounded-full">
+          <Button variant="ghost" size="sm">
             {section === "guest" ? "Switch to hosting" : "Switch to travelling"}
           </Button>
         </Link>
@@ -214,7 +214,7 @@ function NavActions({
       {/* Guest specific header actions */}
       {user.role === "Guest" && (
         <Link href="/become-host">
-          <Button variant="ghost" size="sm" className="rounded-full">
+          <Button variant="ghost" size="sm">
             Become a Host
           </Button>
         </Link>
@@ -252,7 +252,7 @@ function UserMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="icon" className="rounded-full">
+        <Button variant="secondary" size="icon">
           <Menu />
         </Button>
       </DropdownMenuTrigger>
