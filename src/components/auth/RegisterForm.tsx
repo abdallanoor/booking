@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { GoogleLoginBtn } from "./GoogleLoginBtn";
 import { useRouter } from "nextjs-toploader/app";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -104,7 +104,12 @@ export function RegisterForm() {
             </Tabs>
           </div>
 
-          <Button type="submit" className="w-full" disabled={isPending}>
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full"
+            disabled={isPending}
+          >
             {isPending ? "Creating account..." : "Sign Up"}
           </Button>
 

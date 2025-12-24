@@ -90,18 +90,6 @@ export interface Booking {
 }
 
 // ============================================================================
-// DASHBOARD TYPES
-// ============================================================================
-
-export interface DashboardStats {
-  totalListings: number;
-  totalBookings: number;
-  totalRevenue: number;
-  pendingListings?: number;
-  recentBookings?: Booking[];
-}
-
-// ============================================================================
 // API RESPONSE TYPES
 // ============================================================================
 

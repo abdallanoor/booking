@@ -130,7 +130,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
           toast.success("Listing created successfully");
         }
 
-        router.push("/dashboard/listings");
+        router.push("/hosting/listings");
         router.refresh();
       } catch (error) {
         const message =

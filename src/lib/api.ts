@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 // API utility with Next.js caching
 const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -30,6 +31,14 @@ export async function fetchAPI<T>(
       tags,
     },
   });
+
+  if (response.status === 401) {
+    redirect("/api/auth/logout?redirect=/");
+  }
+
+  if (response.status === 403) {
+    redirect("/");
+  }
 
   if (!response.ok) {
     const error = await response

@@ -49,6 +49,7 @@ export function GoogleLoginBtn() {
     <Button
       variant="outline"
       type="button"
+      size="lg"
       className="w-full flex items-center gap-2"
       onClick={() => handleGoogleLogin()}
     >

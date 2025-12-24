@@ -17,7 +17,7 @@ export default async function EditListingPage({
   const listing = await getListing(id);
 
   if (!listing) {
-    redirect("/dashboard/listings");
+    redirect("/hosting/listings");
   }
 
   // Verify ownership
@@ -25,7 +25,7 @@ export default async function EditListingPage({
     listing.host._id.toString() !== user._id.toString() &&
     user.role !== "Admin"
   ) {
-    redirect("/dashboard/listings");
+    redirect("/hosting/listings");
   }
 
   return (

@@ -33,16 +33,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextTopLoader color="var(--primary)" showSpinner={false} height={2} />
-        <ThemeProvider>
-          <GoogleOAuthProvider
-            clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
-          >
-            <AuthProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <GoogleOAuthProvider
+              clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}
+            >
               {children}
               <Toaster />
-            </AuthProvider>
-          </GoogleOAuthProvider>
-        </ThemeProvider>
+            </GoogleOAuthProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

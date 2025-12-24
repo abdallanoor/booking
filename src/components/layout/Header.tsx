@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
 import { useSection, type Section } from "@/contexts/SectionContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,7 @@ import { useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { useRouter } from "nextjs-toploader/app";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Types wrapper to ensure type safety with minimal noise
 interface HeaderUser {
@@ -48,7 +48,7 @@ interface HeaderProps {
 }
 
 export function Header({ links }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const section = useSection();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -73,7 +73,8 @@ export function Header({ links }: HeaderProps) {
     });
   };
 
-  if (!isClient) return <HeaderSkeleton />;
+  // Show skeleton while hydrating OR while auth state is loading
+  if (!isClient || loading) return <HeaderSkeleton />;
 
   return (
     <header className="border-b bg-card">

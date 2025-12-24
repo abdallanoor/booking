@@ -45,22 +45,13 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL(destination, request.url));
       }
 
-      // Role-based access control (Admin)
-      if (pathname.startsWith("/admin")) {
-        if (role !== "Admin") {
-          return NextResponse.redirect(new URL("/", request.url));
-        }
-      }
-
-      // Role-based access control (Hosting)
-      if (pathname.startsWith("/hosting")) {
-        if (role !== "Host" && role !== "Admin") {
-          return NextResponse.redirect(new URL("/", request.url));
-        }
-      }
+      // Role-based access control is handled in layout files
+      // where we have full DB access to check reactive role changes.
     } catch {
       // Token is invalid/expired
-      return NextResponse.redirect(new URL("/auth/login", request.url));
+      return NextResponse.redirect(
+        new URL("/api/auth/logout?redirect=/", request.url)
+      );
     }
   }
 

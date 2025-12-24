@@ -2,9 +2,9 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Listing from "@/models/Listing";
-import { requireAuth } from "@/lib/auth/auth-middleware";
 import { bookingSchema } from "@/lib/validations/booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { requireAuth } from "@/lib/auth/auth-middleware";
 
 export async function GET(req: NextRequest) {
   try {
@@ -49,7 +49,9 @@ export async function GET(req: NextRequest) {
     console.error("Get bookings error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to get bookings";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }
 

@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 // Client-side API utilities (for use in browser/client components)
 
 async function fetchAPIClient<T>(
@@ -12,6 +14,14 @@ async function fetchAPIClient<T>(
     },
     credentials: "include", // Include cookies in client-side requests
   });
+
+  if (response.status === 401) {
+    redirect("/api/auth/logout?redirect=/auth/login");
+  }
+
+  if (response.status === 403) {
+    redirect("/");
+  }
 
   if (!response.ok) {
     const error = await response

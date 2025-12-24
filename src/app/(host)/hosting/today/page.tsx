@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSameDay, isAfter, isBefore, startOfDay } from "date-fns";
 import { Booking } from "@/types";
-import { RecentBookings } from "@/components/dashboard/RecentBookings";
+import { RecentBookings } from "@/components/hosting/RecentBookings";
 import { LogInIcon, LogOutIcon, HomeIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 

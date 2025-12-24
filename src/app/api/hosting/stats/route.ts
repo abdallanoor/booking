@@ -78,6 +78,8 @@ export async function GET(req: NextRequest) {
     console.error("Get hosting stats error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to get hosting stats";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }

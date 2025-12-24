@@ -2,10 +2,10 @@ import { NextRequest } from "next/server";
 import { revalidateTag } from "next/cache";
 import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
-import { requireAuth } from "@/lib/auth/auth-middleware";
 import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { deleteImageFromCloudinary } from "@/lib/cloudinary";
+import { requireAuth } from "@/lib/auth/auth-middleware";
 
 export async function GET(
   req: NextRequest,
@@ -29,7 +29,9 @@ export async function GET(
     console.error("Get listing error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to get listing";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }
 
@@ -97,7 +99,9 @@ export async function PUT(
     console.error("Update listing error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to update listing";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }
 
@@ -152,7 +156,9 @@ export async function PATCH(
     console.error("Patch listing error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to update listing";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }
 
@@ -196,6 +202,8 @@ export async function DELETE(
     console.error("Delete listing error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to delete listing";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }

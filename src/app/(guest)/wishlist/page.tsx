@@ -5,25 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export const dynamic = "force-dynamic";
 
 export default async function WishlistPage() {
-  let wishlist;
-
-  try {
-    wishlist = await getWishlist();
-  } catch {
-    // User not authenticated or error fetching
-    return (
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">My Wishlist</h1>
-        <Card>
-          <CardContent className="text-center">
-            <p className="text-muted-foreground">
-              Please login to view your wishlist
-            </p>
-          </CardContent>
-        </Card>
-      </main>
-    );
-  }
+  const wishlist = await getWishlist();
 
   // Filter out items with deleted listings
   const validWishlist = wishlist.filter((item) => item.listing !== null);
@@ -34,7 +16,7 @@ export default async function WishlistPage() {
 
       {validWishlist.length === 0 ? (
         <Card>
-          <CardContent className="text-center">
+          <CardContent className="text-center py-10">
             <p className="text-muted-foreground">
               Your wishlist is empty. Start adding listings you love!
             </p>

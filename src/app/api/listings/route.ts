@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
-import { requireRole, getCurrentUser } from "@/lib/auth/auth-middleware";
 import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { getCurrentUser, requireRole } from "@/lib/auth/auth-middleware";
 
 export const dynamic = "force-dynamic";
 
@@ -124,7 +124,9 @@ export async function GET(req: NextRequest) {
     console.error("Get listings error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to get listings";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }
 
@@ -162,6 +164,8 @@ export async function POST(req: NextRequest) {
     console.error("Create listing error:", error);
     const message =
       error instanceof Error ? error.message : "Failed to create listing";
-    return errorResponse(message, 500);
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return errorResponse(message, status);
   }
 }

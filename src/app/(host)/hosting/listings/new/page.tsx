@@ -10,7 +10,7 @@ export default async function NewListingPage() {
   }
 
   if (user.role !== "Host" && user.role !== "Admin") {
-    redirect("/dashboard");
+    redirect("/hosting");
   }
 
   return (
