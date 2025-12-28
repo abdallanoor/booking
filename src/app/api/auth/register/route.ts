@@ -25,6 +25,12 @@ export async function POST(req: NextRequest) {
     // Check if user already exists
     const existingUser = await User.findOne({ email: validatedData.email });
     if (existingUser) {
+      if (existingUser.isBlocked) {
+        return errorResponse(
+          "This account has been blocked. Please contact support.",
+          403
+        );
+      }
       if (existingUser.provider === "google" && !existingUser.password) {
         // Link account: Add password to existing Google account
         existingUser.password = validatedData.password;
@@ -69,6 +75,7 @@ export async function POST(req: NextRequest) {
       role: validatedData.role || "Guest",
       verificationToken,
       emailVerified: false,
+      isBlocked: false,
     });
 
     // Send verification email

@@ -10,6 +10,7 @@ export interface IUser extends Document {
   role: "Guest" | "Host" | "Admin";
   avatar?: string;
   emailVerified: boolean;
+  isBlocked: boolean;
   verificationToken?: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
@@ -65,6 +66,10 @@ const userSchema = new Schema<IUser>(
     },
     resetPasswordExpires: {
       type: Date,
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
     },
   },
   {

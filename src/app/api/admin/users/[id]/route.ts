@@ -12,13 +12,17 @@ export async function PATCH(
     await requireRole(req, ["Admin"]);
     const { id } = await params;
     const body = await req.json();
-    const { role, name, emailVerified } = body;
+    const { isBlocked } = body;
+
+    if (typeof isBlocked !== "boolean") {
+      return errorResponse("isBlocked must be a boolean", 400);
+    }
 
     await dbConnect();
 
     const user = await User.findByIdAndUpdate(
       id,
-      { role, name, emailVerified },
+      { isBlocked },
       { new: true, runValidators: true }
     );
 
@@ -37,29 +41,4 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    await requireRole(req, ["Admin"]);
-    const { id } = await params;
-
-    await dbConnect();
-
-    const user = await User.findByIdAndDelete(id);
-
-    if (!user) {
-      return errorResponse("User not found", 404);
-    }
-
-    return successResponse({ message: "User deleted successfully" });
-  } catch (error) {
-    console.error("Delete admin user error:", error);
-    const message =
-      error instanceof Error ? error.message : "Failed to delete admin user";
-    const status =
-      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
-    return errorResponse(message, status);
-  }
-}
+// DELETE method removed as per requirements: admin can only "block user"

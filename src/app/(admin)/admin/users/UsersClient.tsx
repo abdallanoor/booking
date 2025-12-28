@@ -5,10 +5,11 @@ import { toast } from "sonner";
 import {
   MoreVertical,
   Shield,
-  Trash2,
   Search,
   Building2,
   UserIcon,
+  Ban,
+  CheckCircle,
 } from "lucide-react";
 import {
   Table,
@@ -32,67 +33,32 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usersService, type User } from "@/services/users.service";
 import { formatDate } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function AdminUsersPage({
   initialUsers,
 }: {
   initialUsers: User[];
 }) {
-  const { user: currentUser, refreshUser, logout } = useAuth();
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [searchQuery, setSearchQuery] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
 
-  const handleUpdateRole = async (id: string, role: User["role"]) => {
+  const handleToggleBlock = async (
+    id: string,
+    currentBlockedStatus: boolean
+  ) => {
     setProcessingId(id);
+    const newStatus = !currentBlockedStatus;
     try {
-      await usersService.updateUser(id, { role });
-      setUsers((prev) => prev.map((u) => (u._id === id ? { ...u, role } : u)));
+      await usersService.updateUser(id, { isBlocked: newStatus });
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, isBlocked: newStatus } : u))
+      );
 
-      // If the admin updated their own role or the currently logged in user
-      if (
-        currentUser &&
-        (currentUser.id === id ||
-          currentUser.email === users.find((u) => u._id === id)?.email)
-      ) {
-        await refreshUser();
-      }
-
-      toast.success(`User role updated to ${role}`);
+      toast.success(`User ${newStatus ? "blocked" : "unblocked"} successfully`);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to update role");
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleDeleteUser = async (id: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this user? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    setProcessingId(id);
-    try {
-      await usersService.deleteUser(id);
-      setUsers((prev) => prev.filter((u) => u._id !== id));
-
-      // If the admin deleted their own account
-      if (currentUser && currentUser.id === id) {
-        await logout();
-        window.location.href = "/";
-        return;
-      }
-
-      toast.success("User deleted successfully");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete user");
+      toast.error(`Failed to ${newStatus ? "block" : "unblock"} user`);
     } finally {
       setProcessingId(null);
     }
@@ -189,7 +155,19 @@ export default function AdminUsersPage({
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col">
-                        <span className="font-medium text-sm">{user.name}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {user.name}
+                          </span>
+                          {user.isBlocked && (
+                            <Badge
+                              variant="destructive"
+                              className="h-4 px-1.5 text-[10px] leading-none uppercase font-medium"
+                            >
+                              Blocked
+                            </Badge>
+                          )}
+                        </div>
                         <span className="text-xs text-muted-foreground">
                           {user.email}
                         </span>
@@ -219,6 +197,7 @@ export default function AdminUsersPage({
                       </Badge>
                     )}
                   </TableCell>
+
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -227,45 +206,31 @@ export default function AdminUsersPage({
                           size="icon"
                           className="h-8 w-8 rounded-full"
                         >
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                          Change Role
-                        </DropdownMenuLabel>
                         <DropdownMenuItem
-                          onClick={() => handleUpdateRole(user._id, "Admin")}
+                          onClick={() =>
+                            handleToggleBlock(user._id, user.isBlocked)
+                          }
+                          variant={user.isBlocked ? "default" : "destructive"}
                           disabled={
-                            user.role === "Admin" || processingId === user._id
+                            processingId === user._id || user.role === "Admin"
                           }
                         >
-                          <Shield /> Set as Admin
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleUpdateRole(user._id, "Host")}
-                          disabled={
-                            user.role === "Host" || processingId === user._id
-                          }
-                        >
-                          <Building2 /> Set as Host
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleUpdateRole(user._id, "Guest")}
-                          disabled={
-                            user.role === "Guest" || processingId === user._id
-                          }
-                        >
-                          <UserIcon /> Set as Guest
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteUser(user._id)}
-                          disabled={processingId === user._id}
-                        >
-                          <Trash2 /> Delete User
+                          {user.isBlocked ? (
+                            <>
+                              <CheckCircle />
+                              Unblock User
+                            </>
+                          ) : (
+                            <>
+                              <Ban /> Block User
+                            </>
+                          )}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>

@@ -1,4 +1,4 @@
-import { clientDelete, clientPatch } from "@/lib/api-client";
+import { clientPatch } from "@/lib/api-client";
 
 export interface User {
   _id: string;
@@ -7,6 +7,7 @@ export interface User {
   role: "Guest" | "Host" | "Admin";
   provider: "local" | "google";
   emailVerified: boolean;
+  isBlocked: boolean;
   avatar?: string;
   createdAt: string;
   updatedAt: string;
@@ -20,9 +21,5 @@ export const usersService = {
       data
     );
     return response.data.user;
-  },
-
-  deleteUser: async (id: string): Promise<void> => {
-    await clientDelete(`/admin/users/${id}`);
   },
 };

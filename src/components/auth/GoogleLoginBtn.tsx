@@ -34,7 +34,6 @@ export function GoogleLoginBtn() {
         await refreshUser();
         router.push("/");
       } catch (error) {
-        console.error(error);
         toast.error(
           error instanceof Error ? error.message : "Google login failed"
         );

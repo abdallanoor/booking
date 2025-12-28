@@ -19,6 +19,14 @@ export async function POST(req: NextRequest) {
       return errorResponse("Invalid email or password", 401);
     }
 
+    // Check if user is blocked
+    if (user.isBlocked === true) {
+      return errorResponse(
+        "Your account has been blocked. Please contact support.",
+        403
+      );
+    }
+
     // Check if user is Google user without password
     if (user.provider === "google" && !user.password) {
       return errorResponse(

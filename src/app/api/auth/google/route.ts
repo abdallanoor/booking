@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
     let user = await User.findOne({ email });
 
     if (user) {
+      // Check if user is blocked
+      if (user.isBlocked) {
+        return errorResponse(
+          "Your account has been blocked. Please contact support.",
+          403
+        );
+      }
       // User exists, update googleId if missing
       if (!user.googleId) {
         user.googleId = googleId;
@@ -61,6 +68,7 @@ export async function POST(req: NextRequest) {
         emailVerified: true,
         avatar: picture,
         role: "Guest", // Default role
+        isBlocked: false,
       });
     }
 

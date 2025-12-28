@@ -20,6 +20,10 @@ export async function getCurrentUser(req: NextRequest): Promise<IUser | null> {
     await dbConnect();
     const user = await User.findById(payload.userId).select("-password");
 
+    if (user?.isBlocked) {
+      return null;
+    }
+
     return user;
   } catch {
     return null;
