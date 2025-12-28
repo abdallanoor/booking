@@ -1,5 +1,5 @@
 import { apiGet } from "@/lib/api";
-import type { User } from "./users.service";
+import { User } from "@/types";
 
 // Server-side service (for use in server components)
 export const usersServerService = {

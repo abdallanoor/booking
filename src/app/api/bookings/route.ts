@@ -4,7 +4,10 @@ import Booking from "@/models/Booking";
 import Listing from "@/models/Listing";
 import { bookingSchema } from "@/lib/validations/booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { requireAuth } from "@/lib/auth/auth-middleware";
+import {
+  requireAuth,
+  requireProfileCompletion,
+} from "@/lib/auth/auth-middleware";
 
 export async function GET(req: NextRequest) {
   try {
@@ -57,7 +60,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireAuth(req);
+    // Check if user profile is complete for booking
+    const user = await requireProfileCompletion(req, "book");
     await dbConnect();
 
     const body = await req.json();

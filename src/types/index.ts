@@ -2,6 +2,18 @@
 // USER TYPES
 // ============================================================================
 
+export interface CreditCard {
+  lastFour?: string;
+  token?: string;
+  provider?: string;
+}
+
+export interface BankDetails {
+  bankName?: string;
+  accountNumber?: string;
+  routingNumber?: string;
+}
+
 export interface User {
   _id: string;
   name: string;
@@ -9,6 +21,19 @@ export interface User {
   role: "Guest" | "Host" | "Admin";
   avatar?: string;
   emailVerified: boolean;
+  password?: string;
+  provider: "local" | "google";
+  googleId?: string;
+  verificationToken?: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: string;
+  isBlocked: boolean;
+  phoneNumber?: string;
+  country?: string;
+  nationalId?: string;
+  creditCard?: CreditCard;
+  bankDetails?: BankDetails;
+  profileCompleted: boolean;
   createdAt: string;
   updatedAt: string;
 }

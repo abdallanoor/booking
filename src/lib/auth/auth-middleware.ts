@@ -55,3 +55,16 @@ export async function requireRole(
 
   return user;
 }
+
+export async function requireProfileCompletion(
+  req: NextRequest,
+  action: "book" | "withdraw"
+): Promise<IUser> {
+  const user = await requireAuth(req);
+
+  if (!user.checkProfileCompletion(action)) {
+    throw new Error("Profile Incomplete");
+  }
+
+  return user;
+}

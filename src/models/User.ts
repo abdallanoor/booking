@@ -1,22 +1,15 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
+import { User as UserType } from "@/types";
 
-export interface IUser extends Document {
-  name: string;
-  email: string;
-  password: string;
-  provider: "local" | "google";
-  googleId?: string;
-  role: "Guest" | "Host" | "Admin";
-  avatar?: string;
-  emailVerified: boolean;
-  isBlocked: boolean;
-  verificationToken?: string;
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
+export interface IUser
+  extends Document,
+    Omit<UserType, "_id" | "createdAt" | "updatedAt" | "resetPasswordExpires"> {
   createdAt: Date;
   updatedAt: Date;
+  resetPasswordExpires?: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
+  checkProfileCompletion(action: "book" | "withdraw"): boolean;
 }
 
 const userSchema = new Schema<IUser>(
@@ -67,7 +60,36 @@ const userSchema = new Schema<IUser>(
     resetPasswordExpires: {
       type: Date,
     },
+
     isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+
+    // New Fields
+    phoneNumber: {
+      type: String,
+      required: false,
+    },
+    country: {
+      type: String,
+      required: false,
+    },
+    nationalId: {
+      type: String,
+      required: false,
+    },
+    creditCard: {
+      lastFour: String,
+      token: String,
+      provider: String,
+    },
+    bankDetails: {
+      bankName: String,
+      accountNumber: String,
+      routingNumber: String,
+    },
+    profileCompleted: {
       type: Boolean,
       default: false,
     },
@@ -94,6 +116,12 @@ userSchema.pre("save", async function () {
     }
   }
 
+  // Update profileCompleted flag logic if desired, though "informational only"
+  // We can do a best-effort check here for generic completeness or leave it to manual updates.
+  // The user said "calculate it logically", which usually means via method, but also "Do NOT hardcode... manually".
+  // Let's implement the method as the source of truth for logic, and maybe leave the field mainly for UI reading.
+  // For now, I'll rely on the method for logic.
+
   if (!this.isModified("password") || !this.password) {
     return;
   }
@@ -108,6 +136,43 @@ userSchema.methods.comparePassword = async function (
 ): Promise<boolean> {
   if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to check profile completion based on action
+userSchema.methods.checkProfileCompletion = function (
+  action: "book" | "withdraw"
+): boolean {
+  const hasBasicInfo = !!(
+    this.name &&
+    this.email &&
+    this.phoneNumber &&
+    this.country
+  );
+
+  if (action === "book") {
+    // Booking requires Basic Info + National ID
+    // Credit Card is NOT required for profile completion check
+    const hasBookingInfo = !!this.nationalId;
+
+    return hasBasicInfo && hasBookingInfo;
+  }
+
+  if (action === "withdraw") {
+    // Withdrawal requires Basic Info + National ID + Bank Details
+    // (Note: User prompt says "When a host tries to withdraw money, they must complete their profile.")
+    // And schema diff lists bankDetails as "Required for hosts"
+    const hasHostInfo = !!this.nationalId;
+    const hasBankDetails = !!(
+      this.bankDetails &&
+      this.bankDetails.bankName &&
+      this.bankDetails.accountNumber &&
+      this.bankDetails.routingNumber
+    );
+
+    return hasBasicInfo && hasHostInfo && hasBankDetails;
+  }
+
+  return false;
 };
 
 // Indexes
