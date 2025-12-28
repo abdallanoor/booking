@@ -129,7 +129,6 @@ export default function AdminUsersPage({
               <TableHead className="w-[300px]">User</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Joined</TableHead>
-              <TableHead>Verified</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -180,24 +179,6 @@ export default function AdminUsersPage({
                       {formatDate(user.createdAt)}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    {user.emailVerified ? (
-                      <Badge
-                        variant="outline"
-                        className="text-green-600 bg-green-500/10 border-green-500/20 dark:text-green-400"
-                      >
-                        Verified
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="text-amber-600 bg-amber-500/10 border-amber-500/20 dark:text-amber-400"
-                      >
-                        Pending
-                      </Badge>
-                    )}
-                  </TableCell>
-
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
