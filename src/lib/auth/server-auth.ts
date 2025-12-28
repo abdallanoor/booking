@@ -32,6 +32,7 @@ export async function getServerUser(): Promise<SerializedUser | null> {
   }
 
   // Type assertion for lean() result
+  // Type assertion for lean() result
   const user = userData as {
     _id: mongoose.Types.ObjectId;
     name: string;
@@ -41,6 +42,12 @@ export async function getServerUser(): Promise<SerializedUser | null> {
     avatar?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    provider: string;
+    isBlocked: boolean;
+    profileCompleted: boolean;
+    phoneNumber?: string;
+    country?: string;
+    nationalId?: string;
   };
 
   // Serialize for client components
@@ -53,5 +60,11 @@ export async function getServerUser(): Promise<SerializedUser | null> {
     avatar: user.avatar,
     createdAt: user.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: user.updatedAt?.toISOString() || new Date().toISOString(),
+    provider: user.provider as "local" | "google",
+    isBlocked: user.isBlocked,
+    profileCompleted: user.profileCompleted,
+    phoneNumber: user.phoneNumber,
+    country: user.country,
+    nationalId: user.nationalId,
   };
 }
