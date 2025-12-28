@@ -31,8 +31,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { usersService, type User } from "@/services/users.service";
+import { usersService } from "@/services/users.service";
 import { formatDate } from "@/lib/utils";
+import { User } from "@/types";
 
 export default function AdminUsersPage({
   initialUsers,
