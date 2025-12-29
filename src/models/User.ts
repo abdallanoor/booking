@@ -1,6 +1,7 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import { User as UserType } from "@/types";
+import { calculateProfileScore } from "@/lib/profile";
 
 export interface IUser
   extends Document,
@@ -122,11 +123,9 @@ userSchema.pre("save", async function () {
     }
   }
 
-  // Update profileCompleted flag logic if desired, though "informational only"
-  // We can do a best-effort check here for generic completeness or leave it to manual updates.
-  // The user said "calculate it logically", which usually means via method, but also "Do NOT hardcode... manually".
-  // Let's implement the method as the source of truth for logic, and maybe leave the field mainly for UI reading.
-  // For now, I'll rely on the method for logic.
+  // Update profileCompleted flag logic
+  const score = calculateProfileScore(this);
+  this.profileCompleted = score >= 100;
 
   if (!this.isModified("password") || !this.password) {
     return;

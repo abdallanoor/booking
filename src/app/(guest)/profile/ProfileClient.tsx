@@ -11,6 +11,7 @@ import { PersonalDetails } from "@/components/profile/PersonalDetails";
 import { BankDetails } from "@/components/profile/BankDetails";
 import { PasswordSettings } from "@/components/profile/PasswordSettings";
 import { User } from "@/types";
+import { calculateProfileScore } from "@/lib/profile";
 
 interface ProfileClientProps {
   initialUser: User;
@@ -22,25 +23,7 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
-  const calculateCompletion = () => {
-    let score = 0;
-    if (user.name) score += 20;
-    if (user.emailVerified) score += 20;
-    if (user.phoneNumber) score += 20;
-    if (user.country) score += 20;
-
-    const isHostOrAdmin = user.role === "Host" || user.role === "Admin";
-    if (isHostOrAdmin) {
-      if (user.nationalId) score += 10;
-      if (user.bankDetails?.bankName && user.bankDetails?.accountNumber)
-        score += 10;
-    } else {
-      if (user.nationalId) score += 20;
-    }
-    return Math.min(score, 100);
-  };
-
-  const completionPercentage = calculateCompletion();
+  const completionPercentage = calculateProfileScore(user);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

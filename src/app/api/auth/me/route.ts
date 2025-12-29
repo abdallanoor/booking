@@ -85,25 +85,6 @@ export async function PUT(req: NextRequest) {
     if (bankDetails !== undefined) user.bankDetails = bankDetails;
     if (creditCard !== undefined) user.creditCard = creditCard;
 
-    // Calculate Profile Completion Score
-    let score = 0;
-    if (user.name) score += 20;
-    if (user.emailVerified) score += 20;
-    if (user.phoneNumber) score += 20;
-    if (user.country) score += 20;
-
-    const isHostOrAdmin = user.role === "Host" || user.role === "Admin";
-
-    if (isHostOrAdmin) {
-      if (user.nationalId) score += 10;
-      if (user.bankDetails?.bankName && user.bankDetails?.accountNumber)
-        score += 10;
-    } else {
-      if (user.nationalId) score += 20;
-    }
-
-    user.profileCompleted = score >= 100;
-
     await user.save();
 
     return successResponse({
