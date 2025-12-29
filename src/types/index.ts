@@ -34,6 +34,7 @@ export interface User {
   creditCard?: CreditCard;
   bankDetails?: BankDetails;
   profileCompleted: boolean;
+  hasPassword?: boolean;
   createdAt: string;
   updatedAt: string;
 }

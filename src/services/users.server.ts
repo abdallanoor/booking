@@ -1,7 +1,6 @@
 import { apiGet } from "@/lib/api";
 import { User } from "@/types";
 
-// Server-side service (for use in server components)
 export const usersServerService = {
   getUsers: async (): Promise<User[]> => {
     const response = await apiGet<{ data: { users: User[] } }>("/admin/users", {

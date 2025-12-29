@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
         avatar: picture,
         role: "Guest", // Default role
         isBlocked: false,
+        hasPassword: false,
       });
     }
 

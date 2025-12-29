@@ -289,9 +289,6 @@ function AuthenticatedMenu({
       <div className="px-2 py-1.5 focus:bg-accent focus:text-accent-foreground outline-none">
         <p className="font-semibold truncate">{user.name}</p>
         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-        <p className="text-xs text-muted-foreground mt-1 capitalize">
-          {user.role}
-        </p>
       </div>
       <DropdownMenuSeparator />
 

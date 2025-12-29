@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       if (existingUser.provider === "google" && !existingUser.password) {
         // Link account: Add password to existing Google account
         existingUser.password = validatedData.password;
+        existingUser.hasPassword = true;
         await existingUser.save();
 
         // Generate JWT token
@@ -76,6 +77,7 @@ export async function POST(req: NextRequest) {
       verificationToken,
       emailVerified: false,
       isBlocked: false,
+      hasPassword: true,
     });
 
     // Send verification email

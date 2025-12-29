@@ -25,6 +25,14 @@ export async function GET(req: NextRequest) {
         avatar: user.avatar,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        phoneNumber: user.phoneNumber,
+        country: user.country,
+        nationalId: user.nationalId,
+        bankDetails: user.bankDetails,
+        creditCard: user.creditCard,
+        profileCompleted: user.profileCompleted,
+
+        hasPassword: user.hasPassword,
       },
     });
   } catch (error) {
@@ -44,7 +52,15 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { name, avatar } = body;
+    const {
+      name,
+      avatar,
+      phoneNumber,
+      country,
+      nationalId,
+      bankDetails,
+      creditCard,
+    } = body;
 
     if (!name) {
       return errorResponse("Name is required", 400);
@@ -63,6 +79,30 @@ export async function PUT(req: NextRequest) {
     }
 
     user.name = name;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+    if (country !== undefined) user.country = country;
+    if (nationalId !== undefined) user.nationalId = nationalId;
+    if (bankDetails !== undefined) user.bankDetails = bankDetails;
+    if (creditCard !== undefined) user.creditCard = creditCard;
+
+    // Calculate Profile Completion Score
+    let score = 0;
+    if (user.name) score += 20;
+    if (user.emailVerified) score += 20;
+    if (user.phoneNumber) score += 20;
+    if (user.country) score += 20;
+
+    const isHostOrAdmin = user.role === "Host" || user.role === "Admin";
+
+    if (isHostOrAdmin) {
+      if (user.nationalId) score += 10;
+      if (user.bankDetails?.bankName && user.bankDetails?.accountNumber)
+        score += 10;
+    } else {
+      if (user.nationalId) score += 20;
+    }
+
+    user.profileCompleted = score >= 100;
 
     await user.save();
 
@@ -76,6 +116,14 @@ export async function PUT(req: NextRequest) {
         avatar: user.avatar,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
+        phoneNumber: user.phoneNumber,
+        country: user.country,
+        nationalId: user.nationalId,
+        bankDetails: user.bankDetails,
+        creditCard: user.creditCard,
+        profileCompleted: user.profileCompleted,
+
+        hasPassword: user.hasPassword,
       },
       message: "Profile updated successfully",
     });

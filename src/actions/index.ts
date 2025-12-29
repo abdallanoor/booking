@@ -114,6 +114,18 @@ export async function getAllBookingsAction() {
 export async function updateUserAction(data: {
   name: string;
   avatar?: string;
+  phoneNumber?: string;
+  country?: string;
+  nationalId?: string;
+  bankDetails?: {
+    bankName: string;
+    accountNumber: string;
+    routingNumber: string;
+  };
+  creditCard?: {
+    lastFour: string;
+    provider?: string;
+  };
 }) {
   // SECURITY: Explicitly select only allowed fields to prevent Mass Assignment attacks.
   // This ensures that even if 'role' or other sensitive fields are injected into 'data',
@@ -121,6 +133,11 @@ export async function updateUserAction(data: {
   const safePayload = {
     name: data.name,
     avatar: data.avatar,
+    phoneNumber: data.phoneNumber,
+    country: data.country,
+    nationalId: data.nationalId,
+    bankDetails: data.bankDetails,
+    creditCard: data.creditCard,
   };
 
   const result = await apiPut<ApiResponse<{ user: User; message?: string }>>(
@@ -128,6 +145,13 @@ export async function updateUserAction(data: {
     safePayload
   );
   revalidatePath("/", "layout");
+  return result;
+}
+
+export async function resendVerificationAction() {
+  const result = await apiPost<ApiResponse<unknown>>(
+    "/auth/resend-verification"
+  );
   return result;
 }
 
@@ -164,5 +188,28 @@ export async function uploadListingImagesAction(formData: FormData) {
   } catch (error) {
     console.error("Listing images upload failed:", error);
     return { success: false, message: "Failed to upload images" };
+  }
+}
+
+export async function changePasswordAction(
+  currentPassword?: string,
+  newPassword?: string
+) {
+  try {
+    const result = await apiPatch<ApiResponse<{ message: string }>>(
+      "/auth/update-password",
+      {
+        currentPassword,
+        newPassword,
+      }
+    );
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to change password",
+      data: { message: "" },
+    };
   }
 }

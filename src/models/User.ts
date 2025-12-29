@@ -5,6 +5,7 @@ import { User as UserType } from "@/types";
 export interface IUser
   extends Document,
     Omit<UserType, "_id" | "createdAt" | "updatedAt" | "resetPasswordExpires"> {
+  hasPassword?: boolean;
   createdAt: Date;
   updatedAt: Date;
   resetPasswordExpires?: Date;
@@ -59,6 +60,11 @@ const userSchema = new Schema<IUser>(
     },
     resetPasswordExpires: {
       type: Date,
+    },
+
+    hasPassword: {
+      type: Boolean,
+      default: false,
     },
 
     isBlocked: {
