@@ -1,19 +1,5 @@
-import mongoose, { Document, Model, Schema, HydratedDocument } from "mongoose";
-
-export interface IBooking {
-  listing: mongoose.Types.ObjectId;
-  guest: mongoose.Types.ObjectId;
-  checkIn: Date;
-  checkOut: Date;
-  guests: number;
-  totalPrice: number;
-  status: "pending" | "confirmed" | "cancelled";
-}
-
-export interface IBookingDocument extends IBooking, Document {
-  createdAt: Date;
-  updatedAt: Date;
-}
+import mongoose, { Model, Schema, HydratedDocument } from "mongoose";
+import { IBookingDocument } from "@/types";
 
 const bookingSchema = new Schema<IBookingDocument>(
   {
@@ -54,8 +40,18 @@ const bookingSchema = new Schema<IBookingDocument>(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "cancelled"],
+      enum: ["pending_payment", "confirmed", "cancelled"],
+      default: "pending_payment",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", "refunded"],
       default: "pending",
+    },
+    paymentId: {
+      type: Schema.Types.ObjectId,
+      ref: "Payment",
+      sparse: true,
     },
   },
   {
@@ -72,19 +68,19 @@ bookingSchema.index({ status: 1 });
 bookingSchema.pre("save", async function () {
   const booking = this as HydratedDocument<IBookingDocument>;
 
-  // Skip validation if booking is cancelled
-  if (booking.status === "cancelled") {
+  // Skip validation if booking is cancelled or pending payment
+  if (booking.status === "cancelled" || booking.status === "pending_payment") {
     return;
   }
 
   const overlappingBooking = await mongoose.models.Booking.findOne({
     listing: booking.listing,
     _id: { $ne: booking._id },
-    status: { $ne: "cancelled" },
+    status: "confirmed", // Only block if another booking is ALREADY confirmed
     $or: [
       {
-        checkIn: { $lte: booking.checkOut },
-        checkOut: { $gte: booking.checkIn },
+        checkIn: { $lt: booking.checkOut },
+        checkOut: { $gt: booking.checkIn },
       },
     ],
   });

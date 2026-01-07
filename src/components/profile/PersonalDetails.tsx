@@ -152,14 +152,8 @@ export function PersonalDetails({ user, refreshUser }: PersonalDetailsProps) {
           className="max-sm:h-10"
           variant="secondary"
         >
-          {loading ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <>
-              <SaveIcon />
-              <span className="hidden sm:inline">Save</span>
-            </>
-          )}
+          {loading ? <Loader2 className="animate-spin" /> : <SaveIcon />}
+          <span className="hidden sm:inline">Save</span>
         </Button>
       </div>
 

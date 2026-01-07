@@ -7,11 +7,7 @@ if (!JWT_SECRET) {
   throw new Error("Please define the JWT_SECRET environment variable");
 }
 
-export interface JWTPayload {
-  userId: string;
-  email: string;
-  role: string;
-}
+import { JWTPayload } from "@/types";
 
 export function generateToken(
   userId: string,

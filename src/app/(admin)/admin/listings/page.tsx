@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { updateListingStatusAction, deleteListingAction } from "@/actions";
 import type { Listing } from "@/types";
+import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
 
 export default function AdminListingsPage() {
@@ -169,7 +170,7 @@ export default function AdminListingsPage() {
                               {listing.host?.name || "Unknown"}
                             </p>
                             <p className="text-lg font-bold">
-                              ${listing.pricePerNight}/night
+                              {formatCurrency(listing.pricePerNight)}/night
                             </p>
                           </div>
 

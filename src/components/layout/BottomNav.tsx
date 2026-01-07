@@ -3,13 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { type LucideIcon } from "lucide-react";
-
-export interface BottomNavLink {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-}
+import type { BottomNavLink } from "@/types";
 
 interface BottomNavProps {
   links: BottomNavLink[];

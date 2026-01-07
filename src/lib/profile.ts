@@ -1,17 +1,6 @@
-export interface ProfileScoreData {
-  name?: string;
-  emailVerified?: boolean;
-  phoneNumber?: string;
-  country?: string;
-  role?: string;
-  nationalId?: string;
-  bankDetails?: {
-    bankName?: string;
-    accountNumber?: string;
-  };
-}
+import type { UserBase } from "@/types";
 
-export function calculateProfileScore(user: ProfileScoreData): number {
+export function calculateProfileScore(user: UserBase): number {
   let score = 0;
   if (user.name) score += 20;
   if (user.emailVerified) score += 20;

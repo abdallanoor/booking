@@ -4,6 +4,8 @@ import Booking from "@/models/Booking";
 import Listing from "@/models/Listing";
 import { requireAuth } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import Payment from "@/models/Payment";
+import { refundTransaction } from "@/lib/paymob/client";
 
 export async function GET(
   req: NextRequest,
@@ -15,7 +17,13 @@ export async function GET(
     const { id } = await params;
 
     const booking = await Booking.findById(id)
-      .populate("listing")
+      .populate({
+        path: "listing",
+        populate: {
+          path: "host",
+          select: "name email avatar",
+        },
+      })
       .populate("guest", "name email");
 
     if (!booking) {
@@ -67,9 +75,68 @@ export async function PATCH(
     const body = await req.json();
 
     if (body.status === "cancelled") {
+      // Enforce 48-hour cancellation policy
+      const checkInDate = new Date(booking.checkIn);
+      const now = new Date();
+      const hoursDifference =
+        (checkInDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      if (hoursDifference < 48) {
+        return errorResponse(
+          "Cancellation is not allowed within 48 hours of check-in",
+          400
+        );
+      }
+
+      // 1. Process Refund if paid
+      const payment = await Payment.findOne({
+        booking: booking._id,
+        status: "paid",
+      });
+
+      if (payment && payment.paymobTransactionId) {
+        try {
+          console.log(
+            `[Cancellation] Processing refund for payment: ${payment._id}`
+          );
+          // Multiplied by 100 because amount is stored in piasters/cents in Payment model?
+          // Let's check Payment model. verify if 'amount' is in EGP or piasters.
+          // Payment model says "amount: number; // Amount in piasters".
+          // So we pass payment.amount directly.
+
+          await refundTransaction(payment.paymobTransactionId, payment.amount);
+
+          payment.status = "refunded";
+          booking.paymentStatus = "refunded";
+          await payment.save();
+          console.log(`[Cancellation] Refund successful`);
+        } catch (refundError) {
+          console.error("[Cancellation] Refund failed:", refundError);
+          // We abort cancellation if refund fails to protect the guest's money
+          return errorResponse(
+            "Cancellation failed: Unable to process refund. Please contact support.",
+            500
+          );
+        }
+      } else if (payment && !payment.paymobTransactionId) {
+        console.warn(
+          `[Cancellation] Payment ${payment._id} found but missing transaction ID. Manual refund required.`
+        );
+        // Decide: Allow cancel but warn? Or Block?
+        // For now, let's allow cancel but log it, maybe return a warning message if possible.
+        // But effectively we just proceed to cancel locally.
+      }
+
+      // 2. Update Booking Status
       booking.status = "cancelled";
       await booking.save();
-      return successResponse({ booking }, "Booking cancelled successfully");
+
+      const responseMessage =
+        payment?.status === "refunded"
+          ? "Booking cancelled and refunded successfully"
+          : "Booking cancelled successfully";
+
+      return successResponse({ booking }, responseMessage);
     }
 
     return errorResponse("Invalid status", 400);

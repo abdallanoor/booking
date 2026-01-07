@@ -1,15 +1,6 @@
 import { clientGet, clientPost } from "@/lib/api-client";
 import { RegisterInput, LoginInput } from "@/lib/validations/auth";
-import type { User as BaseUser } from "@/types";
-
-// Auth service uses 'id' field for backward compatibility
-export interface User extends Omit<BaseUser, "_id"> {
-  id: string;
-}
-
-export interface AuthResponse {
-  user: User;
-}
+import type { AuthUser as User, AuthResponse } from "@/types";
 
 export const authService = {
   // Register new user

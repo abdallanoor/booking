@@ -44,11 +44,12 @@ export async function GET(req: NextRequest) {
     const filter: ListingFilter & { _id?: any } = {};
 
     // Date Availability Filtering
+    // Only confirmed bookings block dates; pending_payment bookings don't reserve dates
     if (checkIn && checkOut) {
       const conflictingBookings = await import("@/models/Booking").then((mod) =>
         mod.default
           .find({
-            status: { $ne: "cancelled" },
+            status: "confirmed",
             $or: [
               {
                 checkIn: { $lt: new Date(checkOut) },

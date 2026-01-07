@@ -65,9 +65,18 @@ export async function deleteListingAction(id: string) {
 // ============================================================================
 
 export async function createBookingAction(data: unknown) {
-  const result = await apiPost("/bookings", data);
+  const result = await apiPost<{ data: { booking: Booking } }>(
+    "/bookings",
+    data
+  );
   revalidateBookings();
-  return result;
+
+  // Return the booking object for payment initiation
+  if (result.data?.booking) {
+    return result.data.booking;
+  }
+
+  throw new Error("Failed to create booking");
 }
 
 export async function cancelBookingAction(id: string) {

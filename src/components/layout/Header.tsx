@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSection, type Section } from "@/contexts/SectionContext";
+import { useSection } from "@/contexts/SectionContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,14 +32,7 @@ import { toast } from "sonner";
 import { useRouter } from "nextjs-toploader/app";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
-
-// Types wrapper to ensure type safety with minimal noise
-interface HeaderUser {
-  name: string;
-  email: string;
-  role: string;
-  avatar?: string;
-}
+import { Section, HeaderUser } from "@/types";
 
 const emptySubscribe = () => () => {};
 

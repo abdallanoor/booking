@@ -340,7 +340,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="pricePerNight">Price/Night ($) *</Label>
+                <Label htmlFor="pricePerNight">Price/Night (EGP) *</Label>
                 <Input
                   id="pricePerNight"
                   type="number"

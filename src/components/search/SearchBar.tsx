@@ -118,8 +118,24 @@ export function SearchBar() {
               defaultMonth={date?.from}
               selected={date}
               onSelect={handleDateSelect}
-              disabled={(date) => date < new Date()}
+              startMonth={new Date()}
+              fromDate={new Date()}
+              disabled={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return date < today;
+              }}
             />
+            <div className="p-3 border-t flex justify-end">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setDate(undefined)}
+                className="text-xs font-semibold underline hover:bg-transparent p-0 h-auto"
+              >
+                Clear dates
+              </Button>
+            </div>
           </PopoverContent>
         </Popover>
 

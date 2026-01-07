@@ -1,33 +1,7 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
+import { IListingDocument } from "@/types";
 
-export interface IListing extends Document {
-  title: string;
-  description: string;
-  listingType: string;
-  location: {
-    address: string;
-    city: string;
-    country: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    };
-  };
-  images: string[];
-  amenities: string[];
-  pricePerNight: number;
-  maxGuests: number;
-  bedrooms: number;
-  beds: number;
-  bathrooms: number;
-  rooms: number;
-  privacyType: "entire_place" | "private_room" | "shared_room";
-  status: "pending" | "approved" | "rejected";
-  host: mongoose.Types.ObjectId;
-  createdAt: Date;
-}
-
-const listingSchema = new Schema<IListing>(
+const listingSchema = new Schema<IListingDocument>(
   {
     title: {
       type: String,
@@ -135,7 +109,8 @@ listingSchema.index({ "location.country": 1 });
 listingSchema.index({ pricePerNight: 1 });
 listingSchema.index({ host: 1 });
 
-const Listing: Model<IListing> =
-  mongoose.models.Listing || mongoose.model<IListing>("Listing", listingSchema);
+const Listing: Model<IListingDocument> =
+  mongoose.models.Listing ||
+  mongoose.model<IListingDocument>("Listing", listingSchema);
 
 export default Listing;

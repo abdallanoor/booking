@@ -194,7 +194,7 @@ export default async function ListingDetailPage({
 
         {/* Right Column: Sticky Booking Card */}
         <div className="relative">
-          <div className="sticky top-24">
+          <div className="sticky top-10">
             <BookingForm listing={listing} bookedDates={bookedDates} />
           </div>
         </div>

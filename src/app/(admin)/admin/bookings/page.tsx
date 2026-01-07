@@ -13,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { cancelBookingAction } from "@/actions";
 import type { Booking } from "@/types";
+import { formatCurrency, formatDate } from "@/lib/utils";
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -66,18 +67,11 @@ export default function AdminBookingsPage() {
     return matchesTab && matchesSearch;
   });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const counts = {
     all: bookings.length,
     confirmed: bookings.filter((b) => b.status === "confirmed").length,
-    pending: bookings.filter((b) => b.status === "pending").length,
+    pending_payment: bookings.filter((b) => b.status === "pending_payment")
+      .length,
     cancelled: bookings.filter((b) => b.status === "cancelled").length,
   };
 
@@ -120,7 +114,9 @@ export default function AdminBookingsPage() {
           <TabsTrigger value="confirmed">
             Confirmed ({counts.confirmed})
           </TabsTrigger>
-          <TabsTrigger value="pending">Pending ({counts.pending})</TabsTrigger>
+          <TabsTrigger value="pending_payment">
+            Pending Payment ({counts.pending_payment})
+          </TabsTrigger>
           <TabsTrigger value="cancelled">
             Cancelled ({counts.cancelled})
           </TabsTrigger>
@@ -196,8 +192,8 @@ export default function AdminBookingsPage() {
                             <div>
                               <p className="font-medium text-xs">Stay Dates</p>
                               <p className="font-semibold">
-                                {formatDate(booking.checkIn)} -{" "}
-                                {formatDate(booking.checkOut)}
+                                {formatDate(booking.checkIn, "short")} -{" "}
+                                {formatDate(booking.checkOut, "short")}
                               </p>
                             </div>
                           </div>
@@ -206,7 +202,7 @@ export default function AdminBookingsPage() {
                         <div className="flex items-center justify-between pt-2">
                           <div className="space-y-1">
                             <p className="text-xl font-bold">
-                              ${booking.totalPrice}
+                              {formatCurrency(booking.totalPrice)}
                             </p>
                             <p className="text-xs text-muted-foreground uppercase tracking-wider">
                               Total Price

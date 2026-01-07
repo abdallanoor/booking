@@ -11,10 +11,11 @@ export async function GET(
     await dbConnect();
     const { id } = await params;
 
-    // Fetch all confirmed/pending bookings for this listing
+    // Fetch only confirmed bookings for this listing
+    // pending_payment bookings don't block dates until payment is successful
     const bookings = await Booking.find({
       listing: id,
-      status: { $ne: "cancelled" },
+      status: "confirmed",
     }).select("checkIn checkOut");
 
     // Format the booked dates

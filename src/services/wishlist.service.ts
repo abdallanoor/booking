@@ -1,12 +1,5 @@
 import { apiGet } from "@/lib/api";
-import type { Listing } from "./listings.service";
-
-export interface WishlistItem {
-  _id: string;
-  user: string;
-  listing: Listing;
-  createdAt: string;
-}
+import type { WishlistItem } from "@/types";
 
 export async function getWishlist(): Promise<WishlistItem[]> {
   const response = await apiGet<{ data: { wishlist: WishlistItem[] } }>(

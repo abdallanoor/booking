@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { format } from "date-fns";
+import { formatCurrency } from "@/lib/utils";
 
 interface RecentBookingsProps {
   bookings: Booking[];
@@ -90,7 +91,7 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
                     </span>
                   </div>
                 </TableCell>
-                <TableCell>${booking.totalPrice.toLocaleString()}</TableCell>
+                <TableCell>{formatCurrency(booking.totalPrice)}</TableCell>
                 <TableCell>
                   <Badge
                     variant={

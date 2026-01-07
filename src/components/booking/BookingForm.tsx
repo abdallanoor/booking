@@ -14,10 +14,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { format, differenceInCalendarDays } from "date-fns";
 import { Minus, Plus, ChevronDown } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { apiClient } from "@/lib/api-client";
+import type { ApiResponse } from "@/types";
+import type { InitiatePaymentResult } from "@/lib/paymob";
 
 interface BookingFormProps {
   listing: Listing;
@@ -35,7 +38,6 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
 
   // Standard pattern for handling hydration issues with dynamic IDs from Radix UI
   useEffect(() => {
-    // eslint-disable-next-line
     setMounted(true);
   }, []);
 
@@ -50,17 +52,13 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     );
   };
 
-  // Helper function to check if a date is disabled (middle of a booking)
-  // This is for visual disabling in the calendar.
-  const isDateDisabled = (day: Date): boolean => {
+  // Check if a night is already booked (used for visual line)
+  const isNightBooked = (day: Date): boolean => {
     return bookedDates.some((booking) => {
       const bookingStart = parseDate(booking.from);
       const bookingEnd = parseDate(booking.to);
       if (!bookingStart || !bookingEnd) return false;
-
-      // Disable dates strictly BETWEEN start and end
-      // This allows checking in on a checkout day and vice versa
-      return day > bookingStart && day < bookingEnd;
+      return day >= bookingStart && day < bookingEnd;
     });
   };
 
@@ -117,14 +115,28 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
 
     startTransition(async () => {
       try {
-        await createBookingAction({
+        // Step 1: Create booking with pending_payment status
+        const booking = await createBookingAction({
           listingId: listing._id,
           checkIn: format(date.from!, "yyyy-MM-dd"),
           checkOut: format(date.to!, "yyyy-MM-dd"),
           guests: Number(guests),
         });
-        toast.success("Booking created successfully");
-        router.push("/bookings");
+
+        // Step 2: Initiate payment and get checkout URL
+        const paymentResponse = await apiClient.post<
+          ApiResponse<InitiatePaymentResult>
+        >("/payments/initiate", {
+          bookingId: booking._id,
+        });
+
+        if (!paymentResponse.success || !paymentResponse.data.checkoutUrl) {
+          throw new Error("Failed to initiate payment");
+        }
+
+        // Step 3: Redirect to Paymob checkout
+        toast.success("Redirecting to payment...");
+        window.location.href = paymentResponse.data.checkoutUrl;
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to create booking";
@@ -137,10 +149,12 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     date?.from && date?.to ? differenceInCalendarDays(date.to, date.from) : 0;
 
   return (
-    <Card className="border shadow-xl rounded-xl overflow-hidden sticky top-24">
+    <Card className="border shadow-xl rounded-xl overflow-hidden">
       <CardHeader>
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold">${listing.pricePerNight}</span>
+          <span className="text-2xl font-bold">
+            {formatCurrency(listing.pricePerNight)}
+          </span>
           <span className="text-muted-foreground"> night</span>
         </div>
       </CardHeader>
@@ -215,18 +229,35 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
                     defaultMonth={date?.from}
                     selected={date}
                     onSelect={handleDateSelect}
+                    // className="[--cell-size:--spacing(11)] md:[--cell-size:--spacing(10)]"
+                    startMonth={new Date()}
+                    fromDate={new Date()}
+                    modifiers={{
+                      booked: (day) => isNightBooked(day),
+                    }}
                     disabled={(day) => {
-                      // Normalize to midnight for accurate comparison
                       const today = new Date();
                       today.setHours(0, 0, 0, 0);
+
                       // Disable past dates
                       if (day < today) {
                         return true;
                       }
-                      // Check if the date is booked
-                      return isDateDisabled(day);
+
+                      // Disable nights already booked by others
+                      return isNightBooked(day);
                     }}
                   />
+                  <div className="p-3 border-t flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setDate(undefined)}
+                      className="text-xs font-semibold underline hover:bg-transparent p-0 h-auto"
+                    >
+                      Clear dates
+                    </Button>
+                  </div>
                 </PopoverContent>
               </Popover>
 
@@ -298,13 +329,13 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
           <div className="space-y-3 pt-4">
             <div className="flex justify-between text-muted-foreground">
               <span className="underline">
-                ${listing.pricePerNight} x {nights} nights
+                {formatCurrency(listing.pricePerNight)} x {nights} nights
               </span>
-              <span>${listing.pricePerNight * nights}</span>
+              <span>{formatCurrency(listing.pricePerNight * nights)}</span>
             </div>
             <div className="pt-4 border-t flex justify-between font-semibold text-foreground text-lg">
               <span>Total</span>
-              <span>${listing.pricePerNight * nights}</span>
+              <span>{formatCurrency(listing.pricePerNight * nights)}</span>
             </div>
           </div>
         )}

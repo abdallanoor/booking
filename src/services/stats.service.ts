@@ -1,19 +1,5 @@
 import { apiGet } from "@/lib/api";
-
-export interface AdminStats {
-  totalUsers: number;
-  activeListings: number;
-  pendingListings: number;
-  totalBookings: number;
-  revenue: number;
-}
-
-export interface HostingStats {
-  activeListings: number;
-  pendingBookings: number;
-  upcomingGuests: number;
-  totalEarnings: number;
-}
+import type { AdminStats, HostingStats } from "@/types";
 
 export const statsService = {
   getAdminStats: async (): Promise<AdminStats> => {

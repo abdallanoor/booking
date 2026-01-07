@@ -97,7 +97,8 @@ export async function POST(req: NextRequest) {
       checkOut: checkOutDate,
       guests: validatedData.guests,
       totalPrice,
-      status: "confirmed",
+      status: "pending_payment",
+      paymentStatus: "pending",
     });
 
     await booking.populate("listing");

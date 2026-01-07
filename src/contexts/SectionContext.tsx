@@ -1,8 +1,7 @@
 "use client";
 
 import React, { createContext, useContext } from "react";
-
-export type Section = "guest" | "hosting" | "admin";
+import type { Section } from "@/types";
 
 interface SectionContextType {
   section: Section;

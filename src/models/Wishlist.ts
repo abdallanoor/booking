@@ -1,12 +1,7 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
+import { IWishlistDocument } from "@/types";
 
-export interface IWishlist extends Document {
-  user: mongoose.Types.ObjectId;
-  listing: mongoose.Types.ObjectId;
-  createdAt: Date;
-}
-
-const wishlistSchema = new Schema<IWishlist>(
+const wishlistSchema = new Schema<IWishlistDocument>(
   {
     user: {
       type: Schema.Types.ObjectId,
@@ -27,8 +22,8 @@ const wishlistSchema = new Schema<IWishlist>(
 // Compound unique index to prevent duplicate wishlist entries
 wishlistSchema.index({ user: 1, listing: 1 }, { unique: true });
 
-const Wishlist: Model<IWishlist> =
+const Wishlist: Model<IWishlistDocument> =
   mongoose.models.Wishlist ||
-  mongoose.model<IWishlist>("Wishlist", wishlistSchema);
+  mongoose.model<IWishlistDocument>("Wishlist", wishlistSchema);
 
 export default Wishlist;

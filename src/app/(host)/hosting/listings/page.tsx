@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { deleteListingAction } from "@/actions";
 import type { Listing } from "@/types";
+import { formatCurrency } from "@/lib/utils";
 
 export default function HostingListingsPage() {
   const router = useRouter();
@@ -127,7 +128,7 @@ export default function HostingListingsPage() {
                     <div className="flex items-center justify-between mt-4">
                       <div className="space-y-1">
                         <p className="text-lg font-bold">
-                          ${listing.pricePerNight}/night
+                          {formatCurrency(listing.pricePerNight)}/night
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {listing.maxGuests} guests · {listing.bedrooms}{" "}

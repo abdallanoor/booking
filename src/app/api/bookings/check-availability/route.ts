@@ -17,10 +17,11 @@ export async function POST(req: NextRequest) {
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
 
-    // Check for overlapping bookings
+    // Check for overlapping confirmed bookings only
+    // pending_payment bookings don't block dates until payment is successful
     const overlappingBooking = await Booking.findOne({
       listing: listingId,
-      status: { $ne: "cancelled" },
+      status: "confirmed",
       $or: [
         {
           checkIn: { $lte: checkOutDate },

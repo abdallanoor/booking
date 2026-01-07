@@ -1,20 +1,9 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
-import { User as UserType } from "@/types";
+import { IUserDocument } from "@/types";
 import { calculateProfileScore } from "@/lib/profile";
 
-export interface IUser
-  extends Document,
-    Omit<UserType, "_id" | "createdAt" | "updatedAt" | "resetPasswordExpires"> {
-  hasPassword?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  resetPasswordExpires?: Date;
-  comparePassword(candidatePassword: string): Promise<boolean>;
-  checkProfileCompletion(action: "book" | "withdraw"): boolean;
-}
-
-const userSchema = new Schema<IUser>(
+const userSchema = new Schema<IUserDocument>(
   {
     name: {
       type: String,
@@ -193,7 +182,7 @@ if (process.env.NODE_ENV === "development") {
   }
 }
 
-const User: Model<IUser> =
-  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
+const User: Model<IUserDocument> =
+  mongoose.models.User || mongoose.model<IUserDocument>("User", userSchema);
 
 export default User;

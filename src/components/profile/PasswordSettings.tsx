@@ -97,16 +97,10 @@ export function PasswordSettings({
           className="max-sm:h-10"
           variant="secondary"
         >
-          {loading ? (
-            <Loader2 className="animate-spin" />
-          ) : (
-            <>
-              <SaveIcon />
-              <span className="hidden sm:inline">
-                {hasPassword ? "Update Password" : "Set Password"}
-              </span>
-            </>
-          )}
+          {loading ? <Loader2 className="animate-spin" /> : <SaveIcon />}
+          <span className="hidden sm:inline">
+            {hasPassword ? "Update Password" : "Set Password"}
+          </span>
         </Button>
       </div>
 

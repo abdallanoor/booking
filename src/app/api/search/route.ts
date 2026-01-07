@@ -38,12 +38,13 @@ export async function GET(req: NextRequest) {
     let listings = await Listing.find(filter).populate("host", "name avatar");
 
     // Filter out listings that are already booked for the selected dates
+    // Only confirmed bookings block dates; pending_payment bookings don't reserve dates
     if (checkIn && checkOut) {
       const checkInDate = new Date(checkIn);
       const checkOutDate = new Date(checkOut);
 
       const bookedListings = await Booking.find({
-        status: { $ne: "cancelled" },
+        status: "confirmed",
         $or: [
           {
             checkIn: { $lte: checkOutDate },

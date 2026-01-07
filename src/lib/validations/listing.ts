@@ -17,7 +17,7 @@ export const listingSchema = z.object({
   }),
   images: z.array(z.string()).min(1, "At least one image is required"),
   amenities: z.array(z.string()).default([]),
-  pricePerNight: z.number().min(1, "Price must be at least $1"),
+  pricePerNight: z.number().min(1, "Price must be at least EGP 1"),
   maxGuests: z.number().int().min(1, "At least 1 guest required"),
   bedrooms: z.number().int().min(0, "Bedrooms cannot be negative"),
   beds: z.number().int().min(1, "At least 1 bed required"),

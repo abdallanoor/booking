@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Listing } from "@/types";
 import { toast } from "sonner";
+import { formatCurrency } from "@/lib/utils";
 
 interface ListingCardProps {
   listing: Listing;
@@ -59,7 +60,7 @@ export function ListingCard({
     <Card className="group relative overflow-hidden hover:shadow-lg transition-shadow pt-0">
       <div className="relative aspect-4/3">
         <Image
-          src={listing.images[0] || "/placeholder.jpg"}
+          src={listing.images[0]}
           alt={listing.title}
           fill
           className="object-cover"
@@ -76,7 +77,9 @@ export function ListingCard({
             {listing.location.city}, {listing.location.country}
           </p>
           <div className="flex items-baseline gap-1">
-            <span className="font-bold">${listing.pricePerNight}</span>
+            <span className="font-bold">
+              {formatCurrency(listing.pricePerNight)}
+            </span>
             <span className="text-sm text-muted-foreground">/ night</span>
           </div>
           <div className="flex gap-2 text-xs text-muted-foreground">

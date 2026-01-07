@@ -1,9 +1,12 @@
 import { NextRequest } from "next/server";
 import { verifyToken } from "./jwt";
 import dbConnect from "../mongodb";
-import User, { IUser } from "@/models/User";
+import User from "@/models/User";
+import { IUserDocument } from "@/types";
 
-export async function getCurrentUser(req: NextRequest): Promise<IUser | null> {
+export async function getCurrentUser(
+  req: NextRequest
+): Promise<IUserDocument | null> {
   try {
     const token = req.cookies.get("auth_token")?.value;
 
@@ -30,7 +33,7 @@ export async function getCurrentUser(req: NextRequest): Promise<IUser | null> {
   }
 }
 
-export async function requireAuth(req: NextRequest): Promise<IUser> {
+export async function requireAuth(req: NextRequest): Promise<IUserDocument> {
   const user = await getCurrentUser(req);
 
   if (!user) {
@@ -43,7 +46,7 @@ export async function requireAuth(req: NextRequest): Promise<IUser> {
 export async function requireRole(
   req: NextRequest,
   role: string | string[]
-): Promise<IUser> {
+): Promise<IUserDocument> {
   const user = await requireAuth(req);
 
   const allowedRoles = Array.isArray(role) ? role : [role];
@@ -59,7 +62,7 @@ export async function requireRole(
 export async function requireProfileCompletion(
   req: NextRequest,
   action: "book" | "withdraw"
-): Promise<IUser> {
+): Promise<IUserDocument> {
   const user = await requireAuth(req);
 
   if (!user.checkProfileCompletion(action)) {

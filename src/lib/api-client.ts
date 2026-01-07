@@ -82,3 +82,11 @@ export async function clientDelete<T>(
 ): Promise<T> {
   return fetchAPIClient<T>(endpoint, { ...options, method: "DELETE" });
 }
+
+export const apiClient = {
+  get: clientGet,
+  post: clientPost,
+  put: clientPut,
+  patch: clientPatch,
+  delete: clientDelete,
+};

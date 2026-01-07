@@ -1,12 +1,5 @@
 import { apiGet } from "@/lib/api";
-import type { Listing } from "./listings.service";
-
-export interface SearchFilters {
-  location?: string;
-  checkIn?: string;
-  checkOut?: string;
-  guests?: number;
-}
+import type { Listing, SearchFilters } from "@/types";
 
 // Search listings with minimal caching
 export async function searchListings(
