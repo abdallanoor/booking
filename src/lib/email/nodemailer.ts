@@ -611,3 +611,147 @@ export async function sendReviewInvitationEmail(
     throw new Error("Failed to send review invitation email");
   }
 }
+
+export async function sendQuestionReplyEmail(
+  email: string,
+  replyDetails: {
+    listingTitle: string;
+    question: string;
+    answer: string;
+    listingId: string;
+  }
+) {
+  const listingUrl = `${APP_URL}/listings/${replyDetails.listingId}`;
+
+  const mailOptions = {
+    from: `"Booking Platform" <${EMAIL_USER}>`,
+    to: email,
+    subject: "New Answer to Your Question",
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              line-height: 1.6;
+              color: #1a1a1a;
+              margin: 0;
+              padding: 0;
+              background-color: #f4f7f6;
+            }
+            .wrapper {
+              width: 100%;
+              table-layout: fixed;
+              background-color: #f4f7f6;
+              padding-bottom: 40px;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              margin-top: 40px;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+            .header {
+              background-color: #000000;
+              color: #ffffff;
+              padding: 30px 20px;
+              text-align: center;
+            }
+            .content {
+              padding: 40px 30px;
+            }
+            h1 {
+              margin: 0;
+              font-size: 22px;
+              font-weight: 700;
+            }
+            .qa-box {
+              background-color: #f9f9f9;
+              border: 1px solid #e5e5e5;
+              border-radius: 8px;
+              padding: 24px;
+              margin: 20px 0;
+            }
+            .question {
+              font-weight: 600;
+              color: #1a1a1a;
+              margin-bottom: 10px;
+            }
+            .answer {
+              color: #4a4a4a;
+              padding-top: 10px;
+              border-top: 1px dashed #cccccc;
+            }
+            .label {
+              font-size: 12px;
+              color: #888888;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 4px;
+              display: block;
+            }
+            .btn {
+              display: block;
+              background-color: #000000;
+              color: #ffffff !important;
+              text-decoration: none;
+              text-align: center;
+              padding: 14px 24px;
+              border-radius: 8px;
+              font-weight: 600;
+              margin-top: 25px;
+            }
+            .footer {
+              text-align: center;
+              padding: 20px;
+              font-size: 13px;
+              color: #999999;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="container">
+              <div class="header">
+                <h1>New Answer Received</h1>
+              </div>
+              <div class="content">
+                <p>Hello,</p>
+                <p>The host has answered your question about <strong>${
+                  replyDetails.listingTitle
+                }</strong>.</p>
+                
+                <div class="qa-box">
+                  <span class="label">Your Question</span>
+                  <div class="question">"${replyDetails.question}"</div>
+                  
+                  <br>
+                  
+                  <span class="label">Host Answer</span>
+                  <div class="answer">"${replyDetails.answer}"</div>
+                </div>
+
+                <a href="${listingUrl}" class="btn">View Listing</a>
+              </div>
+              <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} Booking Platform. All rights reserved.</p>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  };
+
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail(mailOptions);
+    console.log("Question reply email sent to:", email);
+  } catch (error) {
+    console.error("Error sending question reply email:", error);
+  }
+}

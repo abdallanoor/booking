@@ -13,6 +13,7 @@ A modern, full-stack property booking platform built with Next.js 16, MongoDB, a
 - **Image Management:** Cloudinary
 - **Email Service:** Nodemailer
 - **UI Components:** React 19, Lucide Icons, Sonner (Toasts), React Day Picker, Embla Carousel
+- **Date Management:** date-fns
 - **Validation:** Zod
 - **Form Handling:** React Hook Form (via Radix UI)
 
@@ -26,6 +27,8 @@ A modern, full-stack property booking platform built with Next.js 16, MongoDB, a
 - **Booking Management:** View, track, and cancel bookings with payment status
 - **Wishlists:** Save and organize favorite listings
 - **Profile Management:** Complete profile with personal details, phone, and national ID
+- **Interactive Q&A:** Ask questions about listings and receive answers from hosts
+- **Reviews & Ratings:** Leave detailed reviews and ratings for completed stays
 - **Email Verification:** Secure email verification system with resend functionality
 - **Password Recovery:** Forgot password and reset password functionality
 
@@ -37,6 +40,8 @@ A modern, full-stack property booking platform built with Next.js 16, MongoDB, a
 - **Revenue Tracking:** Monitor earnings and booking statistics
 - **Bank Details:** Set up bank account information for payment withdrawals
 - **Listing Analytics:** Track views, bookings, and revenue per listing
+- **Q&A Management:** View and answer questions from potential guests
+- **Review System:** View guest reviews and ratings for your properties
 - **Approval System:** Listings require admin approval before going live
 
 ### For Admins
@@ -58,6 +63,7 @@ A modern, full-stack property booking platform built with Next.js 16, MongoDB, a
 - **Profile Completion System:** Progressive profile completion for enhanced security
 - **Become a Host:** Users can upgrade from Guest to Host role
 - **Email Notifications:** Automated emails for verification, password reset, and bookings
+- **Automated Review Reminders:** Scheduled notifications to prompt guests for reviews after their stay
 
 ## 🛠️ Getting Started
 
@@ -121,6 +127,9 @@ Ensure you have the following installed:
 
     # App
     NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+    # Cron Jobs
+    CRON_SECRET=your_cron_secret_key
     ```
 
 4.  **Run the development server:**
@@ -133,52 +142,63 @@ Ensure you have the following installed:
 
 ## 📂 Project Structure
 
-```
 src/
-├── app/                      # Next.js App Router
-│   ├── (admin)/             # Admin-only routes
-│   │   └── admin/           # Admin dashboard, users, listings, bookings
-│   ├── (auth)/              # Authentication routes
-│   │   └── auth/            # Login, register, forgot/reset password
-│   ├── (guest)/             # Guest user routes
-│   │   ├── bookings/        # View bookings, payment results
-│   │   ├── listings/        # Browse and view listings
-│   │   ├── profile/         # User profile management
-│   │   ├── search/          # Search listings
-│   │   └── wishlist/        # Saved listings
-│   ├── (host)/              # Host-only routes
-│   │   └── hosting/         # Host dashboard, manage listings
-│   └── api/                 # API routes
-│       ├── auth/            # Authentication endpoints
-│       ├── bookings/        # Booking management
-│       ├── listings/        # Listing CRUD operations
-│       ├── payments/        # Payment processing & webhooks
-│       ├── search/          # Search functionality
-│       └── wishlist/        # Wishlist operations
-├── components/              # Reusable UI components
-│   ├── auth/               # Authentication forms
-│   ├── booking/            # Booking-related components
-│   ├── hosting/            # Host dashboard components
-│   ├── layout/             # Layout components (Header, Nav, etc.)
-│   ├── listing/            # Listing cards and grids
-│   ├── profile/            # Profile management components
-│   ├── search/             # Search bar and filters
-│   └── ui/                 # Reusable UI primitives (Radix UI)
-├── contexts/               # React Context providers
-├── lib/                    # Utility functions and configurations
-│   ├── auth/              # Authentication utilities (JWT, middleware)
-│   ├── email/             # Email templates and sender
-│   ├── paymob/            # Payment gateway integration
-│   └── validations/       # Zod validation schemas
-├── models/                 # MongoDB/Mongoose models
-│   ├── User.ts            # User model with roles
-│   ├── Listing.ts         # Property listing model
-│   ├── Booking.ts         # Booking model
-│   ├── Payment.ts         # Payment transaction model
-│   └── Wishlist.ts        # Wishlist model
-├── services/              # Business logic layer
-└── types/                 # TypeScript type definitions
-```
+├── app/ # Next.js App Router
+│ ├── (admin)/ # Admin-only routes
+│ │ └── admin/ # Admin dashboard, users, listings, bookings
+│ ├── (auth)/ # Authentication routes
+│ │ └── auth/ # Login, register, forgot/reset password
+│ ├── (guest)/ # Guest user routes
+│ │ ├── bookings/ # View bookings, payment results
+│ │ ├── listings/ # Browse and view listings
+│ │ ├── profile/ # User profile management
+│ │ ├── search/ # Search listings
+│ │ └── wishlist/ # Saved listings
+│ ├── (host)/ # Host-only routes
+│ │ └── hosting/ # Host dashboard, manage listings
+│ └── api/ # API routes
+│ ├── auth/ # Authentication endpoints
+│ ├── bookings/ # Booking management
+│ ├── listings/ # Listing CRUD operations
+│ ├── payments/ # Payment processing & webhooks
+│ ├── reviews/ # Review management & notifications
+│ ├── search/ # Search functionality
+│ └── wishlist/ # Wishlist operations
+├── components/ # Reusable UI components
+│ ├── Question/ # Q&A components
+│ ├── auth/ # Authentication forms
+│ ├── booking/ # Booking-related components
+│ ├── hosting/ # Host dashboard components
+│ ├── layout/ # Layout components (Header, Nav, etc.)
+│ ├── listing/ # Listing cards and grids
+│ ├── profile/ # Profile management components
+│ ├── review/ # Review & Rating components
+│ ├── search/ # Search bar and filters
+│ └── ui/ # Reusable UI primitives (Radix UI)
+├── contexts/ # React Context providers
+├── lib/ # Utility functions and configurations
+│ ├── auth/ # Authentication utilities (JWT, middleware)
+│ ├── email/ # Email templates and sender
+│ ├── paymob/ # Payment gateway integration
+│ └── validations/ # Zod validation schemas
+├── models/ # MongoDB/Mongoose models
+│ ├── User.ts # User model with roles
+│ ├── Listing.ts # Property listing model
+│ ├── Booking.ts # Booking model
+│ ├── Payment.ts # Payment transaction model
+│ ├── Wishlist.ts # Wishlist model
+│ ├── Review.ts # Review model
+│ └── Question.ts # Question & Answer model
+├── services/ # Business logic & Database services
+│ ├── auth.service.ts
+│ ├── bookings.service.ts
+│ ├── listings.service.ts
+│ ├── questions.service.ts
+│ ├── reviews.service.ts
+│ └── ...
+└── types/ # TypeScript type definitions
+
+````
 
 ## 🔐 User Roles & Permissions
 
@@ -313,6 +333,18 @@ The application uses **Paymob** payment gateway with the following features:
 
 - `GET /api/hosting/stats` - Get host statistics
 
+### Reviews
+
+- `GET /api/reviews` - Get reviews for a listing
+- `POST /api/reviews` - Create a review
+- `POST /api/reviews/send-notifications` - Trigger review reminder emails (Cron)
+
+### Questions
+
+- `GET /api/listings/[id]/questions` - Get questions for a listing
+- `POST /api/listings/[id]/questions` - Ask a question
+- `POST /api/questions/[id]/answer` - Answer a question (Host)
+
 ## 🚀 Deployment
 
 ### Prerequisites for Production
@@ -335,4 +367,4 @@ npm run build
 
 # Start production server
 npm start
-```
+````

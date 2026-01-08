@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Trash2, Loader2, Edit, MapPin, HousePlus, Eye } from "lucide-react";
+import { Trash2, Loader2, Edit, MapPin, HousePlus, Eye, MessageCircleQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -117,8 +117,8 @@ export default function HostingListingsPage() {
                           listing.status === "approved"
                             ? "default"
                             : listing.status === "rejected"
-                            ? "destructive"
-                            : "secondary"
+                              ? "destructive"
+                              : "secondary"
                         }
                       >
                         {listing.status || "pending"}
@@ -145,6 +145,17 @@ export default function HostingListingsPage() {
                             className="rounded-full"
                           >
                             <Eye /> View
+                          </Button>
+                        </Link>
+
+                        {/* Questions */}
+                        <Link href={`/hosting/listings/${listing._id}/questions`}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-full"
+                          >
+                            <MessageCircleQuestion /> Q&A
                           </Button>
                         </Link>
 

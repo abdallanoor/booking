@@ -207,7 +207,8 @@ export interface ReviewBase {
 /**
  * Review as returned by the API
  */
-export interface Review extends Omit<ReviewBase, "listing" | "guest" | "booking"> {
+export interface Review
+  extends Omit<ReviewBase, "listing" | "guest" | "booking"> {
   _id: string;
   listing: {
     _id: string;
@@ -257,6 +258,31 @@ export interface CreateReviewInput {
 export interface UpdateReviewInput {
   rating?: number;
   comment?: string;
+}
+
+// ============================================================================
+// QUESTION TYPES
+// ============================================================================
+
+export interface QuestionBase {
+  question: string;
+  answer?: string;
+  isVisible: boolean;
+  isFAQ: boolean;
+}
+
+export interface Question extends QuestionBase {
+  _id: string;
+  listingId: string;
+  guestId?: string; // Populated or just ID
+  hostId: string;
+  guest?: {
+    _id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
@@ -532,7 +558,7 @@ export interface IUserDocument extends Document, Omit<UserBase, "hasPassword"> {
  */
 export interface IListingDocument
   extends Document,
-  Omit<ListingBase, "status"> {
+    Omit<ListingBase, "status"> {
   status: ListingStatus;
   host: Types.ObjectId;
   createdAt: Date;
@@ -544,7 +570,7 @@ export interface IListingDocument
  */
 export interface IBookingDocument
   extends Document,
-  Omit<BookingBase, "checkIn" | "checkOut" | "paymentId"> {
+    Omit<BookingBase, "checkIn" | "checkOut" | "paymentId"> {
   listing: Types.ObjectId;
   guest: Types.ObjectId;
   checkIn: Date;
@@ -561,7 +587,7 @@ export interface IBookingDocument
  */
 export interface IReviewDocument
   extends Document,
-  Omit<ReviewBase, "listing" | "guest" | "booking"> {
+    Omit<ReviewBase, "listing" | "guest" | "booking"> {
   listing: Types.ObjectId;
   guest: Types.ObjectId;
   booking: Types.ObjectId;
@@ -576,7 +602,7 @@ export interface IReviewDocument
  */
 export interface IPaymentDocument
   extends Document,
-  Omit<PaymentBase, "paidAt"> {
+    Omit<PaymentBase, "paidAt"> {
   booking: Types.ObjectId;
   guest: Types.ObjectId;
   paidAt?: Date;
@@ -590,6 +616,17 @@ export interface IPaymentDocument
 export interface IWishlistDocument extends Document {
   user: Types.ObjectId;
   listing: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Mongoose Question Document
+ */
+export interface IQuestionDocument extends Document, QuestionBase {
+  listingId: Types.ObjectId;
+  guestId?: Types.ObjectId;
+  hostId: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

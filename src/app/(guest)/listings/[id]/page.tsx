@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButton } from "@/components/listing/ShareButton";
 import { SaveButton } from "@/components/listing/SaveButton";
 import { Review } from "@/types";
+import QuestionList from "@/components/Question/QuestionList";
 
 export default async function ListingDetailPage({
   params,
@@ -205,7 +206,7 @@ export default async function ListingDetailPage({
           </div>
 
           {/* Reviews Section */}
-          <div>
+          <div className="border-b pb-6">
             <Suspense
               fallback={
                 <div className="text-center py-8">Loading reviews...</div>
@@ -214,6 +215,12 @@ export default async function ListingDetailPage({
               <ReviewSection listingId={id} initialReviews={reviews} />
             </Suspense>
           </div>
+
+          {/* Questions Section */}
+          <div className="pb-6">
+            <QuestionList listingId={id} hostId={listing.host._id} />
+          </div>
+
         </div>
 
         {/* Right Column: Sticky Booking Card */}
