@@ -205,7 +205,7 @@ export default async function ListingDetailPage({
           </div>
 
           {/* Reviews Section */}
-          <div className="pt-6">
+          <div>
             <Suspense
               fallback={
                 <div className="text-center py-8">Loading reviews...</div>
@@ -218,7 +218,7 @@ export default async function ListingDetailPage({
 
         {/* Right Column: Sticky Booking Card */}
         <div className="relative">
-          <div className="sticky top-10">
+          <div className="sticky top-8">
             <BookingForm listing={listing} bookedDates={bookedDates} />
           </div>
         </div>

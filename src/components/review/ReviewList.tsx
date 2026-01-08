@@ -34,7 +34,7 @@ export function ReviewList({ reviews }: ReviewListProps) {
           variant="secondary"
           className="flex justify-center items-center w-fit mx-auto"
         >
-          View all reviews
+          Show all {reviews.length} reviews
         </Button>
       )}
     </div>
