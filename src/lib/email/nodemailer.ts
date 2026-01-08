@@ -481,3 +481,133 @@ export async function sendPaymentFailedEmail(
     throw new Error("Failed to send payment failed email");
   }
 }
+
+export async function sendReviewInvitationEmail(
+  email: string,
+  reviewDetails: {
+    listingTitle: string;
+    listingId: string;
+    guestName: string;
+  }
+) {
+  const reviewUrl = `${APP_URL}/listings/${reviewDetails.listingId}?review=true`;
+
+  const mailOptions = {
+    from: `"Booking Platform" <${EMAIL_USER}>`,
+    to: email,
+    subject: "Share Your Experience - Leave a Review",
+    html: `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body {
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+              line-height: 1.6;
+              color: #1a1a1a;
+              margin: 0;
+              padding: 0;
+              background-color: #f4f7f6;
+            }
+            .wrapper {
+              width: 100%;
+              table-layout: fixed;
+              background-color: #f4f7f6;
+              padding-bottom: 40px;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              background-color: #ffffff;
+              margin-top: 40px;
+              border-radius: 12px;
+              overflow: hidden;
+              box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            }
+            .header {
+              background-color: #000000;
+              color: #ffffff;
+              padding: 40px 20px;
+              text-align: center;
+            }
+            .content {
+              padding: 40px 30px;
+            }
+            h1 {
+              margin: 0;
+              font-size: 24px;
+              font-weight: 700;
+              letter-spacing: -0.5px;
+            }
+            p {
+              margin: 0 0 20px 0;
+              color: #4a4a4a;
+            }
+            .listing-title {
+              font-size: 20px;
+              font-weight: 700;
+              color: #1a1a1a;
+              margin: 20px 0;
+            }
+            .btn {
+              display: inline-block;
+              background-color: #000000;
+              color: #ffffff !important;
+              text-decoration: none;
+              text-align: center;
+              padding: 16px 32px;
+              border-radius: 8px;
+              font-weight: 600;
+              margin: 20px 0;
+            }
+            .footer {
+              text-align: center;
+              padding: 20px;
+              font-size: 13px;
+              color: #999999;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="wrapper">
+            <div class="container">
+              <div class="header">
+                <h1>Share Your Experience</h1>
+              </div>
+              <div class="content">
+                <p>Hello ${reviewDetails.guestName},</p>
+                <p>We hope you had a wonderful stay! Your feedback helps other travelers make informed decisions and helps our hosts improve their listings.</p>
+                
+                <div class="listing-title">${reviewDetails.listingTitle}</div>
+                
+                <p>Please take a moment to share your experience by leaving a review. Your opinion matters!</p>
+                
+                <div style="text-align: center;">
+                  <a href="${reviewUrl}" class="btn">Leave a Review</a>
+                </div>
+                
+                <p style="font-size: 14px; color: #666;">
+                  Or copy and paste this link into your browser:<br>
+                  <span style="word-break: break-all; color: #000;">${reviewUrl}</span>
+                </p>
+                
+                <div class="footer">
+                  <p>Thank you for being part of our community!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </body>
+      </html>
+    `,
+  };
+
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail(mailOptions);
+    console.log("Review invitation email sent to:", email);
+  } catch (error) {
+    console.error("Error sending review invitation email:", error);
+    throw new Error("Failed to send review invitation email");
+  }
+}

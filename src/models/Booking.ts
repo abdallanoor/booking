@@ -53,6 +53,15 @@ const bookingSchema = new Schema<IBookingDocument>(
       ref: "Payment",
       sparse: true,
     },
+    reviewEmailSent: {
+      type: Boolean,
+      default: false,
+    },
+    reviewId: {
+      type: Schema.Types.ObjectId,
+      ref: "Review",
+      sparse: true,
+    },
   },
   {
     timestamps: true,

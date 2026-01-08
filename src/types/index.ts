@@ -134,6 +134,7 @@ export interface ListingBase {
 export interface Listing extends ListingBase {
   _id: string;
   host: Host; // Populated in API
+  reviews?: Review[]; // Optional reviews array
   createdAt: string;
   updatedAt: string;
 }
@@ -183,7 +184,79 @@ export interface Booking extends Omit<BookingBase, "checkIn" | "checkOut"> {
     email: string;
     avatar?: string;
   };
+  reviewEmailSent?: boolean;
+  reviewId?: string;
   createdAt: string;
+}
+
+// ============================================================================
+// REVIEW TYPES
+// ============================================================================
+
+/**
+ * Base Review structure
+ */
+export interface ReviewBase {
+  listing: string;
+  guest: string;
+  booking: string;
+  rating: number;
+  comment?: string;
+}
+
+/**
+ * Review as returned by the API
+ */
+export interface Review extends Omit<ReviewBase, "listing" | "guest" | "booking"> {
+  _id: string;
+  listing: {
+    _id: string;
+    title: string;
+  };
+  guest: {
+    _id: string;
+    name: string;
+    avatar?: string;
+  };
+  booking: {
+    _id: string;
+    checkIn: string;
+    checkOut: string;
+  };
+  rating: number;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewEligibilityResponse {
+  eligible: boolean;
+  reason?: string;
+  message?: string;
+  booking?: {
+    _id: string;
+    checkIn: string;
+    checkOut: string;
+    hoursSinceCheckout?: number;
+  };
+  bookings?: Array<{
+    _id: string;
+    checkIn: string;
+    checkOut: string;
+    hoursSinceCheckout?: number;
+  }>; // Keep for backward compatibility
+}
+
+export interface CreateReviewInput {
+  listingId: string;
+  bookingId?: string; // Optional - backend will auto-select
+  rating: number;
+  comment?: string;
+}
+
+export interface UpdateReviewInput {
+  rating?: number;
+  comment?: string;
 }
 
 // ============================================================================
@@ -459,7 +532,7 @@ export interface IUserDocument extends Document, Omit<UserBase, "hasPassword"> {
  */
 export interface IListingDocument
   extends Document,
-    Omit<ListingBase, "status"> {
+  Omit<ListingBase, "status"> {
   status: ListingStatus;
   host: Types.ObjectId;
   createdAt: Date;
@@ -471,12 +544,29 @@ export interface IListingDocument
  */
 export interface IBookingDocument
   extends Document,
-    Omit<BookingBase, "checkIn" | "checkOut" | "paymentId"> {
+  Omit<BookingBase, "checkIn" | "checkOut" | "paymentId"> {
   listing: Types.ObjectId;
   guest: Types.ObjectId;
   checkIn: Date;
   checkOut: Date;
   paymentId?: Types.ObjectId;
+  reviewEmailSent?: boolean;
+  reviewId?: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Mongoose Review Document
+ */
+export interface IReviewDocument
+  extends Document,
+  Omit<ReviewBase, "listing" | "guest" | "booking"> {
+  listing: Types.ObjectId;
+  guest: Types.ObjectId;
+  booking: Types.ObjectId;
+  rating: number;
+  comment?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -486,7 +576,7 @@ export interface IBookingDocument
  */
 export interface IPaymentDocument
   extends Document,
-    Omit<PaymentBase, "paidAt"> {
+  Omit<PaymentBase, "paidAt"> {
   booking: Types.ObjectId;
   guest: Types.ObjectId;
   paidAt?: Date;

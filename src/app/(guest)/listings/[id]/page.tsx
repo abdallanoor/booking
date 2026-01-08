@@ -1,11 +1,14 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import {
   getListing,
   getListingBookedDates,
   Listing,
 } from "@/services/listings.service";
 import { getWishlist } from "@/services/wishlist.service";
+import { getReviews } from "@/services/reviews.server";
 import { BookingForm } from "@/components/booking/BookingForm";
+import { ReviewSection } from "@/components/review/ReviewSection";
 import { notFound } from "next/navigation";
 import {
   Carousel,
@@ -18,6 +21,7 @@ import { MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButton } from "@/components/listing/ShareButton";
 import { SaveButton } from "@/components/listing/SaveButton";
+import { Review } from "@/types";
 
 export default async function ListingDetailPage({
   params,
@@ -29,10 +33,19 @@ export default async function ListingDetailPage({
   let listing: Listing;
   let bookedDates: { from: string; to: string }[] = [];
   let isInWishlist = false;
+  let reviews: Review[] | undefined = [];
 
   try {
     listing = await getListing(id);
     bookedDates = await getListingBookedDates(id);
+
+    // Fetch reviews for the listing
+    try {
+      reviews = await getReviews(id);
+    } catch {
+      // Reviews fetch failed, continue without reviews
+      reviews = [];
+    }
 
     // Check wishlist using the same approach as home page
     try {
@@ -167,7 +180,7 @@ export default async function ListingDetailPage({
           </div>
 
           {/* Amenities */}
-          <div className="pb-6">
+          <div className="border-b pb-6">
             <h2 className="text-xl font-semibold mb-4">
               What this place offers
             </h2>
@@ -189,6 +202,17 @@ export default async function ListingDetailPage({
                 No amenities listed.
               </p>
             )}
+          </div>
+
+          {/* Reviews Section */}
+          <div className="pt-6">
+            <Suspense
+              fallback={
+                <div className="text-center py-8">Loading reviews...</div>
+              }
+            >
+              <ReviewSection listingId={id} initialReviews={reviews} />
+            </Suspense>
           </div>
         </div>
 
