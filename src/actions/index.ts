@@ -157,13 +157,6 @@ export async function updateUserAction(data: {
   return result;
 }
 
-export async function resendVerificationAction() {
-  const result = await apiPost<ApiResponse<unknown>>(
-    "/auth/resend-verification"
-  );
-  return result;
-}
-
 export async function logoutAction() {
   await apiPost("/auth/logout", {});
   revalidatePath("/", "layout");

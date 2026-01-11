@@ -5,13 +5,11 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const { refreshUser, user } = useAuth();
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     "loading"
@@ -37,9 +35,9 @@ function VerifyEmailContent() {
 
         if (response.ok) {
           setStatus("success");
-          setMessage(data.message || "Email verified successfully!");
-          // Refresh user state to reflect verification
-          await refreshUser();
+          setMessage(
+            "Email verified successfully! You can now log in to your account."
+          );
         } else {
           setStatus("error");
           setMessage(data.message || "Email verification failed.");
@@ -51,14 +49,14 @@ function VerifyEmailContent() {
     };
 
     verifyEmail();
-  }, [token, refreshUser, user]);
+  }, [token]);
 
   return (
     <div className="max-w-md mx-auto">
       <Card>
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">
-            Verification
+            Email Verification
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-8 pt-8">
@@ -91,22 +89,40 @@ function VerifyEmailContent() {
 
           {/* Actions */}
           <div className="flex flex-col gap-3 pt-4">
-            <Link href="/" className="w-full">
-              <Button className="w-full h-12 text-lg">Go to Home</Button>
-            </Link>
-
-            {status === "success" && user && (
-              <Link href="/profile" className="w-full">
-                <Button variant="outline" className="w-full h-12 text-lg">
-                  View Profile
-                </Button>
-              </Link>
+            {status === "success" && (
+              <>
+                <Link href="/auth/login" className="w-full">
+                  <Button className="w-full h-12 text-lg">
+                    Continue to Login
+                  </Button>
+                </Link>
+                <Link href="/" className="w-full">
+                  <Button variant="outline" className="w-full h-12 text-lg">
+                    Go to Home
+                  </Button>
+                </Link>
+              </>
             )}
 
-            {status === "error" && !user && (
-              <Link href="/auth/register" className="w-full">
+            {status === "error" && (
+              <>
+                <Link href="/auth/register" className="w-full">
+                  <Button className="w-full h-12 text-lg">
+                    Try Registering Again
+                  </Button>
+                </Link>
+                <Link href="/" className="w-full">
+                  <Button variant="ghost" className="w-full h-12 text-lg">
+                    Go to Home
+                  </Button>
+                </Link>
+              </>
+            )}
+
+            {status === "loading" && (
+              <Link href="/" className="w-full">
                 <Button variant="ghost" className="w-full h-12 text-lg">
-                  Try Registering Again
+                  Go to Home
                 </Button>
               </Link>
             )}

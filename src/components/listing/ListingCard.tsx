@@ -104,9 +104,8 @@ export function ListingCard({
         disabled={isPending}
       >
         <Heart
-          className={`h-5 w-5 transition-colors ${
-            inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
-          }`}
+          className={`h-5 w-5 transition-colors ${inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
+            }`}
         />
       </Button>
     </Card>

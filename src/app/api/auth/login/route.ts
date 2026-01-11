@@ -41,6 +41,14 @@ export async function POST(req: NextRequest) {
       return errorResponse("Invalid email or password", 401);
     }
 
+    // Check email verification
+    if (!user.emailVerified) {
+      return errorResponse(
+        "Please verify your email address before logging in. Check your inbox for the verification link or register again.",
+        403
+      );
+    }
+
     // Generate JWT token
     const token = generateToken(user._id.toString(), user.email, user.role);
 

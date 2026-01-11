@@ -21,6 +21,15 @@ import { DateRange } from "react-day-picker";
 import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/types";
 import type { InitiatePaymentResult } from "@/lib/paymob";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { ProfileForm } from "@/components/profile/ProfileForm";
+import { authService } from "@/services/auth.service";
 
 interface BookingFormProps {
   listing: Listing;
@@ -28,10 +37,11 @@ interface BookingFormProps {
 }
 
 export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [mounted, setMounted] = useState(false);
+  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   const [date, setDate] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);
@@ -105,12 +115,17 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     setDate(selectedRange);
   };
 
-  const handleBooking = () => {
-    if (!user) {
-      router.push("/auth/login");
-      return;
-    }
+  const checkProfileComplete = (u: any) => {
+    return !!(
+      u.name &&
+      u.phoneNumber &&
+      u.country &&
+      u.nationalId &&
+      u.emailVerified
+    );
+  };
 
+  const executeBooking = () => {
     if (!date?.from || !date?.to) return;
 
     startTransition(async () => {
@@ -135,7 +150,6 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
         }
 
         // Step 3: Redirect to Paymob checkout
-        toast.success("Redirecting to payment...");
         window.location.href = paymentResponse.data.checkoutUrl;
       } catch (error) {
         const message =
@@ -145,11 +159,27 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     });
   };
 
+  const handleBooking = () => {
+    if (!user) {
+      toast.error("Please login to book");
+      router.push("/auth/login");
+      return;
+    }
+
+    // Check for incomplete profile
+    if (!checkProfileComplete(user)) {
+      setShowProfileDialog(true);
+      return;
+    }
+
+    executeBooking();
+  };
+
   const nights =
     date?.from && date?.to ? differenceInCalendarDays(date.to, date.from) : 0;
 
   return (
-    <Card className="border shadow-xl rounded-xl overflow-hidden">
+    <Card className="border shadow-xl">
       <CardHeader>
         <div className="flex items-baseline gap-1">
           <span className="text-2xl font-bold">
@@ -340,12 +370,40 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
           </div>
         )}
 
-        {!user && (
-          <p className="text-xs text-center text-rose-600 font-medium">
-            Please login to book this listing
-          </p>
-        )}
       </CardContent>
+
+      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Complete Your Profile</DialogTitle>
+            <DialogDescription>
+              Please complete the following details to proceed with your booking.
+            </DialogDescription>
+          </DialogHeader>
+          {user && (
+            <ProfileForm
+              user={user}
+              isDialog
+              onSuccess={async () => {
+                await refreshUser();
+                // Validate fresh user state
+                try {
+                  const freshUser = await authService.me();
+                  if (checkProfileComplete(freshUser)) {
+                    setShowProfileDialog(false);
+                    toast.success("Profile complete! Proceeding to reservation...");
+                    executeBooking();
+                  } else {
+                    toast.error("Please complete all required fields.");
+                  }
+                } catch {
+                  toast.error("Failed to verify profile status");
+                }
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

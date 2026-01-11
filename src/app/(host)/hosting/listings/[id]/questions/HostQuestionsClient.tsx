@@ -26,7 +26,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, EyeOff, MessageSquare, Plus, Trash2 } from "lucide-react";
+import { Edit, Eye, EyeOff, MessageSquare, Trash2 } from "lucide-react";
 import {
   getHostListingQuestions,
   updateQuestion,
@@ -38,11 +38,15 @@ import { useRouter } from "next/navigation";
 interface HostQuestionsClientProps {
   initialQuestions: Question[];
   listingId: string;
+  listingTitle: string;
+  listingImage?: string;
 }
 
 export default function HostQuestionsClient({
   initialQuestions,
   listingId,
+  listingTitle,
+  listingImage,
 }: HostQuestionsClientProps) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [answeringId, setAnsweringId] = useState<string | null>(null);
@@ -153,18 +157,17 @@ export default function HostQuestionsClient({
   };
 
   return (
-    <div className="container">
-      <div className="flex justify-between items-center mb-6">
+    <div>
+      <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl font-bold">Q&A Management</h1>
           <p className="text-muted-foreground">
-            Manage guest questions and create FAQs
+            Manage guest questions and create FAQs for <span className="font-semibold">{listingTitle}</span>
           </p>
         </div>
         <Dialog open={isFAQDialogOpen} onOpenChange={setIsFAQDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus />
               Add FAQ
             </Button>
           </DialogTrigger>
@@ -256,7 +259,7 @@ export default function HostQuestionsClient({
                       </div>
                     ) : (
                       q.answer && (
-                        <div className="text-sm text-muted-foreground mt-1 line-clamp-2 break-words truncate" title={q.answer}>
+                        <div className="text-sm text-muted-foreground mt-1 line-clamp-2 wrap-break-word truncate" title={q.answer}>
                           {q.answer}
                         </div>
                       )
@@ -311,7 +314,7 @@ export default function HostQuestionsClient({
                             setAnswerText("");
                           }}
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <MessageSquare />
                         </Button>
                       )}
                       {(q.answer || q.isFAQ) && !answeringId && (
@@ -324,7 +327,7 @@ export default function HostQuestionsClient({
                             setAnswerText(q.answer || "");
                           }}
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit />
                         </Button>
                       )}
 
@@ -333,7 +336,7 @@ export default function HostQuestionsClient({
                         variant="ghost"
                         onClick={() => handleDelete(q._id)}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 />
                       </Button>
                     </div>
                   </TableCell>

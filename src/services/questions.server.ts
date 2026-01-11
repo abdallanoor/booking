@@ -7,15 +7,15 @@ import type { Question } from "@/types";
  */
 export async function getListingQuestions(
   listingId: string
-): Promise<Question[]> {
+): Promise<{ questions: Question[]; hasAskedQuestion: boolean }> {
   // Use the public API endpoint for getting visible questions for a listing
-  const response = await apiGet<Question[]>(
-    `/listings/${listingId}/questions`,
-    {
-      revalidate: 0, // No cache for now to see immediate updates
-      tags: [`questions-${listingId}`],
-    }
-  );
+  const response = await apiGet<{
+    questions: Question[];
+    hasAskedQuestion: boolean;
+  }>(`/listings/${listingId}/questions`, {
+    revalidate: 0, // No cache for now to see immediate updates
+    tags: [`questions-${listingId}`],
+  });
 
   return response;
 }

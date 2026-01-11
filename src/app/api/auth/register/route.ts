@@ -88,23 +88,16 @@ export async function POST(req: NextRequest) {
       // Continue registration even if email fails
     }
 
-    // Generate JWT token
-    const token = generateToken(user._id.toString(), user.email, user.role);
-
-    // Set HTTP-only cookie
-    await setAuthCookie(token);
-
+    // Don't set auth cookie - user must verify email first
     return successResponse(
       {
         user: {
           id: user._id,
-          name: user.name,
           email: user.email,
-          role: user.role,
-          emailVerified: user.emailVerified,
+          emailVerified: false,
         },
       },
-      "Registration successful. Please check your email to verify your account.",
+      "Registration successful! Please check your email to verify your account before logging in.",
       201
     );
   } catch (error) {

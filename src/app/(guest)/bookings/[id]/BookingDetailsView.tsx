@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import type { Booking } from "@/services/bookings.service";
 import { formatCurrency } from "@/lib/utils";
-import { CancellationModal } from "./CancellationModal";
+import { CancellationModal } from "../../../../components/booking/CancellationModal";
 import { Host } from "@/types";
 
 // We need to hint that listing has these extra fields
@@ -45,23 +45,16 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
 
   const checkInDate = new Date(checkIn);
   const checkOutDate = new Date(checkOut);
-  // Calculate nights logic
-  const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
-  const nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-
-  // Calculate fees (Example logic, backend should provide this ideally)
-  const serviceFee = totalPrice * 0.1; // 10%
-  const basePrice = totalPrice - serviceFee;
 
   const statusColor =
     status === "confirmed"
       ? "bg-green-500/10 text-green-700"
       : status === "cancelled"
-      ? "bg-red-500/10 text-red-700"
-      : "bg-yellow-500/10 text-yellow-700";
+        ? "bg-red-500/10 text-red-700"
+        : "bg-yellow-500/10 text-yellow-700";
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content (Left Column) */}
         <div className="lg:col-span-2 space-y-6">
@@ -72,8 +65,8 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                 {status === "confirmed"
                   ? "Refined stay confirmed!"
                   : status === "cancelled"
-                  ? "Booking cancelled"
-                  : "Booking details"}
+                    ? "Booking cancelled"
+                    : "Booking details"}
               </h1>
               <p className="text-muted-foreground">
                 Booking ID:{" "}
@@ -89,9 +82,9 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
 
           {/* Property Card */}
           <Card className="overflow-hidden pt-0!">
-            <div className="relative h-64 w-full">
+            <div className="relative h-72 w-full">
               <Image
-                src={listing.images?.[0] || "/placeholder-house.webp"}
+                src={listing.images?.[0]}
                 alt={listing.title}
                 fill
                 className="object-cover"
@@ -113,7 +106,7 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                     {format(checkInDate, "EEE, MMM d")}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    After 3:00 PM
+                    After 2:00 PM
                   </div>
                 </div>
                 <div className="space-y-1 text-right">
@@ -124,7 +117,7 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                     {format(checkOutDate, "EEE, MMM d")}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Before 11:00 AM
+                    Before 12:00 PM
                   </div>
                 </div>
               </div>
@@ -188,24 +181,13 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-between text-sm">
-                <span>
-                  {formatCurrency(basePrice / nights)} x {nights} nights
-                </span>
-                <span>{formatCurrency(basePrice)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Service fee</span>
-                <span>{formatCurrency(serviceFee)}</span>
-              </div>
-              <div className="h-px bg-border my-4" />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total</span>
+              <div className="flex justify-between font-bold text-2xl">
+                <span>Total Amount</span>
                 <span>{formatCurrency(totalPrice)}</span>
               </div>
               <Badge
                 variant="outline"
-                className="w-full justify-center py-1 mt-2"
+                className="w-full justify-center py-2 mt-4"
               >
                 Payment Status: {paymentStatus.toUpperCase()}
               </Badge>
@@ -222,8 +204,9 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Need to change your plans? You can request a cancellation.
-                  Please note our 48-hour policy.
+                  Need to change your plans? You can cancel at any time. Note:
+                  Refunds are only available for cancellations made at least 48
+                  hours before check-in.
                 </p>
                 <Button
                   variant="destructive"

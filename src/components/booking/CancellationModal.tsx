@@ -77,39 +77,6 @@ export function CancellationModal({
     }
   };
 
-  if (isTooLate) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-              Cancellation Unavailable
-            </DialogTitle>
-            <DialogDescription>
-              This booking cannot be cancelled because it is less than 48 hours
-              until check-in ({format(checkIn, "PPP p")}).
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4 text-sm text-muted-foreground">
-            <p>
-              According to our cancellation policy, cancellations must be made
-              at least 48 hours before the scheduled check-in time.
-            </p>
-            <p className="mt-2 text-xs">
-              Code: {hoursUntilCheckIn.toFixed(1)}h remaining
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={handleClose}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -122,24 +89,49 @@ export function CancellationModal({
               </DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              <div className="bg-muted p-4 rounded-md text-sm">
-                <p className="font-semibold mb-2">
-                  Policy: 48-Hour Free Cancellation
-                </p>
-                <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                  <li>
-                    You are cancelling more than 48 hours before check-in.
-                  </li>
-                  <li>
-                    You are eligible for a refund according to the host&apos;s
-                    policy.
-                  </li>
-                  <li>
-                    Refunds may take 5-10 business days to appear on your
-                    statement.
-                  </li>
-                </ul>
-              </div>
+              {isTooLate ? (
+                <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-md text-sm">
+                  <div className="flex items-start gap-2 mb-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                    <p className="font-semibold text-destructive">
+                      No Refund Available
+                    </p>
+                  </div>
+                  <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                    <li>
+                      You are cancelling less than 48 hours before check-in ({format(checkIn, "PPP p")}).
+                    </li>
+                    <li className="font-semibold text-destructive">
+                      No refund will be issued for this cancellation.
+                    </li>
+                    <li>
+                      According to our policy, free cancellations must be made at least 48 hours before check-in.
+                    </li>
+                    <li>
+                      Time remaining: {hoursUntilCheckIn.toFixed(1)} hours
+                    </li>
+                  </ul>
+                </div>
+              ) : (
+                <div className="bg-muted p-4 rounded-md text-sm">
+                  <p className="font-semibold mb-2">
+                    Policy: 48-Hour Free Cancellation
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                    <li>
+                      You are cancelling more than 48 hours before check-in.
+                    </li>
+                    <li>
+                      You are eligible for a refund according to the host&apos;s
+                      policy.
+                    </li>
+                    <li>
+                      Refunds may take 5-10 business days to appear on your
+                      statement.
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button

@@ -52,6 +52,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 const Review: Model<IReviewDocument> =
-  mongoose.models.Review || mongoose.model<IReviewDocument>("Review", reviewSchema);
+  mongoose.models.Review ||
+  mongoose.model<IReviewDocument>("Review", reviewSchema);
 
 export default Review;

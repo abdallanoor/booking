@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getBooking } from "@/services/bookings.service";
-import { BookingDetailsView } from "@/components/booking/BookingDetailsView";
+import { BookingDetailsView } from "@/app/(guest)/bookings/[id]/BookingDetailsView";
 import { getServerUser } from "@/lib/auth/server-auth";
 
 interface PageProps {

@@ -16,6 +16,7 @@ export function SaveButton({
   listingId,
   initialIsInWishlist = false,
 }: SaveButtonProps) {
+  // Smart hook that handles SSR gracefully
   const { user } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [inWishlist, setInWishlist] = useState(initialIsInWishlist);
@@ -58,9 +59,8 @@ export function SaveButton({
       disabled={isPending}
     >
       <Heart
-        className={`w-4 h-4 transition-colors ${
-          inWishlist ? "fill-red-500 text-red-500" : ""
-        }`}
+        className={`w-4 h-4 transition-colors ${inWishlist ? "fill-red-500 text-red-500" : ""
+          }`}
       />
       <span>{inWishlist ? "Saved" : "Save"}</span>
     </Button>

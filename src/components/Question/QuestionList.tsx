@@ -8,11 +8,15 @@ interface QuestionListProps {
 }
 
 export default async function QuestionList({ listingId }: QuestionListProps) {
-  const questions = await getListingQuestions(listingId);
+  const { questions, hasAskedQuestion } = await getListingQuestions(listingId);
 
   return (
     <Suspense fallback={<p>Loading...</p>}>
-      <QuestionsDisplay questions={questions} listingId={listingId} />
+      <QuestionsDisplay
+        questions={questions}
+        listingId={listingId}
+        hasAskedQuestion={hasAskedQuestion}
+      />
     </Suspense>
   );
 }

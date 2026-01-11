@@ -1,14 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ReviewCard } from "./ReviewCard";
 import type { Review } from "@/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { StarIcon } from "lucide-react";
 
 interface ReviewListProps {
   reviews: Review[];
 }
 
 export function ReviewList({ reviews }: ReviewListProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const MAX_VISIBLE_REVIEWS = 6;
+  const hasMoreReviews = reviews.length > MAX_VISIBLE_REVIEWS;
+  const visibleReviews = hasMoreReviews ? reviews.slice(0, MAX_VISIBLE_REVIEWS) : reviews;
+
   if (reviews.length === 0) {
     return (
       <div className="text-center py-12">
@@ -24,19 +39,47 @@ export function ReviewList({ reviews }: ReviewListProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Reviews ({reviews.length})</h2>
       </div>
+
+      {/* Show first 6 reviews */}
       <div className="space-y-6 grid grid-cols-1 md:grid-cols-2">
-        {reviews.slice(0, 6).map((review) => (
+        {visibleReviews.map((review) => (
           <ReviewCard key={review._id} review={review} />
         ))}
       </div>
-      {reviews.length > 6 && (
-        <Button
-          variant="secondary"
-          className="flex justify-center items-center w-fit mx-auto"
-        >
-          Show all {reviews.length} reviews
-        </Button>
+
+      {/* View More Button if more than 6 reviews */}
+      {hasMoreReviews && (
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <div className="text-center">
+              <Button
+                variant="secondary"
+                className="mx-auto"
+              >
+                Show all {reviews.length} reviews
+              </Button>
+            </div>
+          </DialogTrigger>
+          <DialogContent variant="drawer" className="md:max-w-3xl! max-h-[85vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>All reviews ({reviews.length})</DialogTitle>
+              <DialogDescription>
+                <span className="flex items-center max-sm:justify-center gap-1">
+                  <StarIcon className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" /> {(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)}
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="overflow-y-auto pr-2 -mr-2 flex-1">
+              <div className="space-y-6 grid grid-cols-1 xl:grid-cols-2">
+                {reviews.map((review) => (
+                  <ReviewCard key={review._id} review={review} />
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );
 }
+

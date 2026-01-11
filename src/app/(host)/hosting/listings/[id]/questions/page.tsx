@@ -1,6 +1,7 @@
 import { Suspense } from "react";
-import HostQuestionsClient from "@/components/Question/HostQuestionsClient";
+import HostQuestionsClient from "@/app/(host)/hosting/listings/[id]/questions/HostQuestionsClient";
 import { getHostListingQuestions } from "@/services/questions.server";
+import { getListing } from "@/services/listings.service";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface HostQuestionsPageProps {
@@ -10,10 +11,16 @@ interface HostQuestionsPageProps {
 export default async function HostQuestionsPage({ params }: HostQuestionsPageProps) {
   const { id } = await params;
   const questions = await getHostListingQuestions(id);
+  const listing = await getListing(id);
 
   return (
     <Suspense fallback={<QuestionsSkeleton />}>
-      <HostQuestionsClient initialQuestions={questions} listingId={id} />
+      <HostQuestionsClient
+        initialQuestions={questions}
+        listingId={id}
+        listingTitle={listing.title}
+        listingImage={listing.images[0]}
+      />
     </Suspense>
   );
 }

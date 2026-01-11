@@ -49,10 +49,12 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
-  showCloseButton = false,
+  showCloseButton = true,
+  variant = "default",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  variant?: "default" | "drawer";
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
@@ -60,7 +62,34 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          // Base styles
+          "bg-background fixed z-50 grid gap-4 p-6 shadow-lg duration-200 w-full",
+          "data-[state=open]:animate-in data-[state=closed]:animate-out",
+
+          // Default variant: centered dialog
+          variant === "default" && [
+            "top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]",
+            "max-w-[calc(100%-2rem)] sm:max-w-lg",
+            "rounded-3xl border",
+            "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+            "data-[state=open]:slide-in-from-bottom-[5%] data-[state=closed]:slide-out-to-top-[-5%]",
+          ],
+
+          // Drawer variant: bottom on mobile, centered on desktop
+          variant === "drawer" && [
+            // Mobile & Tablet: bottom drawer with full width
+            "bottom-0 left-0 right-0 max-w-full",
+            "rounded-t-3xl border-t max-h-[85vh]",
+            "data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
+
+            // Desktop: centered dialog (width fully customizable via className)
+            "md:bottom-auto md:left-[50%] md:top-[50%] md:right-auto",
+            "md:max-w-lg md:translate-x-[-50%] md:translate-y-[-50%]",
+            "md:rounded-3xl md:border",
+            "md:data-[state=open]:slide-in-from-bottom-[5%] md:data-[state=closed]:slide-out-to-top-[-5%]",
+            "md:data-[state=open]:fade-in-0 md:data-[state=closed]:fade-out-0",
+          ],
+
           className
         )}
         {...props}
@@ -69,7 +98,7 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-3 right-3 rounded-full cursor-pointer transition-opacity hover:bg-accent p-2 disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <XIcon />
             <span className="sr-only">Close</span>

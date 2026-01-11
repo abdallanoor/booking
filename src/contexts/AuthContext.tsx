@@ -85,7 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(data.message || "Registration failed");
     }
 
-    setUser(data.data.user);
+    // Don't set user - they must verify email first
+    // User will be set after email verification and login
   };
 
   const logout = async () => {
@@ -128,10 +129,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * useAuth Hook - Smart authentication hook that handles all scenarios
+ * 
+ * This hook safely handles:
+ * - Server-Side Rendering (SSR)
+ * - Client-Side Rendering (CSR)
+ * - Components inside/outside AuthProvider
+ * 
+ * Returns safe defaults when context is unavailable (e.g., during SSR)
+ * Use this everywhere - it just works! ✨
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
+
+  // Return safe defaults if context is not available (e.g., during SSR or outside provider)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    return {
+      user: null,
+      loading: false,
+      login: async () => {
+        throw new Error("Auth not initialized");
+      },
+      register: async () => {
+        throw new Error("Auth not initialized");
+      },
+      logout: async () => {
+        throw new Error("Auth not initialized");
+      },
+      becomeHost: async () => {
+        throw new Error("Auth not initialized");
+      },
+      refreshUser: async () => {
+        throw new Error("Auth not initialized");
+      },
+    };
   }
+
   return context;
 }

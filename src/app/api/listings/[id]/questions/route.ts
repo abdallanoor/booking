@@ -17,7 +17,18 @@ export async function GET(
       .populate("guestId", "name avatar")
       .sort({ isFAQ: -1, createdAt: -1 }); // FAQs first, then new questions
 
-    return NextResponse.json(questions);
+    // Check if current user has already asked a question for this listing
+    let hasAskedQuestion = false;
+    const user = await getCurrentUser(request);
+    if (user) {
+      const existingQuestion = await Question.findOne({
+        listingId: id,
+        guestId: user._id,
+      });
+      hasAskedQuestion = !!existingQuestion;
+    }
+
+    return NextResponse.json({ questions, hasAskedQuestion });
   } catch (error) {
     console.error("Error fetching questions:", error);
     return NextResponse.json(
@@ -53,6 +64,19 @@ export async function POST(
     const listing = await Listing.findById(id);
     if (!listing) {
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+    }
+
+    // Check if user has already asked a question for this listing
+    const existingQuestion = await Question.findOne({
+      listingId: id,
+      guestId: user._id,
+    });
+
+    if (existingQuestion) {
+      return NextResponse.json(
+        { error: "You have already asked a question for this listing" },
+        { status: 400 }
+      );
     }
 
     const newQuestion = await Question.create({

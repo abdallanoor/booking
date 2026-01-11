@@ -38,11 +38,10 @@ export function ReviewCard({ review }: ReviewCardProps) {
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`h-4 w-4 ${
-                  star <= rating
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "fill-muted text-muted-foreground"
-                }`}
+                className={`h-3 w-3 ${star <= rating
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "fill-muted text-muted-foreground"
+                  }`}
               />
             ))}
           </div>

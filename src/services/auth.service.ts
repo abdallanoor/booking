@@ -37,6 +37,11 @@ export const authService = {
     await clientGet(`/auth/verify-email?token=${token}`);
   },
 
+  // Resend verification email
+  resendVerificationEmail: async (email: string): Promise<void> => {
+    await clientPost("/auth/resend-verification", { email });
+  },
+
   // Forgot password
   forgotPassword: async (email: string): Promise<void> => {
     await clientPost("/auth/forgot-password", { email });

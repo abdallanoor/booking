@@ -32,8 +32,8 @@ export function RegisterForm() {
     startTransition(async () => {
       try {
         await register(name, email, password, role);
-        toast.success("Account created successfully");
-        router.push("/");
+        toast.success("Account created! Please check your email to verify.");
+        router.push(`/auth/verification-pending?email=${encodeURIComponent(email)}`);
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : "Registration failed"
