@@ -346,8 +346,8 @@ function AuthenticatedMenu({
       <DropdownMenuSeparator />
 
       <DropdownMenuItem onClick={onLogout} disabled={isPending}>
-        <LogOut className="size-4" />
-        {isPending ? "Logging out..." : "Logout"}
+        <LogOut />
+        Logout
       </DropdownMenuItem>
     </>
   );
