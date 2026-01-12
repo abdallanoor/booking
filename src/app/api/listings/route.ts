@@ -5,8 +5,6 @@ import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { getCurrentUser, requireRole } from "@/lib/auth/auth-middleware";
 
-export const dynamic = "force-dynamic";
-
 interface ListingFilter {
   "location.city"?: RegExp;
   "location.country"?: RegExp;

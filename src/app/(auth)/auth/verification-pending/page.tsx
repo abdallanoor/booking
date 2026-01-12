@@ -80,7 +80,7 @@ function VerificationPendingContent() {
           <div className="space-y-3 text-center">
             <h3 className="text-xl font-semibold">Check Your Email</h3>
             <p className="text-muted-foreground leading-relaxed">
-              We've sent a verification link to{" "}
+              We&apos;ve sent a verification link to{" "}
               <span className="font-semibold text-foreground">{email}</span>
             </p>
             <p className="text-sm text-muted-foreground">

@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { revalidateTag } from "next/cache";
 import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
 import { listingSchema } from "@/lib/validations/listing";
@@ -83,9 +82,6 @@ export async function PUT(
     Object.assign(listing, validatedData);
     await listing.save();
 
-    revalidateTag("listings", "max");
-    revalidateTag(`listing-${id}`, "max");
-
     return successResponse({ listing }, "Listing updated successfully");
   } catch (error) {
     if (
@@ -145,9 +141,6 @@ export async function PATCH(
       new: true,
     }).populate("host", "name email");
 
-    revalidateTag("listings", "max");
-    revalidateTag(`listing-${id}`, "max");
-
     return successResponse(
       { listing: updatedListing },
       "Listing updated successfully"
@@ -193,9 +186,6 @@ export async function DELETE(
     }
 
     await Listing.findByIdAndDelete(id);
-
-    revalidateTag("listings", "max");
-    revalidateTag(`listing-${id}`, "max");
 
     return successResponse(null, "Listing deleted successfully");
   } catch (error) {

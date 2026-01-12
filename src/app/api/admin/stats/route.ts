@@ -6,8 +6,6 @@ import User from "@/models/User";
 import { requireRole } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(req: NextRequest) {
   try {
     await requireRole(req, ["Admin"]);

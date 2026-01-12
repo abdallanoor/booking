@@ -19,7 +19,6 @@ export default async function HostQuestionsPage({ params }: HostQuestionsPagePro
         initialQuestions={questions}
         listingId={id}
         listingTitle={listing.title}
-        listingImage={listing.images[0]}
       />
     </Suspense>
   );

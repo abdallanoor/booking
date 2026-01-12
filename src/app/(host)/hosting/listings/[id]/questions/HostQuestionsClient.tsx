@@ -39,14 +39,12 @@ interface HostQuestionsClientProps {
   initialQuestions: Question[];
   listingId: string;
   listingTitle: string;
-  listingImage?: string;
 }
 
 export default function HostQuestionsClient({
   initialQuestions,
   listingId,
   listingTitle,
-  listingImage,
 }: HostQuestionsClientProps) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions);
   const [answeringId, setAnsweringId] = useState<string | null>(null);

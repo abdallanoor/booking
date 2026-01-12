@@ -2,7 +2,7 @@ import { getWishlist } from "@/services/wishlist.service";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const dynamic = "force-dynamic";
+
 
 export default async function WishlistPage() {
   const wishlist = await getWishlist();

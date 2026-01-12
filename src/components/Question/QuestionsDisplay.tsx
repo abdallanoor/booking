@@ -25,30 +25,31 @@ interface QuestionsDisplayProps {
   hasAskedQuestion: boolean;
 }
 
+// Component must be declared outside of render
+const QuestionAccordion = ({ questionsList }: { questionsList: Question[] }) => (
+  <Accordion type="single" collapsible className="w-full space-y-4">
+    {questionsList.map((q) => (
+      <AccordionItem
+        key={q._id}
+        value={q._id}
+        className="border! border-border rounded-lg bg-muted/30 px-4"
+      >
+        <AccordionTrigger className="hover:no-underline py-4">
+          <span className="font-medium text-foreground text-left">{q.question}</span>
+        </AccordionTrigger>
+        <AccordionContent className="pb-4 pt-1 text-muted-foreground whitespace-pre-wrap wrap-break-word">
+          {q.answer || <span className="italic">No answer yet.</span>}
+        </AccordionContent>
+      </AccordionItem>
+    ))}
+  </Accordion>
+);
+
 export default function QuestionsDisplay({ questions, listingId, hasAskedQuestion }: QuestionsDisplayProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const MAX_VISIBLE_QUESTIONS = 4;
   const hasMoreQuestions = questions.length > MAX_VISIBLE_QUESTIONS;
   const visibleQuestions = hasMoreQuestions ? questions.slice(0, MAX_VISIBLE_QUESTIONS) : questions;
-
-  const QuestionAccordion = ({ questionsList }: { questionsList: Question[] }) => (
-    <Accordion type="single" collapsible className="w-full space-y-4">
-      {questionsList.map((q) => (
-        <AccordionItem
-          key={q._id}
-          value={q._id}
-          className="border! border-border rounded-lg bg-muted/30 px-4"
-        >
-          <AccordionTrigger className="hover:no-underline py-4">
-            <span className="font-medium text-foreground text-left">{q.question}</span>
-          </AccordionTrigger>
-          <AccordionContent className="pb-4 pt-1 text-muted-foreground whitespace-pre-wrap wrap-break-word">
-            {q.answer || <span className="italic">No answer yet.</span>}
-          </AccordionContent>
-        </AccordionItem>
-      ))}
-    </Accordion>
-  );
 
   return (
     <div className="pb-6" id="questions">

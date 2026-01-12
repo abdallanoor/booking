@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { createBookingAction } from "@/actions";
 import { toast } from "sonner";
 import type { Listing } from "@/services/listings.service";
+import type { User, AuthUser } from "@/types";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -115,7 +116,7 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     setDate(selectedRange);
   };
 
-  const checkProfileComplete = (u: any) => {
+  const checkProfileComplete = (u: User | AuthUser) => {
     return !!(
       u.name &&
       u.phoneNumber &&

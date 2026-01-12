@@ -7,6 +7,18 @@ import { reviewSchema } from "@/lib/validations/review";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { requireAuth } from "@/lib/auth/auth-middleware";
 import { isPast, differenceInHours } from "date-fns";
+import { Types } from "mongoose";
+
+// Type for populated booking fields
+interface PopulatedGuest {
+  _id: Types.ObjectId;
+  [key: string]: unknown;
+}
+
+interface PopulatedListing {
+  _id: Types.ObjectId;
+  [key: string]: unknown;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -46,9 +58,11 @@ export async function POST(req: NextRequest) {
 
       // Check if booking belongs to the current user
       const bookingGuestId =
-        booking.guest && "_id" in (booking.guest as any)
-          ? (booking.guest as any)._id.toString()
-          : (booking.guest as any).toString();
+        booking.guest &&
+        typeof booking.guest === "object" &&
+        "_id" in booking.guest
+          ? (booking.guest as unknown as PopulatedGuest)._id.toString()
+          : (booking.guest as Types.ObjectId).toString();
 
       if (bookingGuestId !== user._id.toString()) {
         return errorResponse("You can only review your own bookings", 403);
@@ -56,9 +70,11 @@ export async function POST(req: NextRequest) {
 
       // Check if listing ID matches
       const listingId =
-        booking.listing && "_id" in (booking.listing as any)
-          ? (booking.listing as any)._id.toString()
-          : (booking.listing as any).toString();
+        booking.listing &&
+        typeof booking.listing === "object" &&
+        "_id" in booking.listing
+          ? (booking.listing as unknown as PopulatedListing)._id.toString()
+          : (booking.listing as Types.ObjectId).toString();
 
       if (listingId !== validatedData.listingId) {
         return errorResponse("Listing ID does not match the booking", 400);
@@ -146,8 +162,7 @@ export async function POST(req: NextRequest) {
     // Check for duplicate review error (unique constraint on listing + guest)
     if (
       error instanceof Error &&
-      (error.message.includes("duplicate") ||
-        error.message.includes("E11000"))
+      (error.message.includes("duplicate") || error.message.includes("E11000"))
     ) {
       return errorResponse("You have already reviewed this listing", 409);
     }
@@ -158,10 +173,10 @@ export async function POST(req: NextRequest) {
       message === "Unauthorized"
         ? 401
         : message === "Forbidden"
-          ? 403
-          : message.includes("already reviewed")
-            ? 409
-            : 500;
+        ? 403
+        : message.includes("already reviewed")
+        ? 409
+        : 500;
     return errorResponse(message, status);
   }
 }

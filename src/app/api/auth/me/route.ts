@@ -3,8 +3,6 @@ import { getCurrentUser } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { deleteImageFromCloudinary } from "@/lib/cloudinary";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser(req);

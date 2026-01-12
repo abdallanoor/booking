@@ -1,32 +1,8 @@
 "use server";
 
-import { revalidateTag, revalidatePath } from "next/cache";
 import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
 import type { Booking, ApiResponse, User } from "@/types";
 import { uploadToCloudinary } from "@/lib/cloudinary";
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-function revalidateListings() {
-  revalidateTag("listings", "max");
-  revalidateTag("host-listings", "max");
-  revalidatePath("/hosting/listings", "page");
-  revalidatePath("/admin/listings", "page");
-}
-
-function revalidateBookings() {
-  revalidateTag("bookings", "max");
-  revalidatePath("/bookings", "page");
-  revalidatePath("/hosting/bookings", "page");
-  revalidatePath("/admin/bookings", "page");
-}
-
-function revalidateWishlist() {
-  revalidateTag("wishlist", "max");
-  revalidatePath("/wishlist", "page");
-}
 
 // ============================================================================
 // LISTING ACTIONS
@@ -34,14 +10,11 @@ function revalidateWishlist() {
 
 export async function createListingAction(data: unknown) {
   const result = await apiPost("/listings", data);
-  revalidateListings();
   return result;
 }
 
 export async function updateListingAction(id: string, data: unknown) {
   const result = await apiPut(`/listings/${id}`, data);
-  revalidateListings();
-  revalidateTag(`listing-${id}`, "max");
   return result;
 }
 
@@ -50,13 +23,11 @@ export async function updateListingStatusAction(
   status: "approved" | "rejected"
 ) {
   const result = await apiPatch(`/listings/${id}`, { status });
-  revalidateListings();
   return result;
 }
 
 export async function deleteListingAction(id: string) {
   const result = await apiDelete(`/listings/${id}`);
-  revalidateListings();
   return result;
 }
 
@@ -69,7 +40,6 @@ export async function createBookingAction(data: unknown) {
     "/bookings",
     data
   );
-  revalidateBookings();
 
   // Return the booking object for payment initiation
   if (result.data?.booking) {
@@ -81,8 +51,6 @@ export async function createBookingAction(data: unknown) {
 
 export async function cancelBookingAction(id: string) {
   const result = await apiPatch(`/bookings/${id}`, { status: "cancelled" });
-  revalidateBookings();
-  revalidateTag(`booking-${id}`, "max");
   return result;
 }
 
@@ -92,13 +60,11 @@ export async function cancelBookingAction(id: string) {
 
 export async function addToWishlistAction(listingId: string) {
   const result = await apiPost("/wishlist", { listingId });
-  revalidateWishlist();
   return result;
 }
 
 export async function removeFromWishlistAction(listingId: string) {
   const result = await apiDelete(`/wishlist/${listingId}`);
-  revalidateWishlist();
   return result;
 }
 
@@ -107,13 +73,7 @@ export async function removeFromWishlistAction(listingId: string) {
 // ============================================================================
 
 export async function getAllBookingsAction() {
-  return await apiGet<{ data: { bookings: Booking[] } }>(
-    "/bookings?view=host",
-    {
-      cache: "no-store",
-      tags: ["bookings"],
-    }
-  );
+  return await apiGet<{ data: { bookings: Booking[] } }>("/bookings?view=host");
 }
 
 // ============================================================================
@@ -153,13 +113,11 @@ export async function updateUserAction(data: {
     "/auth/me",
     safePayload
   );
-  revalidatePath("/", "layout");
   return result;
 }
 
 export async function logoutAction() {
   await apiPost("/auth/logout", {});
-  revalidatePath("/", "layout");
 }
 
 export async function uploadAvatarAction(formData: FormData) {

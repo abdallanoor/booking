@@ -5,8 +5,6 @@ import { generateVerificationToken } from "@/lib/auth/jwt";
 import { sendVerificationEmail } from "@/lib/email/nodemailer";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
-export const dynamic = "force-dynamic";
-
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();

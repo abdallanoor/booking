@@ -7,7 +7,7 @@ import { getWishlist } from "@/services/wishlist.service";
 
 import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
 
-export const dynamic = "force-dynamic";
+
 
 export default async function Home() {
   const listings = await getListings();

@@ -7,7 +7,7 @@ import { getWishlist } from "@/services/wishlist.service";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
 
-export const dynamic = "force-dynamic";
+
 
 export default async function SearchPage({
   searchParams,
