@@ -62,8 +62,8 @@ export default function AdminBookingsPage() {
   const filteredBookings = bookings.filter((booking) => {
     const matchesTab = activeTab === "all" || booking.status === activeTab;
     const matchesSearch =
-      booking.guest?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      booking.listing?.title.toLowerCase().includes(searchQuery.toLowerCase());
+      (booking.guest?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (booking.listing?.title || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -136,8 +136,8 @@ export default function AdminBookingsPage() {
                       {/* Left: Listing Image */}
                       <div className="relative w-full sm:w-48 h-32 shrink-0">
                         <Image
-                          src={booking.listing.images[0] || "/placeholder.jpg"}
-                          alt={booking.listing.title}
+                          src={booking.listing?.images?.[0]}
+                          alt={booking.listing?.title || "Listing"}
                           fill
                           className="object-cover rounded-lg"
                         />
@@ -148,12 +148,12 @@ export default function AdminBookingsPage() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-1">
                             <h3 className="text-xl font-semibold">
-                              {booking.listing.title}
+                              {booking.listing?.title || "Unknown Listing"}
                             </h3>
                             <div className="flex items-center text-sm text-muted-foreground mt-1">
                               <MapPin className="mr-1 h-3 w-3" />
-                              {booking.listing.location.city},{" "}
-                              {booking.listing.location.country}
+                              {booking.listing?.location?.city || "Unknown City"},{" "}
+                              {booking.listing?.location?.country || "Unknown Country"}
                             </div>
                           </div>
 
@@ -162,8 +162,8 @@ export default function AdminBookingsPage() {
                               booking.status === "confirmed"
                                 ? "default"
                                 : booking.status === "cancelled"
-                                ? "destructive"
-                                : "secondary"
+                                  ? "destructive"
+                                  : "secondary"
                             }
                             className="capitalize"
                           >
@@ -174,15 +174,15 @@ export default function AdminBookingsPage() {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                           <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
                             <Avatar className="h-10 w-10">
-                              <AvatarImage src={booking.guest.avatar} />
+                              <AvatarImage src={booking.guest?.avatar} />
                               <AvatarFallback>
-                                {booking.guest.name.charAt(0).toUpperCase()}
+                                {booking.guest?.name?.charAt(0).toUpperCase() || "?"}
                               </AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium text-xs">Guest</p>
                               <p className="font-semibold">
-                                {booking.guest.name}
+                                {booking.guest?.name || "Unknown Guest"}
                               </p>
                             </div>
                           </div>
@@ -210,19 +210,21 @@ export default function AdminBookingsPage() {
                           </div>
 
                           <div className="flex items-center gap-2">
-                            <Link
-                              href={`/listings/${booking.listing._id}`}
-                              target="_blank"
-                            >
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="rounded-full"
+                            {booking.listing && (
+                              <Link
+                                href={`/listings/${booking.listing._id}`}
+                                target="_blank"
                               >
-                                <Eye />
-                                View
-                              </Button>
-                            </Link>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="rounded-full"
+                                >
+                                  <Eye />
+                                  View
+                                </Button>
+                              </Link>
+                            )}
 
                             {booking.status !== "cancelled" && (
                               <Button
