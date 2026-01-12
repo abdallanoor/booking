@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     }
 
     const payload = await googleRes.json();
-    console.log("Google Payload:", JSON.stringify(payload, null, 2));
+    // console.log("Google Payload:", JSON.stringify(payload, null, 2));
     const { email, name, sub: googleId, picture } = payload;
 
     await dbConnect();

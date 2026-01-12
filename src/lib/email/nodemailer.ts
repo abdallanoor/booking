@@ -85,7 +85,7 @@ export async function sendVerificationEmail(email: string, token: string) {
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    console.log("Verification email sent to:", email);
+    // console.log("Verification email sent to:", email);
   } catch (error) {
     console.error("Error sending verification email:", error);
     throw new Error("Failed to send verification email");
@@ -152,7 +152,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    console.log("Password reset email sent to:", email);
+    // console.log("Password reset email sent to:", email);
   } catch (error) {
     console.error("Error sending password reset email:", error);
     throw new Error("Failed to send password reset email");
@@ -357,7 +357,7 @@ export async function sendBookingConfirmationEmail(
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    console.log("Booking confirmation email sent to:", email);
+    // console.log("Booking confirmation email sent to:", email);
   } catch (error) {
     console.error("Error sending booking confirmation email:", error);
     throw new Error("Failed to send booking confirmation email");
@@ -475,7 +475,7 @@ export async function sendPaymentFailedEmail(
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    console.log("Payment failed email sent to:", email);
+    // console.log("Payment failed email sent to:", email);
   } catch (error) {
     console.error("Error sending payment failed email:", error);
     throw new Error("Failed to send payment failed email");
@@ -605,7 +605,7 @@ export async function sendReviewInvitationEmail(
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    console.log("Review invitation email sent to:", email);
+    // console.log("Review invitation email sent to:", email);
   } catch (error) {
     console.error("Error sending review invitation email:", error);
     throw new Error("Failed to send review invitation email");
@@ -750,7 +750,7 @@ export async function sendQuestionReplyEmail(
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    console.log("Question reply email sent to:", email);
+    // console.log("Question reply email sent to:", email);
   } catch (error) {
     console.error("Error sending question reply email:", error);
   }

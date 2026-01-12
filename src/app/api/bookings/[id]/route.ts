@@ -96,9 +96,9 @@ export async function PATCH(
 
       if (payment && payment.paymobTransactionId) {
         try {
-          console.log(
-            `[Cancellation] Processing refund for payment: ${payment._id}`
-          );
+          // console.log(
+          //   `[Cancellation] Processing refund for payment: ${payment._id}`
+          // );
           // Multiplied by 100 because amount is stored in piasters/cents in Payment model?
           // Let's check Payment model. verify if 'amount' is in EGP or piasters.
           // Payment model says "amount: number; // Amount in piasters".
@@ -109,7 +109,7 @@ export async function PATCH(
           payment.status = "refunded";
           booking.paymentStatus = "refunded";
           await payment.save();
-          console.log(`[Cancellation] Refund successful`);
+          // console.log(`[Cancellation] Refund successful`);
         } catch (refundError) {
           console.error("[Cancellation] Refund failed:", refundError);
           // We abort cancellation if refund fails to protect the guest's money

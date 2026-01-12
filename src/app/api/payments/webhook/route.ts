@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     // Get the raw body for HMAC verification
     const payload = await req.json();
 
-    console.log("[Paymob Webhook] Received:", JSON.stringify(payload, null, 2));
+    // console.log("[Paymob Webhook] Received:", JSON.stringify(payload, null, 2));
 
     // Validate payload structure
     if (!isValidWebhookPayload(payload)) {
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("[Paymob Webhook] HMAC verified successfully");
+    // console.log("[Paymob Webhook] HMAC verified successfully");
 
     // Parse the webhook payload
     const paymentResult = parseWebhookPayload(webhookPayload);
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
 
     // Idempotency check - if payment is already processed, skip
     if (payment.status === "paid" || payment.status === "refunded") {
-      console.log("[Paymob Webhook] Payment already processed:", payment._id);
+      // console.log("[Paymob Webhook] Payment already processed:", payment._id);
       return NextResponse.json({
         status: "already_processed",
       });
@@ -151,10 +151,10 @@ export async function POST(req: NextRequest) {
               totalPrice: booking.totalPrice,
               transactionId: paymentResult.transactionId,
             });
-            console.log(
-              "[Paymob Webhook] Confirmation email sent to:",
-              guestEmail
-            );
+            // console.log(
+            //   "[Paymob Webhook] Confirmation email sent to:",
+            //   guestEmail
+            // );
           }
         } catch (emailError) {
           console.error(
@@ -165,10 +165,10 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      console.log(
-        "[Paymob Webhook] Payment successful for booking:",
-        payment.booking
-      );
+      // console.log(
+      //   "[Paymob Webhook] Payment successful for booking:",
+      //   payment.booking
+      // );
     } else {
       // Payment failed
       payment.status = "failed";
@@ -182,11 +182,11 @@ export async function POST(req: NextRequest) {
         await booking.save();
       }
 
-      console.log(
-        "[Paymob Webhook] Payment failed for booking:",
-        payment.booking,
-        paymentResult.errorMessage
-      );
+      // console.log(
+      //   "[Paymob Webhook] Payment failed for booking:",
+      //   payment.booking,
+      //   paymentResult.errorMessage
+      // );
     }
 
     await payment.save();
