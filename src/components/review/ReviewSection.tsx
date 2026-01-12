@@ -26,7 +26,7 @@ export function ReviewSection({
     const shouldShowReview = searchParams.get("review") === "true";
     if (shouldShowReview) {
       setTimeout(() => {
-        const reviewForm = document.getElementById("review-form");
+        const reviewForm = document.getElementById("review");
         if (reviewForm) {
           reviewForm.scrollIntoView({ behavior: "smooth", block: "start" });
         }
@@ -48,7 +48,7 @@ export function ReviewSection({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 scroll-mt-8" id="review">
       {/* Review Form */}
       <ReviewForm
         listingId={listingId}

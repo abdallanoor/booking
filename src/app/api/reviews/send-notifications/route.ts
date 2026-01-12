@@ -49,7 +49,10 @@ export async function POST(req: NextRequest) {
             booking.listing &&
             typeof booking.listing === "object" &&
             "title" in booking.listing
-              ? (booking.listing as { title: string; _id: { toString: () => string } })
+              ? (booking.listing as {
+                  title: string;
+                  _id: { toString: () => string };
+                })
               : null;
 
           const guest =
@@ -65,7 +68,9 @@ export async function POST(req: NextRequest) {
               typeof booking.listing === "object" &&
               booking.listing !== null &&
               "_id" in booking.listing
-                ? (booking.listing as { _id: { toString: () => string } })._id.toString()
+                ? (
+                    booking.listing as { _id: { toString: () => string } }
+                  )._id.toString()
                 : null;
 
             if (listingId) {

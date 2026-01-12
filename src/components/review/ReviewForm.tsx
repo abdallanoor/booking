@@ -26,6 +26,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
     reason?: string;
     booking?: { _id: string; checkIn: string; checkOut: string };
   } | null>(null);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   // Check eligibility on mount
   useEffect(() => {
@@ -58,6 +59,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
       });
 
       toast.success("Review submitted successfully!");
+      setReviewSubmitted(true);
       setRating(0);
       setComment("");
       onReviewSubmitted?.();
@@ -74,18 +76,16 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
 
   if (!eligibility) {
     return (
-      <div className="border rounded-lg p-6">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
+      <div className="border rounded-2xl p-6 h-[370px] animate-pulse bg-muted/30"></div>
     );
   }
 
-  if (!eligibility.eligible) {
+  if (!eligibility.eligible || reviewSubmitted) {
     return null;
   }
 
   return (
-    <div className="border rounded-2xl p-6 space-y-6" id="review-form">
+    <div className="border rounded-2xl p-6 space-y-6">
       <div>
         <h3 className="font-semibold text-lg mb-1">Share Your Experience</h3>
         <p className="text-sm text-muted-foreground">
@@ -110,11 +110,10 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
                 className="transition-transform hover:scale-110"
               >
                 <Star
-                  className={`h-8 w-8 ${
-                    star <= (hoveredRating || rating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "fill-muted text-muted-foreground"
-                  }`}
+                  className={`h-8 w-8 ${star <= (hoveredRating || rating)
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "fill-muted text-muted-foreground"
+                    }`}
                 />
               </button>
             ))}
@@ -145,6 +144,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
         {/* Submit Button */}
         <Button
           type="submit"
+          size="lg"
           disabled={isSubmitting || !rating}
           className="w-full"
         >
