@@ -34,7 +34,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { Section, HeaderUser } from "@/types";
 
-const emptySubscribe = () => () => {};
+const emptySubscribe = () => () => { };
 
 interface HeaderProps {
   links?: { href: string; label: string; icon?: LucideIcon }[];
@@ -55,14 +55,18 @@ export function Header({ links }: HeaderProps) {
 
   const handleLogout = () => {
     startTransition(async () => {
-      try {
-        await logoutAction();
-        await logout();
-        toast.success("Logged out successfully");
-        router.push("/");
-      } catch {
-        toast.error("Failed to logout");
-      }
+      toast.promise(
+        (async () => {
+          await logoutAction();
+          await logout();
+          router.push("/");
+        })(),
+        {
+          loading: "Logging out...",
+          success: "Logged out successfully",
+          error: "Failed to logout",
+        }
+      );
     });
   };
 
