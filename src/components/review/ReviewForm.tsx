@@ -75,9 +75,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
   };
 
   if (!eligibility) {
-    return (
-      <div className="border rounded-2xl p-6 h-[370px] animate-pulse bg-muted/30"></div>
-    );
+    return null;
   }
 
   if (!eligibility.eligible || reviewSubmitted) {

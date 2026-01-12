@@ -27,17 +27,18 @@ interface QuestionsDisplayProps {
 
 // Component must be declared outside of render
 const QuestionAccordion = ({ questionsList }: { questionsList: Question[] }) => (
-  <Accordion type="single" collapsible className="w-full space-y-4">
+  <Accordion type="single" collapsible className="w-full space-y-4" suppressHydrationWarning>
     {questionsList.map((q) => (
       <AccordionItem
         key={q._id}
         value={q._id}
         className="border! border-border rounded-lg bg-muted/30 px-4"
+        suppressHydrationWarning
       >
-        <AccordionTrigger className="hover:no-underline py-4">
+        <AccordionTrigger className="hover:no-underline py-4" suppressHydrationWarning>
           <span className="font-medium text-foreground text-left">{q.question}</span>
         </AccordionTrigger>
-        <AccordionContent className="pb-4 pt-1 text-muted-foreground whitespace-pre-wrap wrap-break-word">
+        <AccordionContent className="pb-4 pt-1 text-muted-foreground whitespace-pre-wrap wrap-break-word" suppressHydrationWarning>
           {q.answer || <span className="italic">No answer yet.</span>}
         </AccordionContent>
       </AccordionItem>
@@ -56,29 +57,29 @@ export default function QuestionsDisplay({ questions, listingId, hasAskedQuestio
       <h2 className="text-2xl font-bold mb-6 text-foreground">Questions &amp; Answers</h2>
 
       {questions.length > 0 ? (
-        <div suppressHydrationWarning>
+        <div>
           {/* Show first 4 questions */}
           <QuestionAccordion questionsList={visibleQuestions} />
 
           {/* View More Button if more than 4 questions */}
           {hasMoreQuestions && (
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <div className="mt-6 text-center">
+            <div className="mt-6 text-center">
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild suppressHydrationWarning>
                   <Button variant="secondary" className="sm:w-auto">
                     Show all {questions.length} questions
                   </Button>
-                </div>
-              </DialogTrigger>
-              <DialogContent variant="drawer" className="md:max-w-lg! max-h-[85vh] flex flex-col">
-                <DialogHeader>
-                  <DialogTitle>All Questions ({questions.length})</DialogTitle>
-                </DialogHeader>
-                <div className="overflow-y-auto pr-2 -mr-2 flex-1">
-                  <QuestionAccordion questionsList={questions} />
-                </div>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent variant="drawer" className="md:max-w-lg! max-h-[85vh] flex flex-col" suppressHydrationWarning>
+                  <DialogHeader>
+                    <DialogTitle>All Questions ({questions.length})</DialogTitle>
+                  </DialogHeader>
+                  <div className="overflow-y-auto pr-2 -mr-2 flex-1">
+                    <QuestionAccordion questionsList={questions} />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
       ) : (

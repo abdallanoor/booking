@@ -76,17 +76,7 @@ export default function AskQuestionForm({
           type="submit"
           disabled={isSubmitting || !question.trim()}
         >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin" />
-              Sending...
-            </>
-          ) : (
-            <>
-              Send Question
-              <Send />
-            </>
-          )}
+          Send Question {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
         </Button>
       </div>
     </form>

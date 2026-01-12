@@ -19,7 +19,6 @@ export function ReviewSection({
 }: ReviewSectionProps) {
   const searchParams = useSearchParams();
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Handle ?review=true query param to scroll to review form
   useEffect(() => {
@@ -36,14 +35,11 @@ export function ReviewSection({
 
   const handleReviewSubmitted = async () => {
     // Refresh reviews after submission
-    setIsLoading(true);
     try {
       const updatedReviews = await getReviews(listingId);
       setReviews(updatedReviews);
     } catch (error) {
       console.error("Error fetching reviews:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -56,13 +52,7 @@ export function ReviewSection({
       />
 
       {/* Reviews List */}
-      {isLoading ? (
-        <div className="text-center py-8">
-          <p className="text-muted-foreground">Loading reviews...</p>
-        </div>
-      ) : (
-        <ReviewList reviews={reviews} />
-      )}
+      <ReviewList reviews={reviews} />
     </div>
   );
 }

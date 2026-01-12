@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { Suspense } from "react";
 import {
   getListing,
   getListingBookedDates,
@@ -115,8 +114,8 @@ export default async function ListingDetailPage({
               {listing.privacyType === "entire_place"
                 ? "Entire home"
                 : listing.privacyType === "private_room"
-                ? "Private room"
-                : "Shared room"}{" "}
+                  ? "Private room"
+                  : "Shared room"}{" "}
               in {listing.location.city}, {listing.location.country}
             </h2>
             <div className="flex gap-1 text-sm text-muted-foreground">
@@ -207,13 +206,7 @@ export default async function ListingDetailPage({
 
           {/* Reviews Section */}
           <div className="border-b pb-6">
-            <Suspense
-              fallback={
-                <div className="text-center py-8">Loading reviews...</div>
-              }
-            >
-              <ReviewSection listingId={id} initialReviews={reviews} />
-            </Suspense>
+            <ReviewSection listingId={id} initialReviews={reviews} />
           </div>
 
           {/* Questions Section */}

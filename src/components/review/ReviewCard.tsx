@@ -3,14 +3,31 @@
 import { format } from "date-fns";
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import type { Review } from "@/types";
 
 interface ReviewCardProps {
   review: Review;
+  showFullReview?: boolean;
+  onShowMore?: () => void;
 }
 
-export function ReviewCard({ review }: ReviewCardProps) {
+export function ReviewCard({ review, showFullReview = false, onShowMore }: ReviewCardProps) {
   const { guest, rating, comment, createdAt } = review;
+
+  // Count words in the comment
+  const wordCount = comment ? comment.trim().split(/\s+/).length : 0;
+  const WORD_LIMIT = 20;
+  const shouldTruncate = !showFullReview && wordCount > WORD_LIMIT;
+
+  // Get truncated comment (first 20 words)
+  const getTruncatedComment = () => {
+    if (!comment) return "";
+    const words = comment.trim().split(/\s+/);
+    return words.slice(0, WORD_LIMIT).join(" ");
+  };
+
+  const displayComment = shouldTruncate ? getTruncatedComment() : comment;
 
   return (
     <div className="pb-6">
@@ -48,9 +65,22 @@ export function ReviewCard({ review }: ReviewCardProps) {
 
           {/* Comment */}
           {comment && (
-            <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
-              {comment}
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
+                {displayComment}
+                {shouldTruncate && "..."}
+              </p>
+              {shouldTruncate && (
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={onShowMore}
+                  className="h-auto p-0 text-sm font-semibold underline"
+                >
+                  Show More
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
