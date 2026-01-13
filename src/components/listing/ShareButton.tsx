@@ -20,7 +20,6 @@ export function ShareButton({ listingTitle }: ShareButtonProps) {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        toast.success("Shared successfully");
       } catch (error) {
         // User cancelled the share
         if (error instanceof Error && error.name !== "AbortError") {
@@ -42,11 +41,11 @@ export function ShareButton({ listingTitle }: ShareButtonProps) {
     <Button
       variant="ghost"
       size="sm"
-      className="hidden sm:flex gap-2"
+      className="flex gap-2 max-sm:rounded-full max-sm:bg-accent max-sm:size-9"
       onClick={handleShare}
     >
-      <Share className="w-4 h-4" />
-      <span>Share</span>
+      <Share />
+      <span className="max-sm:hidden">Share</span>
     </Button>
   );
 }

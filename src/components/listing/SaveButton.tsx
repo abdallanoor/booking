@@ -54,7 +54,7 @@ export function SaveButton({
     <Button
       variant="ghost"
       size="sm"
-      className="flex gap-2"
+      className="flex gap-2 max-sm:rounded-full max-sm:bg-accent max-sm:size-9"
       onClick={toggleWishlist}
       disabled={isPending}
     >
@@ -62,7 +62,7 @@ export function SaveButton({
         className={`w-4 h-4 transition-colors ${inWishlist ? "fill-red-500 text-red-500" : ""
           }`}
       />
-      <span>{inWishlist ? "Saved" : "Save"}</span>
+      <span className="max-sm:hidden">{inWishlist ? "Saved" : "Save"}</span>
     </Button>
   );
 }
