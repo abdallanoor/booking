@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ReviewCard } from "./ReviewCard";
 import type { Review } from "@/types";
@@ -20,9 +20,23 @@ interface ReviewListProps {
 
 export function ReviewList({ reviews }: ReviewListProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [targetReviewId, setTargetReviewId] = useState<string | null>(null);
   const MAX_VISIBLE_REVIEWS = 4;
   const hasMoreReviews = reviews.length > MAX_VISIBLE_REVIEWS;
   const visibleReviews = hasMoreReviews ? reviews.slice(0, MAX_VISIBLE_REVIEWS) : reviews;
+
+  // Scroll to target review when dialog opens
+  useEffect(() => {
+    if (isDialogOpen && targetReviewId) {
+      // Small timeout to ensure dialog content is rendered
+      setTimeout(() => {
+        const element = document.getElementById(`review-${targetReviewId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 600);
+    }
+  }, [isDialogOpen, targetReviewId]);
 
   if (reviews.length === 0) {
     return (
@@ -46,14 +60,23 @@ export function ReviewList({ reviews }: ReviewListProps) {
           <ReviewCard
             key={review._id}
             review={review}
-            onShowMore={() => setIsDialogOpen(true)}
+            onShowMore={() => {
+              setTargetReviewId(review._id);
+              setIsDialogOpen(true);
+            }}
           />
         ))}
       </div>
 
       {/* Dialog for showing all reviews in full */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        {/* Trigger button - only shown if more than 6 reviews */}
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setTargetReviewId(null);
+        }}
+      >
+        {/* Trigger button - only shown if more than 4 reviews */}
         {hasMoreReviews && (
           <div className="text-center">
             <DialogTrigger asChild suppressHydrationWarning>
@@ -76,11 +99,12 @@ export function ReviewList({ reviews }: ReviewListProps) {
           <div className="overflow-y-auto pr-2 -mr-2 flex-1">
             <div className="space-y-6">
               {reviews.map((review) => (
-                <ReviewCard
-                  key={review._id}
-                  review={review}
-                  showFullReview={true}
-                />
+                <div key={review._id} id={`review-${review._id}`}>
+                  <ReviewCard
+                    review={review}
+                    showFullReview={true}
+                  />
+                </div>
               ))}
             </div>
           </div>
