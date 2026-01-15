@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
       filter.$or = [
         { "location.city": new RegExp(location, "i") },
         { "location.country": new RegExp(location, "i") },
-        { "location.address": new RegExp(location, "i") },
+        { "location.streetAddress": new RegExp(location, "i") },
+        { "location.governorate": new RegExp(location, "i") },
       ];
     }
 

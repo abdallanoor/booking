@@ -17,21 +17,36 @@ const listingSchema = new Schema<IListingDocument>(
       required: [true, "Listing type is required"],
     },
     location: {
-      address: {
+      streetAddress: {
         type: String,
-        required: [true, "Address is required"],
+        required: [true, "Street address is required"],
+      },
+      apt: {
+        type: String,
       },
       city: {
         type: String,
         required: [true, "City is required"],
       },
+      governorate: {
+        type: String,
+      },
       country: {
         type: String,
         required: [true, "Country is required"],
       },
+      postalCode: {
+        type: String,
+      },
       coordinates: {
-        lat: Number,
-        lng: Number,
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
+      },
+      placeId: {
+        type: String,
+      },
+      formattedAddress: {
+        type: String,
       },
     },
     images: {

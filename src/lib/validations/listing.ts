@@ -5,15 +5,18 @@ export const listingSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   listingType: z.string().min(1, "Listing type is required"),
   location: z.object({
-    address: z.string().min(1, "Address is required"),
+    streetAddress: z.string().min(1, "Street address is required"),
+    apt: z.string().optional(),
     city: z.string().min(1, "City is required"),
+    governorate: z.string().optional(),
     country: z.string().min(1, "Country is required"),
-    coordinates: z
-      .object({
-        lat: z.number(),
-        lng: z.number(),
-      })
-      .optional(),
+    postalCode: z.string().optional(),
+    coordinates: z.object({
+      lat: z.number(),
+      lng: z.number(),
+    }),
+    placeId: z.string().optional(),
+    formattedAddress: z.string().optional(),
   }),
   images: z.array(z.string()).min(1, "At least one image is required"),
   amenities: z.array(z.string()).default([]),

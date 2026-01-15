@@ -19,10 +19,15 @@ export interface Coordinates {
 }
 
 export interface Location {
-  address: string;
+  streetAddress: string;
+  apt?: string;
   city: string;
+  governorate?: string;
   country: string;
-  coordinates?: Coordinates;
+  postalCode?: string;
+  coordinates: Coordinates;
+  placeId?: string;
+  formattedAddress?: string;
 }
 
 // ============================================================================
