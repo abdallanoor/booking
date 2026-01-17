@@ -118,6 +118,7 @@ export interface ListingBase {
   location: Location;
   images: string[];
   amenities: string[];
+  policies: string[];
   pricePerNight: number;
   maxGuests: number;
   bedrooms: number;

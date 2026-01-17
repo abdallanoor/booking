@@ -7,11 +7,7 @@ export type { Booking };
 // Get all bookings with caching
 export async function getBookings(): Promise<Booking[]> {
   const response = await apiGet<{ data: { bookings: Booking[] } }>(
-    "/bookings?view=guest",
-    {
-      revalidate: 0, // No cache, always fresh
-      tags: ["bookings"],
-    }
+    "/bookings?view=guest"
   );
 
   return response.data.bookings;
@@ -20,11 +16,7 @@ export async function getBookings(): Promise<Booking[]> {
 // Get single booking with caching
 export async function getBooking(id: string): Promise<Booking> {
   const response = await apiGet<{ data: { booking: Booking } }>(
-    `/bookings/${id}`,
-    {
-      revalidate: 0,
-      tags: [`booking-${id}`, "bookings"],
-    }
+    `/bookings/${id}`
   );
 
   return response.data.booking;

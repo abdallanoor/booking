@@ -3,10 +3,7 @@ import { User } from "@/types";
 
 export const usersServerService = {
   getUsers: async (): Promise<User[]> => {
-    const response = await apiGet<{ data: { users: User[] } }>("/admin/users", {
-      revalidate: 0,
-      tags: ["admin-users"],
-    });
+    const response = await apiGet<{ data: { users: User[] } }>("/admin/users");
     return response.data.users;
   },
 };

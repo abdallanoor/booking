@@ -114,8 +114,8 @@ export default async function ListingDetailPage({
               {listing.privacyType === "entire_place"
                 ? "Entire home"
                 : listing.privacyType === "private_room"
-                  ? "Private room"
-                  : "Shared room"}{" "}
+                ? "Private room"
+                : "Shared room"}{" "}
               in {listing.location.city}, {listing.location.country}
             </h2>
             <div className="flex gap-1 text-sm text-muted-foreground">
@@ -180,29 +180,34 @@ export default async function ListingDetailPage({
           </div>
 
           {/* Amenities */}
-          <div className="border-b pb-6">
-            <h2 className="text-xl font-semibold mb-4">
-              What this place offers
-            </h2>
-            {listing.amenities.length > 0 ? (
+          {listing.amenities && listing.amenities.length > 0 && (
+            <div className="border-b pb-6">
+              <h2 className="text-xl font-semibold mb-4">
+                What this place offers
+              </h2>
               <div className="grid grid-cols-2 gap-y-3">
                 {listing.amenities.map((amenity) => (
-                  <div
-                    key={amenity}
-                    className="flex items-center gap-3 text-muted-foreground"
-                  >
-                    {/* Placeholder icon for amenities */}
-                    {/* <div className="w-1 h-1 bg-current rounded-full" />  */}
-                    <span>{amenity}</span>
+                  <div key={amenity} className="text-muted-foreground">
+                    {amenity}
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                No amenities listed.
-              </p>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Policies */}
+          {listing.policies && listing.policies.length > 0 && (
+            <div className="border-b pb-6">
+              <h2 className="text-xl font-semibold mb-4">House Rules</h2>
+              <div className="grid grid-cols-2 gap-y-3">
+                {listing.policies.map((policy, index) => (
+                  <div key={index} className="text-muted-foreground">
+                    {policy}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Reviews Section */}
           <div className="border-b pb-6">
@@ -213,7 +218,6 @@ export default async function ListingDetailPage({
           <div className="pb-6">
             <QuestionList listingId={id} hostId={listing.host._id} />
           </div>
-
         </div>
 
         {/* Right Column: Sticky Booking Card */}

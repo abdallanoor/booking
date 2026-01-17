@@ -5,11 +5,19 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Trash2, Loader2, Edit, MapPin, HousePlus, Eye, MessageCircleQuestion } from "lucide-react";
+import {
+  Trash2,
+  Loader2,
+  Edit,
+  MapPin,
+  HousePlus,
+  Eye,
+  MessageCircleQuestion,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { deleteListingAction } from "@/actions";
+import { deleteListing } from "@/services/listings.service";
 import type { Listing } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 
@@ -44,12 +52,13 @@ export default function HostingListingsPage() {
 
     setProcessingId(id);
     try {
-      await deleteListingAction(id);
+      await deleteListing(id);
       setListings((prev) => prev.filter((p) => p._id !== id));
       toast.success("Listing deleted");
       router.refresh();
-    } catch {
-      toast.error("Delete failed");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Delete failed";
+      toast.error(message);
     } finally {
       setProcessingId(null);
     }
@@ -117,8 +126,8 @@ export default function HostingListingsPage() {
                           listing.status === "approved"
                             ? "default"
                             : listing.status === "rejected"
-                              ? "destructive"
-                              : "secondary"
+                            ? "destructive"
+                            : "secondary"
                         }
                       >
                         {listing.status || "pending"}
@@ -149,7 +158,9 @@ export default function HostingListingsPage() {
                         </Link>
 
                         {/* Questions */}
-                        <Link href={`/hosting/listings/${listing._id}/questions`}>
+                        <Link
+                          href={`/hosting/listings/${listing._id}/questions`}
+                        >
                           <Button
                             size="sm"
                             variant="outline"

@@ -5,33 +5,6 @@ import type { Booking, ApiResponse, User } from "@/types";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 
 // ============================================================================
-// LISTING ACTIONS
-// ============================================================================
-
-export async function createListingAction(data: unknown) {
-  const result = await apiPost("/listings", data);
-  return result;
-}
-
-export async function updateListingAction(id: string, data: unknown) {
-  const result = await apiPut(`/listings/${id}`, data);
-  return result;
-}
-
-export async function updateListingStatusAction(
-  id: string,
-  status: "approved" | "rejected"
-) {
-  const result = await apiPatch(`/listings/${id}`, { status });
-  return result;
-}
-
-export async function deleteListingAction(id: string) {
-  const result = await apiDelete(`/listings/${id}`);
-  return result;
-}
-
-// ============================================================================
 // BOOKING ACTIONS
 // ============================================================================
 
