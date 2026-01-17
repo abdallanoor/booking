@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Payment from "@/models/Payment";
+import User from "@/models/User";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { requireAuth } from "@/lib/auth/auth-middleware";
 import {
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
 
     const body = await req.json();
-    const { bookingId } = body;
+    const { bookingId, saveCard, useSavedCard } = body;
 
     if (!bookingId) {
       return errorResponse("Booking ID is required", 400);
@@ -105,6 +106,20 @@ export async function POST(req: NextRequest) {
         : // Non-populated case: listing is an ObjectId
           (booking.listing as unknown as { toString(): string }).toString();
 
+    // Get saved card token if user wants to use saved card
+    let paymentToken: string | undefined;
+    if (useSavedCard) {
+      const dbUser = await User.findById(user._id);
+      if (dbUser?.creditCard?.token) {
+        paymentToken = dbUser.creditCard.token;
+      } else {
+        return errorResponse(
+          "No saved card found. Please pay with a new card first.",
+          400
+        );
+      }
+    }
+
     // Create payment intention with Paymob
     const intentionResponse = await createPaymentIntention({
       bookingId: booking._id.toString(),
@@ -115,6 +130,8 @@ export async function POST(req: NextRequest) {
       customerName: user.name,
       customerPhone: user.phoneNumber,
       listingTitle,
+      saveCard: saveCard || false,
+      paymentToken,
     });
 
     // Create a payment record in our database

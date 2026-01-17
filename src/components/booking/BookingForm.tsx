@@ -370,7 +370,6 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
             </div>
           </div>
         )}
-
       </CardContent>
 
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
@@ -378,7 +377,8 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
           <DialogHeader>
             <DialogTitle>Complete Your Profile</DialogTitle>
             <DialogDescription>
-              Please complete the following details to proceed with your booking.
+              Please complete the following details to proceed with your
+              booking.
             </DialogDescription>
           </DialogHeader>
           {user && (
@@ -392,7 +392,9 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
                   const freshUser = await authService.me();
                   if (checkProfileComplete(freshUser)) {
                     setShowProfileDialog(false);
-                    toast.success("Profile complete! Proceeding to reservation...");
+                    toast.success(
+                      "Profile complete! Proceeding to reservation..."
+                    );
                     executeBooking();
                   } else {
                     toast.error("Please complete all required fields.");

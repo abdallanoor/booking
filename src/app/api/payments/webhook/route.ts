@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Payment from "@/models/Payment";
+import User from "@/models/User";
 import {
   verifyHmacSignature,
   parseWebhookPayload,
@@ -162,6 +163,59 @@ export async function POST(req: NextRequest) {
             emailError
           );
           // Don't fail the webhook for email errors
+        }
+
+        // Save card token if present (user opted to save card during checkout)
+        // Search for token in multiple possible locations
+        const txnAny = transaction as unknown as Record<string, unknown>;
+        const paymentKeyClaims = txnAny.payment_key_claims as
+          | Record<string, unknown>
+          | undefined;
+
+        console.log("[Paymob Webhook] Looking for card token in:", {
+          "source_data.token": transaction.source_data?.token,
+          "data.token": transaction.data?.token,
+          "token (root)": txnAny.token,
+          "card_token (root)": txnAny.card_token,
+          payment_key_claims: paymentKeyClaims
+            ? Object.keys(paymentKeyClaims)
+            : "undefined",
+        });
+
+        const cardToken =
+          transaction.source_data?.token ||
+          transaction.data?.token ||
+          (txnAny.token as string | undefined) ||
+          (txnAny.card_token as string | undefined);
+
+        console.log(
+          "[Paymob Webhook] Extracted cardToken:",
+          cardToken || "NONE - user may not have selected 'Save Card'"
+        );
+
+        if (cardToken && booking.guest) {
+          const guestId =
+            typeof booking.guest === "object" && "_id" in booking.guest
+              ? String((booking.guest as { _id: unknown })._id)
+              : String(booking.guest);
+
+          try {
+            await User.findByIdAndUpdate(guestId, {
+              creditCard: {
+                token: cardToken,
+                lastFour: transaction.source_data.pan?.slice(-4) || "",
+                provider: transaction.source_data.sub_type || "card",
+                maskedPan: transaction.source_data.pan || "",
+                cardSubtype: transaction.source_data.sub_type || "",
+              },
+            });
+          } catch (tokenError) {
+            console.error(
+              "[Paymob Webhook] Failed to save card token:",
+              tokenError
+            );
+            // Don't fail the webhook for token save errors
+          }
         }
       }
 

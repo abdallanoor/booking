@@ -33,6 +33,8 @@ export interface CreditCard {
   lastFour?: string;
   token?: string;
   provider?: string;
+  maskedPan?: string; // e.g., "xxxx-xxxx-xxxx-1234"
+  cardSubtype?: string; // e.g., "VISA", "MasterCard"
 }
 
 export interface BankDetails {
@@ -369,6 +371,8 @@ export interface CreateIntentionRequest {
   notification_url?: string;
   redirection_url?: string;
   extras?: Record<string, string>;
+  save_card?: boolean; // Whether to save the card for future use
+  card_tokens?: string[]; // Saved card tokens for 3DS flow
 }
 
 export interface PaymobIntentionResponse {
@@ -412,6 +416,7 @@ export interface PaymobTransactionData {
     type: string;
     pan?: string;
     sub_type?: string;
+    token?: string; // Saved card token returned when save_card was true
   };
   error_occured: boolean;
   owner: number;
@@ -420,6 +425,7 @@ export interface PaymobTransactionData {
     gateway_integration_pk?: number;
     klass?: string;
     txn_response_code?: string;
+    token?: string; // Alternative location for card token
   };
 }
 
@@ -452,6 +458,8 @@ export interface InitiatePaymentParams {
   customerName: string;
   customerPhone?: string;
   listingTitle: string;
+  saveCard?: boolean; // Whether to save the card for future payments
+  paymentToken?: string; // Saved card token for 3DS flow
 }
 
 export interface InitiatePaymentResult {

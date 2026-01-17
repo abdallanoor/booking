@@ -9,6 +9,7 @@ import { uploadAvatarAction, updateUserAction } from "@/actions";
 import { toast } from "sonner";
 import { PersonalDetails } from "@/components/profile/PersonalDetails";
 import { BankDetails } from "@/components/profile/BankDetails";
+import { SavedCards } from "@/components/profile/SavedCards";
 import { PasswordSettings } from "@/components/profile/PasswordSettings";
 import { User } from "@/types";
 import { calculateProfileScore } from "@/lib/profile";
@@ -154,7 +155,12 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
           <div>
             <PersonalDetails user={user} refreshUser={handleUserRefresh} />
 
-            <BankDetails user={user} refreshUser={handleUserRefresh} />
+            {/* Show SavedCards for Guest users, BankDetails for Host/Admin */}
+            {user.role === "Guest" ? (
+              <SavedCards user={user} refreshUser={handleUserRefresh} />
+            ) : (
+              <BankDetails user={user} refreshUser={handleUserRefresh} />
+            )}
 
             <PasswordSettings
               hasPassword={!!user.hasPassword}

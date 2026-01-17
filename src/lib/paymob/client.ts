@@ -59,6 +59,9 @@ export async function createPaymentIntention(
       show_cancel_button: "true",
       allow_cancel: "true",
     },
+    // Saved card support
+    ...(params.saveCard && { save_card: true }),
+    ...(params.paymentToken && { card_tokens: [params.paymentToken] }),
   };
 
   const response = await fetch(
