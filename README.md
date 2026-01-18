@@ -1,208 +1,252 @@
-# Booking Application
+# 🏠 Booking Application
 
-A modern, full-stack property booking platform built with Next.js 16, MongoDB, and Tailwind CSS. This comprehensive application enables users to discover and book properties, manage wishlists, and become hosts to list their own properties. The platform includes role-based access control with Guest, Host, and Admin dashboards.
+<div align="center">
+
+A modern, full-stack property booking platform built with **Next.js 16**, **MongoDB**, and **Tailwind CSS**.
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Tech Stack](#-tech-stack)
+- [Features](#-features)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [User Roles & Permissions](#-user-roles--permissions)
+- [Payment System](#-payment-system)
+- [Booking Flow](#-booking-flow)
+- [Email Features](#-email-features)
+- [Security](#-security)
+- [API Reference](#-api-reference)
+- [Deployment](#-deployment)
+
+---
+
+## 🌟 Overview
+
+This comprehensive platform enables users to discover and book properties, manage wishlists, and become hosts to list their own properties. The platform includes **role-based access control** with dedicated dashboards for Guests, Hosts, and Admins.
+
+---
 
 ## 🚀 Tech Stack
 
-- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
-- **Language:** TypeScript
-- **Database:** MongoDB (via [Mongoose](https://mongoosejs.com/))
-- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/)
-- **Authentication:** Custom JWT Auth, Google OAuth 2.0
-- **Payment Gateway:** Paymob (Unified Intention API)
-- **Image Management:** Cloudinary
-- **Email Service:** Nodemailer
-- **UI Components:** React 19, Lucide Icons, Sonner (Toasts), React Day Picker, Embla Carousel
-- **Date Management:** date-fns
-- **Validation:** Zod
-- **Form Handling:** React Hook Form (via Radix UI)
+| Category           | Technologies                                                                       |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **Framework**      | [Next.js 16](https://nextjs.org/) (App Router)                                     |
+| **Language**       | TypeScript                                                                         |
+| **Database**       | MongoDB via [Mongoose](https://mongoosejs.com/)                                    |
+| **Styling**        | [Tailwind CSS v4](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/) |
+| **Authentication** | Custom JWT Auth, Google OAuth 2.0                                                  |
+| **Payments**       | Paymob (Unified Intention API)                                                     |
+| **Maps**           | [Google Maps API](https://developers.google.com/maps) (@react-google-maps/api)     |
+| **Media**          | Cloudinary                                                                         |
+| **Email**          | Nodemailer                                                                         |
+| **Validation**     | Zod, React Hook Form                                                               |
+| **Date Utilities** | date-fns                                                                           |
 
-## ✨ Key Features
+---
 
-### For Guests
+## ✨ Features
 
-- **Advanced Search & Filters:** Search listings by location, dates, guests, and property type
-- **Interactive Booking System:** Select dates with an interactive calendar showing real-time availability
-- **Secure Payments:** Integrated Paymob payment gateway supporting card payments
-- **Booking Management:** View, track, and cancel bookings with payment status
-- **Wishlists:** Save and organize favorite listings
-- **Profile Management:** Complete profile with personal details, phone, and national ID
-- **Interactive Q&A:** Ask questions about listings and receive answers from hosts
-- **Reviews & Ratings:** Leave detailed reviews and ratings for completed stays
-- **Email Verification:** Secure email verification system with resend functionality
-- **Password Recovery:** Forgot password and reset password functionality
+### 👤 For Guests
 
-### For Hosts
+| Feature                       | Description                                                    |
+| ----------------------------- | -------------------------------------------------------------- |
+| **Advanced Search & Filters** | Search listings by location, dates, guests, and property type  |
+| **Interactive Booking**       | Select dates with a real-time availability calendar            |
+| **Secure Payments**           | Integrated Paymob payment gateway with card support            |
+| **Booking Management**        | View, track, and cancel bookings with payment status           |
+| **Wishlists**                 | Save and organize favorite listings                            |
+| **Profile Management**        | Complete profile with personal details, phone, and national ID |
+| **Interactive Q&A**           | Ask questions about listings and receive host answers          |
+| **Reviews & Ratings**         | Leave detailed reviews for completed stays                     |
+| **Email Verification**        | Secure verification system with resend functionality           |
+| **Password Recovery**         | Forgot password and reset password functionality               |
 
-- **Listing Management:** Create, edit, and delete property listings with detailed information
-- **Image Upload:** Multi-image upload with Cloudinary integration
-- **Booking Dashboard:** View and manage guest bookings
-- **Revenue Tracking:** Monitor earnings and booking statistics
-- **Bank Details:** Set up bank account information for payment withdrawals
-- **Listing Analytics:** Track views, bookings, and revenue per listing
-- **Q&A Management:** View and answer questions from potential guests
-- **Review System:** View guest reviews and ratings for your properties
-- **Approval System:** Listings require admin approval before going live
+### 🏡 For Hosts
 
-### For Admins
+| Feature                     | Description                                       |
+| --------------------------- | ------------------------------------------------- |
+| **Listing Management**      | Create, edit, and delete property listings        |
+| **Image Upload**            | Multi-image upload with Cloudinary integration    |
+| **Location Picker**         | Interactive Google Maps with autocomplete         |
+| **Booking Dashboard**       | View and manage guest bookings                    |
+| **Revenue Tracking**        | Monitor earnings and booking statistics           |
+| **Bank Details**            | Set up bank account for payment withdrawals       |
+| **Listing Analytics**       | Track views, bookings, and revenue per listing    |
+| **Availability Management** | Block specific dates to mark as unavailable       |
+| **Q&A Management**          | View and answer questions from guests             |
+| **Review System**           | View guest reviews and ratings                    |
+| **Approval System**         | Listings require admin approval before going live |
 
-- **User Management:** View, manage, block/unblock users
-- **Listing Approval:** Approve or reject new listing submissions
-- **Booking Overview:** Monitor all platform bookings
-- **Platform Statistics:** Dashboard with total users, listings, bookings, and revenue
-- **Role Management:** Manage user roles (Guest, Host, Admin)
+### 🔧 For Admins
 
-### Additional Features
+| Feature                 | Description                                                 |
+| ----------------------- | ----------------------------------------------------------- |
+| **User Management**     | View, manage, block/unblock users                           |
+| **Listing Approval**    | Approve or reject new listing submissions                   |
+| **Booking Overview**    | Monitor all platform bookings                               |
+| **Platform Statistics** | Dashboard with total users, listings, bookings, and revenue |
+| **Role Management**     | Manage user roles (Guest, Host, Admin)                      |
 
-- **Role-Based Access Control:** Three user roles with distinct permissions and dashboards
-- **Responsive Design:** Fully optimized for mobile, tablet, and desktop
-- **Dark Mode:** Theme toggle with system preference support
-- **Real-time Availability:** Check listing availability before booking
-- **Double Booking Prevention:** Automatic validation to prevent booking conflicts
-- **Payment Webhooks:** Secure webhook handling for payment status updates
-- **Profile Completion System:** Progressive profile completion for enhanced security
-- **Become a Host:** Users can upgrade from Guest to Host role
-- **Email Notifications:** Automated emails for verification, password reset, and bookings
-- **Automated Review Reminders:** Scheduled notifications to prompt guests for reviews after their stay
+### 🎯 Platform Features
+
+- 🔐 **Role-Based Access Control** — Three user roles with distinct permissions
+- 📱 **Responsive Design** — Optimized for mobile, tablet, and desktop
+- 🌙 **Dark Mode** — Theme toggle with system preference support
+- ⚡ **Real-time Availability** — Check listing availability before booking
+- 🚫 **Double Booking Prevention** — Automatic validation to prevent conflicts
+- 🔔 **Payment Webhooks** — Secure webhook handling for payment updates
+- ✅ **Profile Completion** — Progressive completion for enhanced security
+- 🏠 **Become a Host** — Users can upgrade from Guest to Host role
+- 📧 **Email Notifications** — Automated emails for verification, bookings, etc.
+- ⏰ **Review Reminders** — Scheduled notifications for post-stay reviews
+
+---
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
 
-Ensure you have the following installed:
-
-- [Node.js](https://nodejs.org/) (v18+ recommended)
-- MongoDB instance (local or Atlas)
+- [Node.js](https://nodejs.org/) v18+
+- MongoDB instance (local or [Atlas](https://www.mongodb.com/atlas))
 
 ### Installation
 
-1.  **Clone the repository:**
+```bash
+# Clone the repository
+git clone https://github.com/abdallanoor/booking.git
+cd booking
 
-    ```bash
-    git clone https://github.com/abdallanoor/booking.git
-    cd booking
-    ```
+# Install dependencies
+npm install
+```
 
-2.  **Install dependencies:**
+### Environment Variables
 
-    ```bash
-    npm install
-    # or
-    yarn install
-    # or
-    pnpm install
-    ```
+Create a `.env.local` file in the root directory:
 
-3.  **Environment Variables:**
-    Create a `.env.local` file in the root directory and add the following variables:
+```env
+# Database
+MONGODB_URI=your_mongodb_connection_string
 
-    ```env
-    # Database
-    MONGODB_URI=your_mongodb_connection_string
+# Authentication
+JWT_SECRET=your_jwt_secret_key
 
-    # Authentication
-    JWT_SECRET=your_jwt_secret_key
+# OAuth (Google)
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 
-    # OAuth (Google)
-    NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 
-    # Cloudinary
-    CLOUDINARY_CLOUD_NAME=your_cloud_name
-    CLOUDINARY_API_KEY=your_api_key
-    CLOUDINARY_API_SECRET=your_api_secret
+# Email (Nodemailer)
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USER=your_email_user
+EMAIL_PASS=your_email_password
+EMAIL_FROM=noreply@yourdomain.com
 
-    # Email (Nodemailer)
-    EMAIL_HOST=smtp.example.com
-    EMAIL_PORT=587
-    EMAIL_USER=your_email_user
-    EMAIL_PASS=your_email_password
-    EMAIL_FROM=noreply@yourdomain.com
+# Payment Gateway (Paymob)
+PAYMOB_SECRET_KEY=your_paymob_secret_key
+PAYMOB_API_KEY=your_paymob_api_key
+PAYMOB_PUBLIC_KEY=your_paymob_public_key
+PAYMOB_HMAC_SECRET=your_paymob_hmac_secret
+PAYMOB_INTEGRATION_ID=your_integration_id
 
-    # Payment Gateway (Paymob)
-    PAYMOB_SECRET_KEY=your_paymob_secret_key
-    PAYMOB_API_KEY=your_paymob_api_key
-    PAYMOB_PUBLIC_KEY=your_paymob_public_key
-    PAYMOB_HMAC_SECRET=your_paymob_hmac_secret
-    PAYMOB_INTEGRATION_ID=your_integration_id
+# Google Maps
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
 
-    # App
-    NEXT_PUBLIC_APP_URL=http://localhost:3000
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-    # Cron Jobs
-    CRON_SECRET=your_cron_secret_key
-    ```
+# Cron Jobs
+CRON_SECRET=your_cron_secret_key
+```
 
-4.  **Run the development server:**
+### Run Development Server
 
-    ```bash
-    npm run dev
-    ```
+```bash
+npm run dev
+```
 
-    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+---
 
 ## 📂 Project Structure
 
+```
 src/
-├── app/ # Next.js App Router
-│ ├── (admin)/ # Admin-only routes
-│ │ └── admin/ # Admin dashboard, users, listings, bookings
-│ ├── (auth)/ # Authentication routes
-│ │ └── auth/ # Login, register, forgot/reset password
-│ ├── (guest)/ # Guest user routes
-│ │ ├── bookings/ # View bookings, payment results
-│ │ ├── listings/ # Browse and view listings
-│ │ ├── profile/ # User profile management
-│ │ ├── search/ # Search listings
-│ │ └── wishlist/ # Saved listings
-│ ├── (host)/ # Host-only routes
-│ │ └── hosting/ # Host dashboard, manage listings
-│ └── api/ # API routes
-│ ├── auth/ # Authentication endpoints
-│ ├── bookings/ # Booking management
-│ ├── listings/ # Listing CRUD operations
-│ ├── payments/ # Payment processing & webhooks
-│ ├── reviews/ # Review management & notifications
-│ ├── search/ # Search functionality
-│ └── wishlist/ # Wishlist operations
-├── components/ # Reusable UI components
-│ ├── Question/ # Q&A components
-│ ├── auth/ # Authentication forms
-│ ├── booking/ # Booking-related components
-│ ├── hosting/ # Host dashboard components
-│ ├── layout/ # Layout components (Header, Nav, etc.)
-│ ├── listing/ # Listing cards and grids
-│ ├── profile/ # Profile management components
-│ ├── review/ # Review & Rating components
-│ ├── search/ # Search bar and filters
-│ └── ui/ # Reusable UI primitives (Radix UI)
-├── contexts/ # React Context providers
-├── lib/ # Utility functions and configurations
-│ ├── auth/ # Authentication utilities (JWT, middleware)
-│ ├── email/ # Email templates and sender
-│ ├── paymob/ # Payment gateway integration
-│ └── validations/ # Zod validation schemas
-├── models/ # MongoDB/Mongoose models
-│ ├── User.ts # User model with roles
-│ ├── Listing.ts # Property listing model
-│ ├── Booking.ts # Booking model
-│ ├── Payment.ts # Payment transaction model
-│ ├── Wishlist.ts # Wishlist model
-│ ├── Review.ts # Review model
-│ └── Question.ts # Question & Answer model
-├── services/ # Business logic & Database services
-│ ├── auth.service.ts
-│ ├── bookings.service.ts
-│ ├── listings.service.ts
-│ ├── questions.service.ts
-│ ├── reviews.service.ts
-│ └── ...
-└── types/ # TypeScript type definitions
+├── app/                          # Next.js App Router
+│   ├── (admin)/admin/            # Admin dashboard, users, listings, bookings
+│   ├── (auth)/auth/              # Login, register, forgot/reset password
+│   ├── (guest)/                  # Guest routes
+│   │   ├── bookings/             # View bookings, payment results
+│   │   ├── listings/             # Browse and view listings
+│   │   ├── profile/              # User profile management
+│   │   ├── search/               # Search listings
+│   │   └── wishlist/             # Saved listings
+│   ├── (host)/hosting/           # Host dashboard, manage listings
+│   └── api/                      # API routes
+│       ├── auth/                 # Authentication endpoints
+│       ├── bookings/             # Booking management
+│       ├── listings/             # Listing CRUD operations
+│       ├── payments/             # Payment processing & webhooks
+│       ├── reviews/              # Review management & notifications
+│       ├── search/               # Search functionality
+│       └── wishlist/             # Wishlist operations
+│
+├── components/                   # Reusable UI components
+│   ├── auth/                     # Authentication forms
+│   ├── booking/                  # Booking-related components
+│   ├── hosting/                  # Host dashboard components
+│   ├── layout/                   # Header, Nav, Footer
+│   ├── listing/                  # Listing cards and grids
+│   ├── maps/                     # Google Maps components
+│   ├── profile/                  # Profile management
+│   ├── Question/                 # Q&A components
+│   ├── review/                   # Review & Rating components
+│   ├── search/                   # Search bar and filters
+│   └── ui/                       # Radix UI primitives
+│
+├── contexts/                     # React Context providers
+│
+├── lib/                          # Utilities & configurations
+│   ├── auth/                     # JWT, middleware
+│   ├── email/                    # Email templates & sender
+│   ├── paymob/                   # Payment gateway integration
+│   └── validations/              # Zod validation schemas
+│
+├── models/                       # MongoDB/Mongoose models
+│   ├── User.ts                   # User model with roles
+│   ├── Listing.ts                # Property listing model
+│   ├── Booking.ts                # Booking model
+│   ├── Payment.ts                # Payment transaction model
+│   ├── Wishlist.ts               # Wishlist model
+│   ├── Review.ts                 # Review model
+│   ├── Question.ts               # Question & Answer model
+│   └── BlockedDate.ts            # Blocked dates for availability
+│
+├── services/                     # Business logic & database services
+│
+└── types/                        # TypeScript type definitions
+```
 
-````
+---
 
 ## 🔐 User Roles & Permissions
 
-### Guest (Default Role)
+### 👤 Guest (Default)
 
 - Browse and search listings
 - Make bookings and payments
@@ -211,155 +255,187 @@ src/
 - View booking history
 - Upgrade to Host role
 
-### Host
+### 🏡 Host
 
-- All Guest permissions
+- All Guest permissions, plus:
 - Create and manage property listings
 - View and manage booking requests
 - Access hosting dashboard with analytics
 - Set up bank details for withdrawals
 - Track earnings and revenue
+- Manage availability calendar
 
-### Admin
+### 🔧 Admin
 
 - Full platform access
 - Manage all users (block/unblock)
-- Approve or reject listing submissions
+- Approve or reject listings
 - View all bookings and transactions
 - Access platform-wide statistics
 - Manage user roles
 
+---
+
 ## 💳 Payment System
 
-The application uses **Paymob** payment gateway with the following features:
+The application uses **Paymob** payment gateway:
 
-- **Secure Payment Processing:** PCI-compliant card payments
-- **Payment Intentions:** Pre-authorized payment flow
-- **Webhook Integration:** Real-time payment status updates
-- **Multiple Payment States:** Pending, Paid, Failed, Refunded
-- **Transaction Tracking:** Complete payment history with card details
-- **Currency Support:** EGP (Egyptian Pound) by default
-- **Payment Verification:** HMAC signature verification for webhooks
+| Feature                  | Description                                |
+| ------------------------ | ------------------------------------------ |
+| **Secure Processing**    | PCI-compliant card payments                |
+| **Payment Intentions**   | Pre-authorized payment flow                |
+| **Webhook Integration**  | Real-time payment status updates           |
+| **Payment States**       | Pending, Paid, Failed, Refunded            |
+| **Transaction Tracking** | Complete payment history with card details |
+| **Currency**             | EGP (Egyptian Pound) by default            |
+| **HMAC Verification**    | Secure webhook signature validation        |
+
+---
 
 ## 🔄 Booking Flow
 
-1. **Search:** User searches for listings by location and dates
-2. **Select:** User views listing details and checks availability
-3. **Book:** User selects dates and number of guests
-4. **Payment:** User is redirected to Paymob secure checkout
-5. **Confirmation:** Upon successful payment, booking is confirmed
-6. **Management:** User can view and manage bookings from dashboard
+```mermaid
+graph LR
+    A[🔍 Search] --> B[👀 View Listing]
+    B --> C[📅 Select Dates]
+    C --> D[💳 Payment]
+    D --> E[✅ Confirmation]
+    E --> F[📊 Dashboard]
+```
+
+1. **Search** — User searches for listings by location and dates
+2. **Select** — User views listing details and checks availability
+3. **Book** — User selects dates and number of guests
+4. **Payment** — User is redirected to Paymob secure checkout
+5. **Confirmation** — Upon successful payment, booking is confirmed
+6. **Management** — User can view and manage bookings from dashboard
+
+---
 
 ## 📧 Email Features
 
-- Welcome email on registration
-- Email verification with token
-- Password reset emails
-- Booking confirmations
-- Payment receipts
-- Listing approval/rejection notifications
+- ✉️ Welcome email on registration
+- 🔐 Email verification with token
+- 🔑 Password reset emails
+- 📅 Booking confirmations
+- 💳 Payment receipts
+- ✅ Listing approval/rejection notifications
+- ⭐ Review reminder emails (automated)
 
-## 🛡️ Security Features
+---
 
-- **JWT Authentication:** Secure token-based authentication
-- **Password Hashing:** bcrypt password encryption
-- **Email Verification:** Required for account activation
-- **Role-Based Access:** Protected routes based on user roles
-- **HMAC Verification:** Webhook signature validation
-- **Profile Completion:** Required for sensitive actions
-- **Input Validation:** Zod schema validation on all inputs
-- **MongoDB Injection Protection:** Mongoose sanitization
-- **HTTP-Only Cookies:** Secure cookie storage for auth tokens
-- **CORS Protection:** Configured for production environments
+## 🛡️ Security
 
-## 🔌 API Endpoints
+| Feature                  | Description                         |
+| ------------------------ | ----------------------------------- |
+| **JWT Authentication**   | Secure token-based authentication   |
+| **Password Hashing**     | bcrypt encryption                   |
+| **Email Verification**   | Required for account activation     |
+| **Role-Based Access**    | Protected routes by user role       |
+| **HMAC Verification**    | Webhook signature validation        |
+| **Profile Completion**   | Required for sensitive actions      |
+| **Input Validation**     | Zod schema validation on all inputs |
+| **Injection Protection** | Mongoose sanitization               |
+| **HTTP-Only Cookies**    | Secure auth token storage           |
+| **CORS Protection**      | Configured for production           |
+
+---
+
+## 🔌 API Reference
 
 ### Authentication
 
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/me` - Get current user
-- `POST /api/auth/verify-email` - Verify email address
-- `POST /api/auth/resend-verification` - Resend verification email
-- `POST /api/auth/forgot-password` - Request password reset
-- `POST /api/auth/reset-password` - Reset password with token
-- `PUT /api/auth/update-password` - Update password (authenticated)
-- `POST /api/auth/google` - Google OAuth authentication
-- `POST /api/auth/become-host` - Upgrade to host role
+| Method | Endpoint                        | Description                     |
+| ------ | ------------------------------- | ------------------------------- |
+| `POST` | `/api/auth/register`            | User registration               |
+| `POST` | `/api/auth/login`               | User login                      |
+| `POST` | `/api/auth/logout`              | User logout                     |
+| `GET`  | `/api/auth/me`                  | Get current user                |
+| `POST` | `/api/auth/verify-email`        | Verify email address            |
+| `POST` | `/api/auth/resend-verification` | Resend verification email       |
+| `POST` | `/api/auth/forgot-password`     | Request password reset          |
+| `POST` | `/api/auth/reset-password`      | Reset password with token       |
+| `PUT`  | `/api/auth/update-password`     | Update password (authenticated) |
+| `POST` | `/api/auth/google`              | Google OAuth authentication     |
+| `POST` | `/api/auth/become-host`         | Upgrade to host role            |
 
 ### Listings
 
-- `GET /api/listings` - Get all listings (with filters)
-- `POST /api/listings` - Create listing (Host/Admin)
-- `GET /api/listings/[id]` - Get listing by ID
-- `PUT /api/listings/[id]` - Update listing (Host/Admin)
-- `PATCH /api/listings/[id]` - Partial update (Admin for status)
-- `DELETE /api/listings/[id]` - Delete listing (Host/Admin)
-- `GET /api/listings/[id]/booked-dates` - Get booked dates
+| Method   | Endpoint                                       | Description                         |
+| -------- | ---------------------------------------------- | ----------------------------------- |
+| `GET`    | `/api/listings`                                | Get all listings (with filters)     |
+| `POST`   | `/api/listings`                                | Create listing (Host/Admin)         |
+| `GET`    | `/api/listings/[id]`                           | Get listing by ID                   |
+| `PUT`    | `/api/listings/[id]`                           | Update listing (Host/Admin)         |
+| `PATCH`  | `/api/listings/[id]`                           | Partial update (Admin for status)   |
+| `DELETE` | `/api/listings/[id]`                           | Delete listing (Host/Admin)         |
+| `GET`    | `/api/listings/[id]/booked-dates`              | Get booked dates (includes blocked) |
+| `GET`    | `/api/listings/[id]/blocked-dates`             | Get blocked dates (Host)            |
+| `POST`   | `/api/listings/[id]/blocked-dates`             | Create blocked date range (Host)    |
+| `DELETE` | `/api/listings/[id]/blocked-dates/[blockedId]` | Delete blocked date (Host)          |
+| `GET`    | `/api/listings/[id]/questions`                 | Get questions for listing           |
+| `POST`   | `/api/listings/[id]/questions`                 | Ask a question                      |
 
 ### Bookings
 
-- `GET /api/bookings` - Get user bookings
-- `POST /api/bookings` - Create booking
-- `GET /api/bookings/[id]` - Get booking details
-- `PATCH /api/bookings/[id]` - Update booking (cancel)
-- `POST /api/bookings/check-availability` - Check availability
+| Method  | Endpoint                           | Description             |
+| ------- | ---------------------------------- | ----------------------- |
+| `GET`   | `/api/bookings`                    | Get user bookings       |
+| `POST`  | `/api/bookings`                    | Create booking          |
+| `GET`   | `/api/bookings/[id]`               | Get booking details     |
+| `PATCH` | `/api/bookings/[id]`               | Update booking (cancel) |
+| `POST`  | `/api/bookings/check-availability` | Check availability      |
 
 ### Payments
 
-- `POST /api/payments/initiate` - Initiate payment
-- `GET /api/payments/[id]` - Get payment details
-- `POST /api/payments/webhook` - Paymob webhook handler
+| Method | Endpoint                 | Description            |
+| ------ | ------------------------ | ---------------------- |
+| `POST` | `/api/payments/initiate` | Initiate payment       |
+| `GET`  | `/api/payments/[id]`     | Get payment details    |
+| `POST` | `/api/payments/webhook`  | Paymob webhook handler |
 
-### Search
+### Search & Wishlist
 
-- `GET /api/search` - Search listings with filters
+| Method   | Endpoint                    | Description                  |
+| -------- | --------------------------- | ---------------------------- |
+| `GET`    | `/api/search`               | Search listings with filters |
+| `GET`    | `/api/wishlist`             | Get user wishlist            |
+| `POST`   | `/api/wishlist/[listingId]` | Add to wishlist              |
+| `DELETE` | `/api/wishlist/[listingId]` | Remove from wishlist         |
 
-### Wishlist
+### Admin & Hosting
 
-- `GET /api/wishlist` - Get user wishlist
-- `POST /api/wishlist/[listingId]` - Add to wishlist
-- `DELETE /api/wishlist/[listingId]` - Remove from wishlist
+| Method  | Endpoint                | Description                 |
+| ------- | ----------------------- | --------------------------- |
+| `GET`   | `/api/admin/stats`      | Get platform statistics     |
+| `GET`   | `/api/admin/users`      | Get all users               |
+| `GET`   | `/api/admin/users/[id]` | Get user by ID              |
+| `PATCH` | `/api/admin/users/[id]` | Update user (block/unblock) |
+| `GET`   | `/api/hosting/stats`    | Get host statistics         |
 
-### Admin
+### Reviews & Questions
 
-- `GET /api/admin/stats` - Get platform statistics
-- `GET /api/admin/users` - Get all users
-- `GET /api/admin/users/[id]` - Get user by ID
-- `PATCH /api/admin/users/[id]` - Update user (block/unblock)
+| Method | Endpoint                          | Description                     |
+| ------ | --------------------------------- | ------------------------------- |
+| `GET`  | `/api/reviews`                    | Get reviews for a listing       |
+| `POST` | `/api/reviews`                    | Create a review                 |
+| `POST` | `/api/reviews/send-notifications` | Trigger review reminders (Cron) |
+| `POST` | `/api/questions/[id]/answer`      | Answer a question (Host)        |
 
-### Hosting
-
-- `GET /api/hosting/stats` - Get host statistics
-
-### Reviews
-
-- `GET /api/reviews` - Get reviews for a listing
-- `POST /api/reviews` - Create a review
-- `POST /api/reviews/send-notifications` - Trigger review reminder emails (Cron)
-
-### Questions
-
-- `GET /api/listings/[id]/questions` - Get questions for a listing
-- `POST /api/listings/[id]/questions` - Ask a question
-- `POST /api/questions/[id]/answer` - Answer a question (Host)
+---
 
 ## 🚀 Deployment
 
-### Prerequisites for Production
+### Prerequisites
 
 1. MongoDB Atlas cluster or production MongoDB instance
 2. Cloudinary account for image hosting
 3. Paymob merchant account with API credentials
 4. SMTP server for email delivery
 5. Google OAuth 2.0 credentials
+6. Google Maps API key
 
-### Environment Variables
-
-Ensure all environment variables are set in your production environment. Refer to the `.env.local` example above.
-
-### Build and Deploy
+### Build & Deploy
 
 ```bash
 # Build for production
@@ -367,4 +443,16 @@ npm run build
 
 # Start production server
 npm start
-````
+```
+
+### Environment Variables
+
+Ensure all environment variables are configured in your production environment. Refer to the [Environment Variables](#environment-variables) section above.
+
+---
+
+<div align="center">
+
+**Built with ❤️ using Next.js**
+
+</div>
