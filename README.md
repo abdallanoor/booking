@@ -123,7 +123,7 @@ This comprehensive platform enables users to discover and book properties, manag
 
 ```bash
 # Clone the repository
-git clone https://github.com/abdallanoor/booking.git
+git clone https://github.com/your-username/booking.git
 cd booking
 
 # Install dependencies
