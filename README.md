@@ -44,13 +44,14 @@ This comprehensive platform enables users to discover and book properties, manag
 | **Language**       | TypeScript                                                                         |
 | **Database**       | MongoDB via [Mongoose](https://mongoosejs.com/)                                    |
 | **Styling**        | [Tailwind CSS v4](https://tailwindcss.com/), [Radix UI](https://www.radix-ui.com/) |
-| **Authentication** | Custom JWT Auth, Google OAuth 2.0                                                  |
+| **Authentication** | Custom JWT Auth (jose, jsonwebtoken), Google OAuth 2.0                             |
 | **Payments**       | Paymob (Unified Intention API)                                                     |
 | **Maps**           | [Google Maps API](https://developers.google.com/maps) (@react-google-maps/api)     |
-| **Media**          | Cloudinary                                                                         |
+| **Media**          | Cloudinary (next-cloudinary)                                                       |
 | **Email**          | Nodemailer                                                                         |
-| **Validation**     | Zod, React Hook Form                                                               |
+| **Validation**     | Zod                                                                                |
 | **Date Utilities** | date-fns                                                                           |
+| **UI Components**  | React 19, Lucide Icons, Sonner, React Day Picker, Embla Carousel                   |
 
 ---
 
@@ -58,34 +59,34 @@ This comprehensive platform enables users to discover and book properties, manag
 
 ### 👤 For Guests
 
-| Feature                       | Description                                                    |
-| ----------------------------- | -------------------------------------------------------------- |
-| **Advanced Search & Filters** | Search listings by location, dates, guests, and property type  |
-| **Interactive Booking**       | Select dates with a real-time availability calendar            |
-| **Secure Payments**           | Integrated Paymob payment gateway with card support            |
-| **Booking Management**        | View, track, and cancel bookings with payment status           |
-| **Wishlists**                 | Save and organize favorite listings                            |
-| **Profile Management**        | Complete profile with personal details, phone, and national ID |
-| **Interactive Q&A**           | Ask questions about listings and receive host answers          |
-| **Reviews & Ratings**         | Leave detailed reviews for completed stays                     |
-| **Email Verification**        | Secure verification system with resend functionality           |
-| **Password Recovery**         | Forgot password and reset password functionality               |
+| Feature                       | Description                                                     |
+| ----------------------------- | --------------------------------------------------------------- |
+| **Advanced Search & Filters** | Search listings by location, dates, guests, and property type   |
+| **Interactive Booking**       | Select dates with a real-time availability calendar             |
+| **Secure Payments**           | Integrated Paymob payment gateway with card support             |
+| **Booking Management**        | View, track, and cancel bookings with payment status            |
+| **Wishlists**                 | Save and organize favorite listings                             |
+| **Profile Management**        | Complete profile with personal details, phone, and national ID  |
+| **Interactive Q&A**           | Ask questions about listings and receive host answers           |
+| **Reviews & Ratings**         | Leave detailed reviews for completed stays (24h after checkout) |
+| **Email Verification**        | Secure verification system with resend functionality            |
+| **Password Recovery**         | Forgot password and reset password functionality                |
+| **Become a Host**             | Upgrade from Guest to Host role                                 |
 
 ### 🏡 For Hosts
 
-| Feature                     | Description                                       |
-| --------------------------- | ------------------------------------------------- |
-| **Listing Management**      | Create, edit, and delete property listings        |
-| **Image Upload**            | Multi-image upload with Cloudinary integration    |
-| **Location Picker**         | Interactive Google Maps with autocomplete         |
-| **Booking Dashboard**       | View and manage guest bookings                    |
-| **Revenue Tracking**        | Monitor earnings and booking statistics           |
-| **Bank Details**            | Set up bank account for payment withdrawals       |
-| **Listing Analytics**       | Track views, bookings, and revenue per listing    |
-| **Availability Management** | Block specific dates to mark as unavailable       |
-| **Q&A Management**          | View and answer questions from guests             |
-| **Review System**           | View guest reviews and ratings                    |
-| **Approval System**         | Listings require admin approval before going live |
+| Feature                     | Description                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| **Listing Management**      | Create, edit, and delete property listings                                   |
+| **Image Upload**            | Multi-image upload with Cloudinary integration                               |
+| **Location Picker**         | Interactive Google Maps with autocomplete                                    |
+| **Availability Management** | Block specific dates to mark as unavailable                                  |
+| **Booking Dashboard**       | View and manage guest bookings                                               |
+| **Host Statistics**         | Track active listings, pending bookings, upcoming guests, and total earnings |
+| **Bank Details**            | Set up bank account for payment withdrawals                                  |
+| **Q&A Management**          | View and answer questions from guests                                        |
+| **Review System**           | View guest reviews and ratings                                               |
+| **Approval System**         | Listings require admin approval before going live                            |
 
 ### 🔧 For Admins
 
@@ -106,9 +107,8 @@ This comprehensive platform enables users to discover and book properties, manag
 - 🚫 **Double Booking Prevention** — Automatic validation to prevent conflicts
 - 🔔 **Payment Webhooks** — Secure webhook handling for payment updates
 - ✅ **Profile Completion** — Progressive completion for enhanced security
-- 🏠 **Become a Host** — Users can upgrade from Guest to Host role
 - 📧 **Email Notifications** — Automated emails for verification, bookings, etc.
-- ⏰ **Review Reminders** — Scheduled notifications for post-stay reviews
+- ⏰ **Review Reminders** — Scheduled notifications for post-stay reviews (Cron)
 
 ---
 
@@ -189,18 +189,27 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 src/
 ├── app/                          # Next.js App Router
 │   ├── (admin)/admin/            # Admin dashboard, users, listings, bookings
-│   ├── (auth)/auth/              # Login, register, forgot/reset password
+│   ├── (auth)/                   # Authentication routes
+│   │   ├── auth/                 # Login, register, forgot/reset password
+│   │   └── verify-email/         # Email verification page
 │   ├── (guest)/                  # Guest routes
+│   │   ├── become-host/          # Host upgrade page
 │   │   ├── bookings/             # View bookings, payment results
 │   │   ├── listings/             # Browse and view listings
 │   │   ├── profile/              # User profile management
 │   │   ├── search/               # Search listings
 │   │   └── wishlist/             # Saved listings
-│   ├── (host)/hosting/           # Host dashboard, manage listings
+│   ├── (host)/hosting/           # Host dashboard
+│   │   ├── bookings/             # Manage guest bookings
+│   │   ├── listings/             # Manage listings, availability, questions
+│   │   └── today/                # Today's activity
 │   └── api/                      # API routes
+│       ├── admin/                # Admin endpoints (stats, users)
 │       ├── auth/                 # Authentication endpoints
 │       ├── bookings/             # Booking management
-│       ├── listings/             # Listing CRUD operations
+│       ├── host/                 # Host-specific endpoints
+│       ├── hosting/              # Hosting stats
+│       ├── listings/             # Listing CRUD, blocked-dates, questions
 │       ├── payments/             # Payment processing & webhooks
 │       ├── reviews/              # Review management & notifications
 │       ├── search/               # Search functionality
@@ -209,26 +218,28 @@ src/
 ├── components/                   # Reusable UI components
 │   ├── auth/                     # Authentication forms
 │   ├── booking/                  # Booking-related components
-│   ├── hosting/                  # Host dashboard components
+│   ├── hosting/                  # ListingForm, AvailabilityCalendar, RecentBookings
 │   ├── layout/                   # Header, Nav, Footer
 │   ├── listing/                  # Listing cards and grids
-│   ├── maps/                     # Google Maps components
-│   ├── profile/                  # Profile management
+│   ├── maps/                     # GoogleMapsProvider, LocationPicker
+│   ├── profile/                  # Profile forms, BankDetails
 │   ├── Question/                 # Q&A components
 │   ├── review/                   # Review & Rating components
 │   ├── search/                   # Search bar and filters
 │   └── ui/                       # Radix UI primitives
 │
 ├── contexts/                     # React Context providers
+│   ├── AuthContext.tsx           # Authentication state
+│   └── SectionContext.tsx        # Section navigation
 │
 ├── lib/                          # Utilities & configurations
-│   ├── auth/                     # JWT, middleware
-│   ├── email/                    # Email templates & sender
+│   ├── auth/                     # JWT utilities, middleware
+│   ├── email/                    # Email templates (nodemailer.ts)
 │   ├── paymob/                   # Payment gateway integration
 │   └── validations/              # Zod validation schemas
 │
 ├── models/                       # MongoDB/Mongoose models
-│   ├── User.ts                   # User model with roles
+│   ├── User.ts                   # User model with roles, bankDetails
 │   ├── Listing.ts                # Property listing model
 │   ├── Booking.ts                # Booking model
 │   ├── Payment.ts                # Payment transaction model
@@ -238,6 +249,18 @@ src/
 │   └── BlockedDate.ts            # Blocked dates for availability
 │
 ├── services/                     # Business logic & database services
+│   ├── auth.service.ts
+│   ├── blocked-dates.service.ts
+│   ├── bookings.service.ts
+│   ├── listings.service.ts
+│   ├── questions.service.ts
+│   ├── reviews.service.ts
+│   ├── search.service.ts
+│   ├── stats.service.ts
+│   ├── users.service.ts
+│   └── wishlist.service.ts
+│
+├── actions/                      # Server actions
 │
 └── types/                        # TypeScript type definitions
 ```
@@ -250,20 +273,24 @@ src/
 
 - Browse and search listings
 - Make bookings and payments
-- Manage personal profile
+- Manage personal profile (phone, country, national ID)
 - Save listings to wishlist
 - View booking history
+- Ask questions about listings
+- Leave reviews (24h after checkout)
 - Upgrade to Host role
 
 ### 🏡 Host
 
 - All Guest permissions, plus:
 - Create and manage property listings
+- Upload images via Cloudinary
+- Set listing location via Google Maps
+- Block dates for availability management
 - View and manage booking requests
-- Access hosting dashboard with analytics
+- Access hosting dashboard with statistics
 - Set up bank details for withdrawals
-- Track earnings and revenue
-- Manage availability calendar
+- Answer guest questions
 
 ### 🔧 Admin
 
@@ -280,15 +307,15 @@ src/
 
 The application uses **Paymob** payment gateway:
 
-| Feature                  | Description                                |
-| ------------------------ | ------------------------------------------ |
-| **Secure Processing**    | PCI-compliant card payments                |
-| **Payment Intentions**   | Pre-authorized payment flow                |
-| **Webhook Integration**  | Real-time payment status updates           |
-| **Payment States**       | Pending, Paid, Failed, Refunded            |
-| **Transaction Tracking** | Complete payment history with card details |
-| **Currency**             | EGP (Egyptian Pound) by default            |
-| **HMAC Verification**    | Secure webhook signature validation        |
+| Feature                  | Description                         |
+| ------------------------ | ----------------------------------- |
+| **Secure Processing**    | PCI-compliant card payments         |
+| **Payment Intentions**   | Pre-authorized payment flow         |
+| **Webhook Integration**  | Real-time payment status updates    |
+| **Payment States**       | Pending, Confirmed, Failed          |
+| **Transaction Tracking** | Complete payment history            |
+| **Currency**             | EGP (Egyptian Pound) by default     |
+| **HMAC Verification**    | Secure webhook signature validation |
 
 ---
 
@@ -300,7 +327,7 @@ graph LR
     B --> C[📅 Select Dates]
     C --> D[💳 Payment]
     D --> E[✅ Confirmation]
-    E --> F[📊 Dashboard]
+    E --> F[📋 Bookings Management]
 ```
 
 1. **Search** — User searches for listings by location and dates
@@ -308,19 +335,20 @@ graph LR
 3. **Book** — User selects dates and number of guests
 4. **Payment** — User is redirected to Paymob secure checkout
 5. **Confirmation** — Upon successful payment, booking is confirmed
-6. **Management** — User can view and manage bookings from dashboard
+6. **Bookings Management** — User can view bookings, see details, and cancel for refund
 
 ---
 
 ## 📧 Email Features
 
-- ✉️ Welcome email on registration
-- 🔐 Email verification with token
-- 🔑 Password reset emails
-- 📅 Booking confirmations
-- 💳 Payment receipts
-- ✅ Listing approval/rejection notifications
-- ⭐ Review reminder emails (automated)
+| Email Type               | Trigger                        |
+| ------------------------ | ------------------------------ |
+| **Verification Email**   | User registration              |
+| **Password Reset**       | Forgot password request        |
+| **Booking Confirmation** | Successful payment             |
+| **Payment Failed**       | Failed payment attempt         |
+| **Review Invitation**    | 24 hours after checkout (Cron) |
+| **Question Reply**       | Host answers a guest question  |
 
 ---
 
@@ -333,11 +361,10 @@ graph LR
 | **Email Verification**   | Required for account activation     |
 | **Role-Based Access**    | Protected routes by user role       |
 | **HMAC Verification**    | Webhook signature validation        |
-| **Profile Completion**   | Required for sensitive actions      |
+| **Profile Completion**   | Required for booking/withdrawals    |
 | **Input Validation**     | Zod schema validation on all inputs |
 | **Injection Protection** | Mongoose sanitization               |
 | **HTTP-Only Cookies**    | Secure auth token storage           |
-| **CORS Protection**      | Configured for production           |
 
 ---
 
@@ -394,6 +421,16 @@ graph LR
 | `GET`  | `/api/payments/[id]`     | Get payment details    |
 | `POST` | `/api/payments/webhook`  | Paymob webhook handler |
 
+### Reviews
+
+| Method | Endpoint                          | Description                     |
+| ------ | --------------------------------- | ------------------------------- |
+| `GET`  | `/api/reviews`                    | Get reviews for a listing       |
+| `POST` | `/api/reviews`                    | Create a review                 |
+| `GET`  | `/api/reviews/[id]`               | Get review by ID                |
+| `GET`  | `/api/reviews/check-eligibility`  | Check if user can review        |
+| `POST` | `/api/reviews/send-notifications` | Trigger review reminders (Cron) |
+
 ### Search & Wishlist
 
 | Method   | Endpoint                    | Description                  |
@@ -403,7 +440,15 @@ graph LR
 | `POST`   | `/api/wishlist/[listingId]` | Add to wishlist              |
 | `DELETE` | `/api/wishlist/[listingId]` | Remove from wishlist         |
 
-### Admin & Hosting
+### Host
+
+| Method | Endpoint                   | Description         |
+| ------ | -------------------------- | ------------------- |
+| `GET`  | `/api/hosting/stats`       | Get host statistics |
+| `GET`  | `/api/host/listings`       | Get host's listings |
+| `POST` | `/api/host/questions/[id]` | Answer a question   |
+
+### Admin
 
 | Method  | Endpoint                | Description                 |
 | ------- | ----------------------- | --------------------------- |
@@ -411,16 +456,6 @@ graph LR
 | `GET`   | `/api/admin/users`      | Get all users               |
 | `GET`   | `/api/admin/users/[id]` | Get user by ID              |
 | `PATCH` | `/api/admin/users/[id]` | Update user (block/unblock) |
-| `GET`   | `/api/hosting/stats`    | Get host statistics         |
-
-### Reviews & Questions
-
-| Method | Endpoint                          | Description                     |
-| ------ | --------------------------------- | ------------------------------- |
-| `GET`  | `/api/reviews`                    | Get reviews for a listing       |
-| `POST` | `/api/reviews`                    | Create a review                 |
-| `POST` | `/api/reviews/send-notifications` | Trigger review reminders (Cron) |
-| `POST` | `/api/questions/[id]/answer`      | Answer a question (Host)        |
 
 ---
 
