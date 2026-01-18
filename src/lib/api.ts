@@ -7,7 +7,7 @@ type FetchOptions = RequestInit;
 
 export async function fetchAPI<T>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   const { ...fetchOptions } = options;
 
@@ -55,7 +55,7 @@ export async function fetchAPI<T>(
 
 export async function apiGet<T>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, { ...options, method: "GET" });
 }
@@ -63,7 +63,7 @@ export async function apiGet<T>(
 export async function apiPost<T>(
   endpoint: string,
   data?: unknown,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, {
     ...options,
@@ -75,7 +75,7 @@ export async function apiPost<T>(
 export async function apiPut<T>(
   endpoint: string,
   data: unknown,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, {
     ...options,
@@ -87,7 +87,7 @@ export async function apiPut<T>(
 export async function apiPatch<T>(
   endpoint: string,
   data: unknown,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, {
     ...options,
@@ -98,7 +98,7 @@ export async function apiPatch<T>(
 
 export async function apiDelete<T>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, { ...options, method: "DELETE" });
 }

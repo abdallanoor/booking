@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
       } else {
         // Fallback for non-admin on generic view: show relevant stuff
         const listingIds = await Listing.find({ host: user._id }).distinct(
-          "_id"
+          "_id",
         );
         query = {
           $or: [{ guest: user._id }, { listing: { $in: listingIds } }],
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     if (validatedData.guests > listing.maxGuests) {
       return errorResponse(
         `Listing can only accommodate ${listing.maxGuests} guests`,
-        400
+        400,
       );
     }
 
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     // Calculate total price
     const nights = Math.ceil(
-      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)
+      (checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24),
     );
     const totalPrice = listing.pricePerNight * nights;
 
