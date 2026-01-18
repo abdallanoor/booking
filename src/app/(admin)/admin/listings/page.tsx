@@ -9,7 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { updateListingStatusAction, deleteListingAction } from "@/actions";
+import {
+  updateListingStatus,
+  deleteListing,
+} from "@/services/listings.service";
 import type { Listing } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 import Link from "next/link";
@@ -52,12 +55,12 @@ export default function AdminListingsPage() {
           setProcessingId(null);
           return;
         }
-        await deleteListingAction(id);
+        await deleteListing(id);
         setListings((prev) => prev.filter((p) => p._id !== id));
         toast.success("Listing deleted");
       } else {
         const status = action === "approve" ? "approved" : "rejected";
-        await updateListingStatusAction(id, status);
+        await updateListingStatus(id, status);
 
         // Update local state
         setListings((prev) =>

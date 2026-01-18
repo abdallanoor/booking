@@ -1,34 +1,37 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// API utility with Next.js caching
+// API utility
 const baseURL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-interface FetchOptions extends RequestInit {
-  revalidate?: number | false;
-  tags?: string[];
-}
+type FetchOptions = RequestInit;
 
 export async function fetchAPI<T>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
-  const { revalidate, tags, ...fetchOptions } = options;
+  const { ...fetchOptions } = options;
+
+  let headers = { ...fetchOptions.headers };
 
   // Get cookies for server-side requests
-  const cookieStore = await cookies();
-  const cookie = cookieStore.toString();
+  if (typeof window === "undefined") {
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const cookie = cookieStore.toString();
+      if (cookie) {
+        headers = { ...headers, Cookie: cookie };
+      }
+    } catch {
+      // Ignore error if next/headers is not available
+    }
+  }
 
   const response = await fetch(`${baseURL}/api${endpoint}`, {
     ...fetchOptions,
     headers: {
       "Content-Type": "application/json",
-      ...(cookie ? { Cookie: cookie } : {}),
-      ...fetchOptions.headers,
-    },
-    next: {
-      revalidate,
-      tags,
+      ...headers,
     },
   });
 
@@ -52,7 +55,7 @@ export async function fetchAPI<T>(
 
 export async function apiGet<T>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, { ...options, method: "GET" });
 }
@@ -60,7 +63,7 @@ export async function apiGet<T>(
 export async function apiPost<T>(
   endpoint: string,
   data?: unknown,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, {
     ...options,
@@ -72,7 +75,7 @@ export async function apiPost<T>(
 export async function apiPut<T>(
   endpoint: string,
   data: unknown,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, {
     ...options,
@@ -84,7 +87,7 @@ export async function apiPut<T>(
 export async function apiPatch<T>(
   endpoint: string,
   data: unknown,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, {
     ...options,
@@ -95,7 +98,7 @@ export async function apiPatch<T>(
 
 export async function apiDelete<T>(
   endpoint: string,
-  options: FetchOptions = {}
+  options: FetchOptions = {},
 ): Promise<T> {
   return fetchAPI<T>(endpoint, { ...options, method: "DELETE" });
 }

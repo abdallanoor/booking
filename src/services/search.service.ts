@@ -13,10 +13,7 @@ export async function searchListings(
 
   const response = await apiGet<{
     data: { listings: Listing[]; count: number };
-  }>(`/search?${params.toString()}`, {
-    revalidate: 30, // Short cache for search results
-    tags: ["search"],
-  });
+  }>(`/search?${params.toString()}`);
 
   return response.data.listings;
 }

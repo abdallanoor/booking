@@ -1,12 +1,13 @@
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/api";
 import type { Listing, ListingFilters } from "@/types";
+import type { ListingInput } from "@/lib/validations/listing";
 
 // Re-export types for backward compatibility
 export type { Listing, ListingFilters };
 
-// Get all listings with caching
+// Get all listings
 export async function getListings(
-  filters?: ListingFilters
+  filters?: ListingFilters,
 ): Promise<Listing[]> {
   const params = new URLSearchParams();
   if (filters?.city) params.append("city", filters.city);
@@ -19,38 +20,29 @@ export async function getListings(
   const query = params.toString();
   const response = await apiGet<{ data: { listings: Listing[] } }>(
     `/listings${query ? `?${query}` : ""}`,
-    {
-      revalidate: 0, // No cache
-      tags: ["listings"],
-    }
   );
 
   return response.data.listings;
 }
 
-// Get single listing with caching
+// Get single listing
 export async function getListing(id: string): Promise<Listing> {
   const response = await apiGet<{ data: { listing: Listing } }>(
     `/listings/${id}`,
-    {
-      revalidate: 0, // No cache
-      tags: [`listing-${id}`, "listings"],
-    }
   );
 
   return response.data.listing;
 }
 
-// Get booked dates for a listing
+// Get booked dates for a listing (includes both bookings and host-blocked dates)
 export async function getListingBookedDates(
-  id: string
-): Promise<{ from: string; to: string }[]> {
+  id: string,
+): Promise<{ from: string; to: string; type?: "booking" | "blocked" }[]> {
   const response = await apiGet<{
-    data: { bookedDates: { from: string; to: string }[] };
-  }>(`/listings/${id}/booked-dates`, {
-    revalidate: 0, // No cache, always fresh
-    tags: [`listing-${id}-bookings`, "bookings"],
-  });
+    data: {
+      bookedDates: { from: string; to: string; type?: "booking" | "blocked" }[];
+    };
+  }>(`/listings/${id}/booked-dates`);
 
   return response.data.bookedDates;
 }
@@ -59,10 +51,6 @@ export async function getListingBookedDates(
 export async function getAllListings(): Promise<Listing[]> {
   const response = await apiGet<{ data: { listings: Listing[] } }>(
     "/listings?dashboard=true",
-    {
-      revalidate: 0,
-      tags: ["listings", "admin-listings"],
-    }
   );
   return response.data.listings;
 }
@@ -71,10 +59,40 @@ export async function getAllListings(): Promise<Listing[]> {
 export async function getHostListings(): Promise<Listing[]> {
   const response = await apiGet<{ data: { listings: Listing[] } }>(
     "/listings?dashboard=true",
-    {
-      revalidate: 0,
-      tags: ["listings", "host-listings"],
-    }
   );
   return response.data.listings;
+}
+
+// Create a new listing
+export async function createListing(data: ListingInput): Promise<Listing> {
+  const response = await apiPost<{ data: { listing: Listing } }>(
+    "/listings",
+    data,
+  );
+  return response.data.listing;
+}
+
+// Update an existing listing
+export async function updateListing(
+  id: string,
+  data: Partial<ListingInput>,
+): Promise<Listing> {
+  const response = await apiPut<{ data: { listing: Listing } }>(
+    `/listings/${id}`,
+    data,
+  );
+  return response.data.listing;
+}
+
+// Update listing status (Admin)
+export async function updateListingStatus(
+  id: string,
+  status: "approved" | "rejected",
+) {
+  return await apiPatch(`/listings/${id}`, { status });
+}
+
+// Delete a listing
+export async function deleteListing(id: string) {
+  return await apiDelete(`/listings/${id}`);
 }

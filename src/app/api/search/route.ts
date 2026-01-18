@@ -43,16 +43,18 @@ export async function GET(req: NextRequest) {
     if (checkIn && checkOut) {
       const checkInDate = new Date(checkIn);
       const checkOutDate = new Date(checkOut);
+      // console.log("Search Dates:", { checkInDate, checkOutDate });
 
       const bookedListings = await Booking.find({
         status: "confirmed",
         $or: [
           {
-            checkIn: { $lte: checkOutDate },
-            checkOut: { $gte: checkInDate },
+            checkIn: { $lt: checkOutDate },
+            checkOut: { $gt: checkInDate },
           },
         ],
       }).distinct("listing");
+      // console.log("Blocked Listings:", bookedListings);
 
       listings = listings.filter(
         (listing) =>

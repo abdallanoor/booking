@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
-import Booking from "@/models/Booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { checkAvailability } from "@/lib/availability";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,26 +17,23 @@ export async function POST(req: NextRequest) {
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
 
-    // Check for overlapping confirmed bookings only
-    // pending_payment bookings don't block dates until payment is successful
-    const overlappingBooking = await Booking.findOne({
-      listing: listingId,
-      status: "confirmed",
-      $or: [
-        {
-          checkIn: { $lte: checkOutDate },
-          checkOut: { $gte: checkInDate },
-        },
-      ],
-    });
+    // Use centralized availability check
+    const { isAvailable, error } = await checkAvailability(
+      listingId,
+      checkInDate,
+      checkOutDate,
+    );
 
-    const isAvailable = !overlappingBooking;
+    if (!isAvailable) {
+      return successResponse({
+        available: false,
+        message: error || "Dates are not available",
+      });
+    }
 
     return successResponse({
-      available: isAvailable,
-      message: isAvailable
-        ? "Dates are available"
-        : "Listing is already booked for these dates",
+      available: true,
+      message: "Dates are available",
     });
   } catch (error) {
     console.error("Check availability error:", error);

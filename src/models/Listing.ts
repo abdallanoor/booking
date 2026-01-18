@@ -63,6 +63,10 @@ const listingSchema = new Schema<IListingDocument>(
       type: [String],
       default: [],
     },
+    policies: {
+      type: [String],
+      default: [],
+    },
     pricePerNight: {
       type: Number,
       required: [true, "Price per night is required"],

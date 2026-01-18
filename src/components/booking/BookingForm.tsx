@@ -34,7 +34,7 @@ import { authService } from "@/services/auth.service";
 
 interface BookingFormProps {
   listing: Listing;
-  bookedDates?: { from: string; to: string }[];
+  bookedDates?: { from: string; to: string; type?: "booking" | "blocked" }[];
 }
 
 export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
@@ -59,28 +59,29 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     return new Date(
       parseInt(parts[0]),
       parseInt(parts[1]) - 1,
-      parseInt(parts[2])
+      parseInt(parts[2]),
     );
   };
 
-  // Check if a night is already booked (used for visual line)
+  // Check if a night is already booked/blocked (used for visual line and disabling)
+  // End date is checkout/end day (exclusive) - guest can check-in on that day
   const isNightBooked = (day: Date): boolean => {
     return bookedDates.some((booking) => {
       const bookingStart = parseDate(booking.from);
       const bookingEnd = parseDate(booking.to);
       if (!bookingStart || !bookingEnd) return false;
+      // End date is exclusive (checkout day available for new check-in)
       return day >= bookingStart && day < bookingEnd;
     });
   };
 
-  // Helper function to check if a range contains any booked dates (Validation)
-  // This must checks for any overlap of nights.
+  // Helper function to check if a range contains any booked/blocked dates (Validation)
+  // End date is checkout/end (exclusive) - same day turnover allowed
   const rangeOverlapsBooking = (start: Date, end: Date): boolean => {
     return bookedDates.some((booking) => {
       const bookingStart = parseDate(booking.from);
       const bookingEnd = parseDate(booking.to);
       if (!bookingStart || !bookingEnd) return false;
-
       // Overlap condition: (StartA < EndB) and (EndA > StartB)
       return start < bookingEnd && bookingStart < end;
     });
@@ -106,7 +107,7 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     if (selectedRange.from && selectedRange.to) {
       if (rangeOverlapsBooking(selectedRange.from, selectedRange.to)) {
         toast.error(
-          "Selected date range includes already booked dates. Please choose different dates."
+          "Selected date range includes already booked dates. Please choose different dates.",
         );
         setDate(undefined);
         return;
@@ -231,7 +232,7 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
                       <div
                         className={cn(
                           "text-sm",
-                          !date?.from && "text-muted-foreground"
+                          !date?.from && "text-muted-foreground",
                         )}
                       >
                         {date?.from
@@ -246,7 +247,7 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
                       <div
                         className={cn(
                           "text-sm",
-                          !date?.to && "text-muted-foreground"
+                          !date?.to && "text-muted-foreground",
                         )}
                       >
                         {date?.to ? format(date.to, "MM/dd/yyyy") : "Add date"}
@@ -254,7 +255,10 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
                     </div>
                   </div>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="center">
+                <PopoverContent
+                  className="w-auto p-0 rounded-2xl"
+                  align="center"
+                >
                   <Calendar
                     mode="range"
                     defaultMonth={date?.from}
@@ -370,7 +374,6 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
             </div>
           </div>
         )}
-
       </CardContent>
 
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
@@ -378,7 +381,8 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
           <DialogHeader>
             <DialogTitle>Complete Your Profile</DialogTitle>
             <DialogDescription>
-              Please complete the following details to proceed with your booking.
+              Please complete the following details to proceed with your
+              booking.
             </DialogDescription>
           </DialogHeader>
           {user && (
@@ -392,7 +396,9 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
                   const freshUser = await authService.me();
                   if (checkProfileComplete(freshUser)) {
                     setShowProfileDialog(false);
-                    toast.success("Profile complete! Proceeding to reservation...");
+                    toast.success(
+                      "Profile complete! Proceeding to reservation...",
+                    );
                     executeBooking();
                   } else {
                     toast.error("Please complete all required fields.");

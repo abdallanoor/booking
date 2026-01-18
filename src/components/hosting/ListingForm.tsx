@@ -3,11 +3,8 @@
 import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import NextImage from "next/image";
-import {
-  createListingAction,
-  updateListingAction,
-  uploadListingImagesAction,
-} from "@/actions";
+import { createListing, updateListing } from "@/services/listings.service";
+import { uploadListingImagesAction } from "@/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,7 +74,20 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
   const [uploadedImages, setUploadedImages] = useState<string[]>(
     listing?.images || []
   );
+  const [policies, setPolicies] = useState<string[]>(listing?.policies || []);
+  const [currentPolicy, setCurrentPolicy] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+
+  const handleAddPolicy = () => {
+    if (currentPolicy.trim()) {
+      setPolicies([...policies, currentPolicy.trim()]);
+      setCurrentPolicy("");
+    }
+  };
+
+  const handleRemovePolicy = (index: number) => {
+    setPolicies(policies.filter((_, i) => i !== index));
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -149,6 +159,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
             .split(",")
             .map((a) => a.trim())
             .filter(Boolean),
+          policies: policies,
           pricePerNight: parseFloat(formData.pricePerNight),
           maxGuests: parseInt(formData.maxGuests),
           bedrooms: parseInt(formData.bedrooms),
@@ -159,15 +170,15 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
         };
 
         if (mode === "edit" && listing?._id) {
-          await updateListingAction(listing._id, listingData);
+          await updateListing(listing._id, listingData);
           toast.success("Listing updated successfully");
         } else {
-          await createListingAction(listingData);
+          await createListing(listingData);
           toast.success("Listing created successfully");
         }
 
-        router.push("/hosting/listings");
-        router.refresh();
+        router.refresh(); // Refresh server components to show new data
+        router.push("/hosting/listings"); // Client-side navigation
       } catch (error) {
         const message =
           error instanceof Error ? error.message : `Failed to ${mode} listing`;
@@ -202,6 +213,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
                   setFormData({ ...formData, title: e.target.value })
                 }
                 required
+                minLength={3}
               />
             </div>
 
@@ -214,6 +226,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
                   setFormData({ ...formData, description: e.target.value })
                 }
                 required
+                minLength={10}
                 rows={4}
               />
             </div>
@@ -376,6 +389,58 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
                 setFormData({ ...formData, amenities: e.target.value })
               }
             />
+          </div>
+
+          {/* Policies */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Policies</h3>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g., No smoking, Check-in after 2PM"
+                value={currentPolicy}
+                onChange={(e) => setCurrentPolicy(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddPolicy();
+                  }
+                }}
+              />
+              <Button type="button" onClick={handleAddPolicy}>
+                Add
+              </Button>
+            </div>
+            {policies.length > 0 && (
+              <div className="space-y-2 mt-2">
+                {policies.map((policy, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between bg-muted p-2 rounded-md"
+                  >
+                    <span className="text-sm">{policy}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePolicy(index)}
+                      className="text-muted-foreground hover:text-destructive transition-colors"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4"
+                      >
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Images */}

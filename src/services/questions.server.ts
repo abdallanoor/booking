@@ -12,10 +12,7 @@ export async function getListingQuestions(
   const response = await apiGet<{
     questions: Question[];
     hasAskedQuestion: boolean;
-  }>(`/listings/${listingId}/questions`, {
-    revalidate: 0, // No cache for now to see immediate updates
-    tags: [`questions-${listingId}`],
-  });
+  }>(`/listings/${listingId}/questions`);
 
   return response;
 }
@@ -27,11 +24,7 @@ export async function getHostListingQuestions(
   listingId: string
 ): Promise<Question[]> {
   const response = await apiGet<Question[]>(
-    `/host/listings/${listingId}/questions`,
-    {
-      revalidate: 0,
-      tags: [`host-questions-${listingId}`],
-    }
+    `/host/listings/${listingId}/questions`
   );
   return response;
 }

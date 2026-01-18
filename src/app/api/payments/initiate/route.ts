@@ -4,12 +4,14 @@ import Booking from "@/models/Booking";
 import Payment from "@/models/Payment";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { requireAuth } from "@/lib/auth/auth-middleware";
+import { checkAvailability } from "@/lib/availability";
 import {
   createPaymentIntention,
   getCheckoutUrl,
   toPiasters,
   paymobConfig,
 } from "@/lib/paymob";
+import { Listing } from "@/types";
 
 /**
  * POST /api/payments/initiate
@@ -43,22 +45,26 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if listing is still available (double-booking check)
-    const alreadyBooked = await Booking.findOne({
-      listing: booking.listing,
-      _id: { $ne: booking._id },
-      status: "confirmed",
-      $or: [
-        {
-          checkIn: { $lt: booking.checkOut },
-          checkOut: { $gt: booking.checkIn },
-        },
-      ],
-    });
+    // FINAL GUARD: Validate one last time before taking money
+    const listingIdStr =
+      booking.listing &&
+      typeof booking.listing === "object" &&
+      "_id" in booking.listing
+        ? (booking.listing as unknown as Listing)._id.toString()
+        : String(booking.listing);
 
-    if (alreadyBooked) {
+    const { isAvailable, error } = await checkAvailability(
+      listingIdStr,
+      booking.checkIn,
+      booking.checkOut,
+      booking._id.toString(), // Exclude current booking from check
+    );
+
+    if (!isAvailable) {
       return errorResponse(
-        "Listing is no longer available for these dates. Someone else just booked it!",
-        400
+        error ||
+          "Listing is no longer available for these dates. Someone else just booked it!",
+        400,
       );
     }
 
@@ -67,7 +73,7 @@ export async function POST(req: NextRequest) {
     if (booking.status !== "pending_payment") {
       return errorResponse(
         `Cannot initiate payment for booking with status: ${booking.status}`,
-        400
+        400,
       );
     }
 
@@ -141,7 +147,7 @@ export async function POST(req: NextRequest) {
         intentionId: intentionResponse.intention_id,
       },
       "Payment initiated successfully",
-      201
+      201,
     );
   } catch (error) {
     console.error("[Payment Initiate] Error:", error);

@@ -5,11 +5,20 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Trash2, Loader2, Edit, MapPin, HousePlus, Eye, MessageCircleQuestion } from "lucide-react";
+import {
+  Trash2,
+  Loader2,
+  Edit,
+  MapPin,
+  HousePlus,
+  Eye,
+  MessageCircleQuestion,
+  CalendarOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { deleteListingAction } from "@/actions";
+import { deleteListing } from "@/services/listings.service";
 import type { Listing } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 
@@ -44,12 +53,13 @@ export default function HostingListingsPage() {
 
     setProcessingId(id);
     try {
-      await deleteListingAction(id);
+      await deleteListing(id);
       setListings((prev) => prev.filter((p) => p._id !== id));
       toast.success("Listing deleted");
       router.refresh();
-    } catch {
-      toast.error("Delete failed");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Delete failed";
+      toast.error(message);
     } finally {
       setProcessingId(null);
     }
@@ -92,12 +102,12 @@ export default function HostingListingsPage() {
             <Card key={listing._id}>
               <CardContent>
                 <div className="flex flex-col sm:flex-row gap-6">
-                  <div className="relative w-full sm:w-48 h-32 shrink-0">
+                  <div className="relative w-full sm:w-48 h-40 sm:h-32 shrink-0">
                     <Image
                       src={listing.images[0] || "/placeholder.jpg"}
                       alt={listing.title}
                       fill
-                      className="object-cover rounded-lg"
+                      className="object-cover rounded-2xl"
                     />
                   </div>
 
@@ -125,7 +135,7 @@ export default function HostingListingsPage() {
                       </Badge>
                     </div>
 
-                    <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-start gap-4 justify-between flex-wrap mt-4">
                       <div className="space-y-1">
                         <p className="text-lg font-bold">
                           {formatCurrency(listing.pricePerNight)}/night
@@ -136,7 +146,7 @@ export default function HostingListingsPage() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap justify-end gap-2">
                         {/* View Listing */}
                         <Link href={`/listings/${listing._id}`} target="_blank">
                           <Button
@@ -149,13 +159,28 @@ export default function HostingListingsPage() {
                         </Link>
 
                         {/* Questions */}
-                        <Link href={`/hosting/listings/${listing._id}/questions`}>
+                        <Link
+                          href={`/hosting/listings/${listing._id}/questions`}
+                        >
                           <Button
                             size="sm"
                             variant="outline"
                             className="rounded-full"
                           >
                             <MessageCircleQuestion /> Q&A
+                          </Button>
+                        </Link>
+
+                        {/* Availability */}
+                        <Link
+                          href={`/hosting/listings/${listing._id}/availability`}
+                        >
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-full"
+                          >
+                            <CalendarOff /> Availability
                           </Button>
                         </Link>
 
@@ -174,14 +199,14 @@ export default function HostingListingsPage() {
                         <Button
                           size="icon"
                           variant="outline"
-                          className="text-red-500 hover:text-red-600 rounded-full"
+                          className="rounded-full"
                           onClick={() => handleDelete(listing._id)}
                           disabled={processingId === listing._id}
                         >
                           {processingId === listing._id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="animate-spin" />
                           ) : (
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 />
                           )}
                         </Button>
                       </div>

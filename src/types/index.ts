@@ -123,6 +123,7 @@ export interface ListingBase {
   location: Location;
   images: string[];
   amenities: string[];
+  policies: string[];
   pricePerNight: number;
   maxGuests: number;
   bedrooms: number;
@@ -212,8 +213,10 @@ export interface ReviewBase {
 /**
  * Review as returned by the API
  */
-export interface Review
-  extends Omit<ReviewBase, "listing" | "guest" | "booking"> {
+export interface Review extends Omit<
+  ReviewBase,
+  "listing" | "guest" | "booking"
+> {
   _id: string;
   listing: {
     _id: string;
@@ -562,8 +565,7 @@ export interface IUserDocument extends Document, Omit<UserBase, "hasPassword"> {
  * Mongoose Listing Document
  */
 export interface IListingDocument
-  extends Document,
-    Omit<ListingBase, "status"> {
+  extends Document, Omit<ListingBase, "status"> {
   status: ListingStatus;
   host: Types.ObjectId;
   createdAt: Date;
@@ -574,8 +576,7 @@ export interface IListingDocument
  * Mongoose Booking Document
  */
 export interface IBookingDocument
-  extends Document,
-    Omit<BookingBase, "checkIn" | "checkOut" | "paymentId"> {
+  extends Document, Omit<BookingBase, "checkIn" | "checkOut" | "paymentId"> {
   listing: Types.ObjectId;
   guest: Types.ObjectId;
   checkIn: Date;
@@ -591,8 +592,7 @@ export interface IBookingDocument
  * Mongoose Review Document
  */
 export interface IReviewDocument
-  extends Document,
-    Omit<ReviewBase, "listing" | "guest" | "booking"> {
+  extends Document, Omit<ReviewBase, "listing" | "guest" | "booking"> {
   listing: Types.ObjectId;
   guest: Types.ObjectId;
   booking: Types.ObjectId;
@@ -606,8 +606,7 @@ export interface IReviewDocument
  * Mongoose Payment Document
  */
 export interface IPaymentDocument
-  extends Document,
-    Omit<PaymentBase, "paidAt"> {
+  extends Document, Omit<PaymentBase, "paidAt"> {
   booking: Types.ObjectId;
   guest: Types.ObjectId;
   paidAt?: Date;
@@ -632,6 +631,59 @@ export interface IQuestionDocument extends Document, QuestionBase {
   listingId: Types.ObjectId;
   guestId?: Types.ObjectId;
   hostId: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ============================================================================
+// BLOCKED DATE TYPES
+// ============================================================================
+
+/**
+ * Base BlockedDate structure
+ */
+export interface BlockedDateBase {
+  startDate: string | Date;
+  endDate: string | Date;
+  reason?: string;
+}
+
+/**
+ * BlockedDate as returned by the API
+ */
+export interface BlockedDate extends Omit<
+  BlockedDateBase,
+  "startDate" | "endDate"
+> {
+  _id: string;
+  listing: string;
+  startDate: string;
+  endDate: string;
+  reason?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Input for creating a blocked date range
+ */
+export interface CreateBlockedDateInput {
+  startDate: string;
+  endDate: string;
+  reason?: string;
+}
+
+/**
+ * Mongoose BlockedDate Document
+ */
+export interface IBlockedDateDocument
+  extends Document, Omit<BlockedDateBase, "startDate" | "endDate"> {
+  listing: Types.ObjectId;
+  startDate: Date;
+  endDate: Date;
+  reason?: string;
+  createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }

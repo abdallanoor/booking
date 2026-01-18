@@ -11,11 +11,7 @@ export const reviewsServerService = {
    */
   getReviews: async (listingId: string): Promise<Review[]> => {
     const response = await apiGet<{ data: { reviews: Review[] } }>(
-      `/reviews?listingId=${listingId}`,
-      {
-        revalidate: 0,
-        tags: [`reviews-${listingId}`],
-      }
+      `/reviews?listingId=${listingId}`
     );
 
     return response.data.reviews;
