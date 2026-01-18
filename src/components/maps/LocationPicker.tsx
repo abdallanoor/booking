@@ -40,7 +40,7 @@ const defaultCenter = {
 export function LocationPicker({ value, onChange }: LocationPickerProps) {
   const { isLoaded, loadError } = useGoogleMaps();
   const [inputMode, setInputMode] = useState<InputMode>(
-    value ? "search" : null
+    value ? "search" : null,
   );
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(!!value);
@@ -59,14 +59,6 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
     placeId: value?.placeId || "",
     formattedAddress: value?.formattedAddress || "",
   });
-
-  // Update form fields when value prop changes
-  useEffect(() => {
-    if (value) {
-      setFormFields(value);
-      setShowConfirmation(true);
-    }
-  }, [value]);
 
   // Update parent when form fields change
   useEffect(() => {
@@ -128,7 +120,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
 
       return result;
     },
-    []
+    [],
   );
 
   // Handle autocomplete place selection
@@ -204,7 +196,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
         setIsDetectingLocation(false);
         setInputMode(null);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 10000 },
     );
   }, [parseAddressComponents]);
 
@@ -409,7 +401,9 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
               <Input
                 id="location-postal"
                 value={formFields.postalCode || ""}
-                onChange={(e) => handleFieldChange("postalCode", e.target.value)}
+                onChange={(e) =>
+                  handleFieldChange("postalCode", e.target.value)
+                }
                 placeholder="12345"
               />
             </div>
