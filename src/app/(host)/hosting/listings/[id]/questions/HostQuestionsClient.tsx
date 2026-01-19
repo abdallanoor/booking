@@ -26,7 +26,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Eye, EyeOff, MessageSquare, Trash2 } from "lucide-react";
+import {
+  ChevronLeft,
+  Edit,
+  Eye,
+  EyeOff,
+  MessageSquare,
+  Trash2,
+} from "lucide-react";
 import {
   getHostListingQuestions,
   updateQuestion,
@@ -34,6 +41,7 @@ import {
   deleteQuestion,
 } from "@/services/questions.service";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface HostQuestionsClientProps {
   initialQuestions: Question[];
@@ -50,7 +58,9 @@ export default function HostQuestionsClient({
   const [answeringId, setAnsweringId] = useState<string | null>(null);
   const [answerText, setAnswerText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [updatingQuestionId, setUpdatingQuestionId] = useState<string | null>(null);
+  const [updatingQuestionId, setUpdatingQuestionId] = useState<string | null>(
+    null,
+  );
   const router = useRouter();
 
   // FAQ State
@@ -72,15 +82,18 @@ export default function HostQuestionsClient({
     }
   }, [listingId]);
 
-  const handleToggleVisibility = async (id: string, currentVisibility: boolean) => {
+  const handleToggleVisibility = async (
+    id: string,
+    currentVisibility: boolean,
+  ) => {
     try {
       setUpdatingQuestionId(id);
       await updateQuestion(id, { isVisible: !currentVisibility });
 
       setQuestions((prev) =>
         prev.map((q) =>
-          q._id === id ? { ...q, isVisible: !currentVisibility } : q
-        )
+          q._id === id ? { ...q, isVisible: !currentVisibility } : q,
+        ),
       );
       toast.success("Visibility updated");
       router.refresh(); // Sync server cache
@@ -155,23 +168,27 @@ export default function HostQuestionsClient({
   };
 
   return (
-    <div>
-      <div className="flex justify-between items-start mb-6">
-        <div>
+    <>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <Link href="/hosting/listings" className="order-1">
+          <Button variant="secondary" size="icon" className="rounded-full">
+            <ChevronLeft />
+          </Button>
+        </Link>
+        <div className="order-3 md:order-2 w-full md:w-auto md:flex-1">
           <h1 className="text-2xl font-bold">Q&A Management</h1>
           <p className="text-muted-foreground">
-            Manage guest questions and create FAQs for <span className="font-semibold">{listingTitle}</span>
+            Manage questions and create FAQs for{" "}
+            <span className="font-semibold">{listingTitle}</span>
           </p>
         </div>
         <Dialog open={isFAQDialogOpen} onOpenChange={setIsFAQDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
-              Add FAQ
-            </Button>
+            <Button className="order-2 md:order-3">Add FAQ</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Frequently Asked Question</DialogTitle>
+              <DialogTitle>Add FAQ</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -195,7 +212,10 @@ export default function HostQuestionsClient({
               <Button onClick={handleCreateFAQ} disabled={isSubmitting}>
                 {isSubmitting ? "Saving..." : "Save FAQ"}
               </Button>
-              <Button variant="outline" onClick={() => setIsFAQDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsFAQDialogOpen(false)}
+              >
                 Cancel
               </Button>
             </DialogFooter>
@@ -218,7 +238,10 @@ export default function HostQuestionsClient({
           <TableBody>
             {questions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                <TableCell
+                  colSpan={6}
+                  className="text-center py-8 text-muted-foreground"
+                >
                   No questions yet.
                 </TableCell>
               </TableRow>
@@ -226,7 +249,9 @@ export default function HostQuestionsClient({
               questions.map((q) => (
                 <TableRow key={q._id}>
                   <TableCell className="align-top max-w-[300px]">
-                    <p className="font-medium mb-1 truncate" title={q.question}>{q.question}</p>
+                    <p className="font-medium mb-1 truncate" title={q.question}>
+                      {q.question}
+                    </p>
                     {answeringId === q._id ? (
                       <div className="mt-2 space-y-2">
                         <Textarea
@@ -257,7 +282,10 @@ export default function HostQuestionsClient({
                       </div>
                     ) : (
                       q.answer && (
-                        <div className="text-sm text-muted-foreground mt-1 line-clamp-2 wrap-break-word truncate" title={q.answer}>
+                        <div
+                          className="text-sm text-muted-foreground mt-1 line-clamp-2 wrap-break-word truncate"
+                          title={q.answer}
+                        >
                           {q.answer}
                         </div>
                       )
@@ -344,6 +372,6 @@ export default function HostQuestionsClient({
           </TableBody>
         </Table>
       </div>
-    </div>
+    </>
   );
 }

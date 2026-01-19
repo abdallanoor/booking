@@ -53,17 +53,17 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
   const [locationData, setLocationData] = useState<LocationData | null>(
     listing?.location
       ? {
-        streetAddress: listing.location.streetAddress,
-        apt: listing.location.apt,
-        city: listing.location.city,
-        governorate: listing.location.governorate,
-        country: listing.location.country,
-        postalCode: listing.location.postalCode,
-        coordinates: listing.location.coordinates,
-        placeId: listing.location.placeId,
-        formattedAddress: listing.location.formattedAddress,
-      }
-      : null
+          streetAddress: listing.location.streetAddress,
+          apt: listing.location.apt,
+          city: listing.location.city,
+          governorate: listing.location.governorate,
+          country: listing.location.country,
+          postalCode: listing.location.postalCode,
+          coordinates: listing.location.coordinates,
+          placeId: listing.location.placeId,
+          formattedAddress: listing.location.formattedAddress,
+        }
+      : null,
   );
 
   const handleLocationChange = useCallback((location: LocationData) => {
@@ -72,7 +72,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>(
-    listing?.images || []
+    listing?.images || [],
   );
   const [policies, setPolicies] = useState<string[]>(listing?.policies || []);
   const [currentPolicy, setCurrentPolicy] = useState("");
@@ -127,7 +127,12 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
       return;
     }
 
-    if (!locationData || !locationData.streetAddress || !locationData.city || !locationData.country) {
+    if (
+      !locationData ||
+      !locationData.streetAddress ||
+      !locationData.city ||
+      !locationData.country
+    ) {
       toast.error("Please select a location for your listing");
       return;
     }
@@ -193,11 +198,6 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>
-          {mode === "edit" ? "Edit Listing" : "List a New Listing"}
-        </CardTitle>
-      </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
@@ -273,7 +273,8 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
           <div className="space-y-4">
             <h3 className="font-semibold">Location</h3>
             <p className="text-sm text-muted-foreground">
-              Search for your property address, use your current location, or enter it manually
+              Search for your property address, use your current location, or
+              enter it manually
             </p>
             <GoogleMapsProvider>
               <LocationPicker

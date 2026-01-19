@@ -18,6 +18,11 @@ export interface Coordinates {
   lng: number;
 }
 
+export interface GeoJSONPoint {
+  type: "Point";
+  coordinates: [number, number]; // [longitude, latitude] - MongoDB order
+}
+
 export interface Location {
   streetAddress: string;
   apt?: string;
@@ -26,6 +31,7 @@ export interface Location {
   country: string;
   postalCode?: string;
   coordinates: Coordinates;
+  geometry?: GeoJSONPoint; // GeoJSON format for geospatial queries
   placeId?: string;
   formattedAddress?: string;
 }
@@ -152,6 +158,10 @@ export interface ListingFilters {
   maxPrice?: number;
   guests?: number;
   hostId?: string;
+  bounds?: {
+    sw: Coordinates; // Southwest corner
+    ne: Coordinates; // Northeast corner
+  };
 }
 
 // ============================================================================

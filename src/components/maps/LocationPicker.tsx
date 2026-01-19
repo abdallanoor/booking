@@ -32,11 +32,6 @@ const mapContainerStyle = {
   height: "200px",
 };
 
-const defaultCenter = {
-  lat: 30.0444, // Cairo, Egypt
-  lng: 31.2357,
-};
-
 export function LocationPicker({ value, onChange }: LocationPickerProps) {
   const { isLoaded, loadError } = useGoogleMaps();
   const [inputMode, setInputMode] = useState<InputMode>(
