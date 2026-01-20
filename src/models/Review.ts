@@ -35,7 +35,7 @@ const reviewSchema = new Schema<IReviewDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Compound index for listing reviews
@@ -43,13 +43,6 @@ reviewSchema.index({ listing: 1, createdAt: -1 });
 
 // Unique compound index: one review per user per listing
 reviewSchema.index({ listing: 1, guest: 1 }, { unique: true });
-
-// Prevent Mongoose overwrite warning in development
-if (process.env.NODE_ENV === "development") {
-  if (mongoose.models.Review) {
-    delete mongoose.models.Review;
-  }
-}
 
 const Review: Model<IReviewDocument> =
   mongoose.models.Review ||

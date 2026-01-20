@@ -11,7 +11,7 @@ import { uploadToCloudinary } from "@/lib/cloudinary";
 export async function createBookingAction(data: unknown) {
   const result = await apiPost<{ data: { booking: Booking } }>(
     "/bookings",
-    data
+    data,
   );
 
   // Return the booking object for payment initiation
@@ -59,15 +59,6 @@ export async function updateUserAction(data: {
   phoneNumber?: string;
   country?: string;
   nationalId?: string;
-  bankDetails?: {
-    bankName: string;
-    accountNumber: string;
-    routingNumber: string;
-  };
-  creditCard?: {
-    lastFour: string;
-    provider?: string;
-  };
 }) {
   // SECURITY: Explicitly select only allowed fields to prevent Mass Assignment attacks.
   // This ensures that even if 'role' or other sensitive fields are injected into 'data',
@@ -78,13 +69,11 @@ export async function updateUserAction(data: {
     phoneNumber: data.phoneNumber,
     country: data.country,
     nationalId: data.nationalId,
-    bankDetails: data.bankDetails,
-    creditCard: data.creditCard,
   };
 
   const result = await apiPut<ApiResponse<{ user: User; message?: string }>>(
     "/auth/me",
-    safePayload
+    safePayload,
   );
   return result;
 }
@@ -126,7 +115,7 @@ export async function uploadListingImagesAction(formData: FormData) {
 
 export async function changePasswordAction(
   currentPassword?: string,
-  newPassword?: string
+  newPassword?: string,
 ) {
   try {
     const result = await apiPatch<ApiResponse<{ message: string }>>(
@@ -134,7 +123,7 @@ export async function changePasswordAction(
       {
         currentPassword,
         newPassword,
-      }
+      },
     );
     return result;
   } catch (error) {

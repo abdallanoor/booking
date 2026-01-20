@@ -59,7 +59,7 @@ function buildHmacString(transaction: PaymobTransactionData): string {
   for (const field of HMAC_FIELDS) {
     const value = getNestedValue(
       transaction as unknown as Record<string, unknown>,
-      field
+      field,
     );
     // Convert to string, handling booleans and undefined
     if (value === undefined || value === null) {
@@ -82,7 +82,7 @@ function buildHmacString(transaction: PaymobTransactionData): string {
  */
 export function verifyHmacSignature(
   transaction: PaymobTransactionData,
-  receivedHmac: string
+  receivedHmac: string,
 ): boolean {
   if (!paymobConfig.hmacSecret) {
     console.error("[Paymob] HMAC secret not configured");
@@ -100,7 +100,7 @@ export function verifyHmacSignature(
   try {
     return crypto.timingSafeEqual(
       Buffer.from(calculatedHmac, "hex"),
-      Buffer.from(receivedHmac, "hex")
+      Buffer.from(receivedHmac, "hex"),
     );
   } catch {
     // If buffers are different lengths, comparison will fail
@@ -112,7 +112,7 @@ export function verifyHmacSignature(
  * Parses the webhook payload into a structured result
  */
 export function parseWebhookPayload(
-  payload: PaymobWebhookPayload
+  payload: PaymobWebhookPayload,
 ): ParsedPaymentResult {
   const { obj: transaction } = payload;
 
@@ -135,7 +135,7 @@ export function parseWebhookPayload(
  * Validates that a webhook payload has the expected structure
  */
 export function isValidWebhookPayload(
-  payload: unknown
+  payload: unknown,
 ): payload is PaymobWebhookPayload {
   if (!payload || typeof payload !== "object") return false;
 

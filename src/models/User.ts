@@ -75,16 +75,6 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       required: false,
     },
-    creditCard: {
-      lastFour: String,
-      token: String,
-      provider: String,
-    },
-    bankDetails: {
-      bankName: String,
-      accountNumber: String,
-      routingNumber: String,
-    },
     profileCompleted: {
       type: Boolean,
       default: false,
@@ -92,7 +82,7 @@ const userSchema = new Schema<IUserDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Hash password and validate before saving
@@ -126,7 +116,7 @@ userSchema.pre("save", async function () {
 
 // Method to compare password
 userSchema.methods.comparePassword = async function (
-  candidatePassword: string
+  candidatePassword: string,
 ): Promise<boolean> {
   if (!this.password) return false;
   return bcrypt.compare(candidatePassword, this.password);
@@ -134,7 +124,7 @@ userSchema.methods.comparePassword = async function (
 
 // Method to check profile completion based on action
 userSchema.methods.checkProfileCompletion = function (
-  action: "book" | "withdraw"
+  action: "book" | "withdraw",
 ): boolean {
   const hasBasicInfo = !!(
     this.name &&
@@ -152,18 +142,9 @@ userSchema.methods.checkProfileCompletion = function (
   }
 
   if (action === "withdraw") {
-    // Withdrawal requires Basic Info + National ID + Bank Details
-    // (Note: User prompt says "When a host tries to withdraw money, they must complete their profile.")
-    // And schema diff lists bankDetails as "Required for hosts"
+    // Withdrawal requires Basic Info + National ID
     const hasHostInfo = !!this.nationalId;
-    const hasBankDetails = !!(
-      this.bankDetails &&
-      this.bankDetails.bankName &&
-      this.bankDetails.accountNumber &&
-      this.bankDetails.routingNumber
-    );
-
-    return hasBasicInfo && hasHostInfo && hasBankDetails;
+    return hasBasicInfo && hasHostInfo;
   }
 
   return false;
@@ -173,14 +154,6 @@ userSchema.methods.checkProfileCompletion = function (
 // userSchema.index({ email: 1 }); // Removed to avoid duplicate index warning as unique:true already creates one
 userSchema.index({ verificationToken: 1 });
 userSchema.index({ resetPasswordToken: 1 });
-
-// Prevent Mongoose overwrite warning in development by checking if model exists
-// In development, we want to overwrite the model to ensure schema changes are reflected
-if (process.env.NODE_ENV === "development") {
-  if (mongoose.models.User) {
-    delete mongoose.models.User;
-  }
-}
 
 const User: Model<IUserDocument> =
   mongoose.models.User || mongoose.model<IUserDocument>("User", userSchema);
