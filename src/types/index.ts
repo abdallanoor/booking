@@ -40,18 +40,6 @@ export interface Location {
 // USER TYPES
 // ============================================================================
 
-export interface CreditCard {
-  lastFour?: string;
-  token?: string;
-  provider?: string;
-}
-
-export interface BankDetails {
-  bankName?: string;
-  accountNumber?: string;
-  routingNumber?: string;
-}
-
 /**
  * Base User structure shared across DB and API
  */
@@ -66,8 +54,6 @@ export interface UserBase {
   phoneNumber?: string;
   country?: string;
   nationalId?: string;
-  creditCard?: CreditCard;
-  bankDetails?: BankDetails;
   profileCompleted: boolean;
   isBlocked: boolean;
   hasPassword?: boolean;

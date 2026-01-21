@@ -16,12 +16,12 @@ import type {
  * This returns a client_secret that can be used for the checkout page
  */
 export async function createPaymentIntention(
-  params: InitiatePaymentParams
+  params: InitiatePaymentParams,
 ): Promise<PaymobIntentionResponse> {
   const { valid, missing } = validatePaymobConfig();
   if (!valid) {
     throw new Error(
-      `Paymob configuration incomplete. Missing: ${missing.join(", ")}`
+      `Paymob configuration incomplete. Missing: ${missing.join(", ")}`,
     );
   }
 
@@ -70,7 +70,7 @@ export async function createPaymentIntention(
         Authorization: `Token ${paymobConfig.secretKey}`,
       },
       body: JSON.stringify(requestBody),
-    }
+    },
   );
 
   if (!response.ok) {
@@ -148,7 +148,7 @@ export async function authenticate(): Promise<string> {
  */
 export async function refundTransaction(
   transactionId: string,
-  amountCents: number
+  amountCents: number,
 ): Promise<void> {
   const authToken = await authenticate();
 
@@ -162,7 +162,7 @@ export async function refundTransaction(
         transaction_id: transactionId,
         amount_cents: amountCents,
       }),
-    }
+    },
   );
 
   if (!response.ok) {

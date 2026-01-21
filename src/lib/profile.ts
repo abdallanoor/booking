@@ -10,9 +10,7 @@ export function calculateProfileScore(user: UserBase): number {
   const isHostOrAdmin = user.role === "Host" || user.role === "Admin";
 
   if (isHostOrAdmin) {
-    if (user.nationalId) score += 10;
-    if (user.bankDetails?.bankName && user.bankDetails?.accountNumber)
-      score += 10;
+    if (user.nationalId) score += 20;
   } else {
     if (user.nationalId) score += 20;
   }

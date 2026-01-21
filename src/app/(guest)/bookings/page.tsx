@@ -1,6 +1,9 @@
 import { getBookings } from "@/services/bookings.service";
 import { BookingsList } from "@/components/booking/BookingsList";
 
+// Force dynamic rendering - this page requires user authentication
+export const dynamic = "force-dynamic";
+
 export default async function BookingsPage() {
   const bookings = await getBookings();
 

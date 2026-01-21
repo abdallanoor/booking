@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
       console.error("[Paymob Webhook] Invalid payload structure");
       return NextResponse.json(
         { error: "Invalid payload structure" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       console.error("[Paymob Webhook] Missing HMAC signature");
       return NextResponse.json(
         { error: "Missing HMAC signature" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       console.error("[Paymob Webhook] Invalid HMAC signature");
       return NextResponse.json(
         { error: "Invalid HMAC signature" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     if (!payment) {
       console.error(
         "[Paymob Webhook] Payment not found for order:",
-        paymentResult.orderId
+        paymentResult.orderId,
       );
       // Return 200 to prevent Paymob from retrying
       return NextResponse.json({
@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
         } catch (emailError) {
           console.error(
             "[Paymob Webhook] Failed to send confirmation email:",
-            emailError
+            emailError,
           );
           // Don't fail the webhook for email errors
         }

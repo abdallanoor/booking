@@ -26,10 +26,7 @@ export async function GET(req: NextRequest) {
         phoneNumber: user.phoneNumber,
         country: user.country,
         nationalId: user.nationalId,
-        bankDetails: user.bankDetails,
-        creditCard: user.creditCard,
         profileCompleted: user.profileCompleted,
-
         hasPassword: user.hasPassword,
       },
     });
@@ -50,15 +47,7 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      name,
-      avatar,
-      phoneNumber,
-      country,
-      nationalId,
-      bankDetails,
-      creditCard,
-    } = body;
+    const { name, avatar, phoneNumber, country, nationalId } = body;
 
     if (!name) {
       return errorResponse("Name is required", 400);
@@ -80,8 +69,6 @@ export async function PUT(req: NextRequest) {
     if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
     if (country !== undefined) user.country = country;
     if (nationalId !== undefined) user.nationalId = nationalId;
-    if (bankDetails !== undefined) user.bankDetails = bankDetails;
-    if (creditCard !== undefined) user.creditCard = creditCard;
 
     await user.save();
 
@@ -98,10 +85,7 @@ export async function PUT(req: NextRequest) {
         phoneNumber: user.phoneNumber,
         country: user.country,
         nationalId: user.nationalId,
-        bankDetails: user.bankDetails,
-        creditCard: user.creditCard,
         profileCompleted: user.profileCompleted,
-
         hasPassword: user.hasPassword,
       },
       message: "Profile updated successfully",
