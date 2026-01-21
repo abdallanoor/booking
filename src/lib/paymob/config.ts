@@ -59,8 +59,8 @@ export function checkPaymobConfig(): void {
   if (!valid) {
     console.warn(
       `[Paymob] Missing configuration: ${missing.join(
-        ", "
-      )}. Payment features will not work.`
+        ", ",
+      )}. Payment features will not work.`,
     );
   }
 }
