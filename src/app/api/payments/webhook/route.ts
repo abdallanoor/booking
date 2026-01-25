@@ -6,8 +6,14 @@ import {
   verifyHmacSignature,
   parseWebhookPayload,
   isValidWebhookPayload,
+  isValidTokenWebhookPayload,
+  parseTokenWebhookPayload,
 } from "@/lib/paymob";
-import type { PaymobWebhookPayload, PaymobTransactionData } from "@/lib/paymob";
+import type {
+  PaymobWebhookPayload,
+  PaymobTransactionData,
+} from "@/lib/paymob";
+import User from "@/models/User";
 import { sendBookingConfirmationEmail } from "@/lib/email/nodemailer";
 
 /**
@@ -22,9 +28,58 @@ export async function POST(req: NextRequest) {
     // Get the raw body for HMAC verification
     const payload = await req.json();
 
-    // console.log("[Paymob Webhook] Received:", JSON.stringify(payload, null, 2));
+    console.log("[Paymob Webhook] Received:", JSON.stringify(payload, null, 2));
 
-    // Validate payload structure
+    // Check for Token Webhook first
+    if (isValidTokenWebhookPayload(payload)) {
+      const tokenResult = parseTokenWebhookPayload(payload);
+      console.log("[Paymob Webhook] Received Token:", tokenResult.token);
+      console.log("[Paymob Webhook] Token Email:", tokenResult.email);
+
+      await dbConnect();
+
+      // Find user by email (case-insensitive conversion)
+      const userEmail = tokenResult.email.toLowerCase();
+      const user = await User.findOne({ email: userEmail });
+
+      if (user) {
+        // Init savedCards if not exists
+        if (!user.savedCards) {
+          user.savedCards = [];
+        }
+
+        // Check if card already exists (by token or duplicate fingerprint?)
+        // Dedup by token
+        const exists = user.savedCards.some(
+          (c) => c.token === tokenResult.token,
+        );
+
+        if (!exists) {
+          user.savedCards.push({
+            token: tokenResult.token,
+            last4: tokenResult.last4,
+            brand: tokenResult.brand,
+            createdAt: new Date().toISOString(), // Use string to match interface or rely on Mongoose cast
+          });
+          await user.save();
+          console.log("[Paymob Webhook] Saved card for user:", user.email);
+        } else {
+          console.log("[Paymob Webhook] Card already exists for user:", user.email);
+        }
+      } else {
+        console.warn(
+          "[Paymob Webhook] User not found for token email:",
+          tokenResult.email,
+        );
+      }
+
+      return NextResponse.json({
+        status: "processed",
+        message: "Token saved",
+      });
+    }
+
+    // Validate transaction payload structure
     if (!isValidWebhookPayload(payload)) {
       console.error("[Paymob Webhook] Invalid payload structure");
       return NextResponse.json(
@@ -131,15 +186,15 @@ export async function POST(req: NextRequest) {
         try {
           const guestEmail =
             booking.guest &&
-            typeof booking.guest === "object" &&
-            "email" in booking.guest
+              typeof booking.guest === "object" &&
+              "email" in booking.guest
               ? (booking.guest as { email: string }).email
               : null;
 
           const listingTitle =
             booking.listing &&
-            typeof booking.listing === "object" &&
-            "title" in booking.listing
+              typeof booking.listing === "object" &&
+              "title" in booking.listing
               ? (booking.listing as { title: string }).title
               : "Your booking";
 

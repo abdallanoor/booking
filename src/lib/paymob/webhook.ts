@@ -8,6 +8,7 @@ import { paymobConfig } from "./config";
 import type {
   PaymobWebhookPayload,
   PaymobTransactionData,
+  PaymobTokenWebhookData, // Added
   ParsedPaymentResult,
 } from "./types";
 
@@ -114,7 +115,7 @@ export function verifyHmacSignature(
 export function parseWebhookPayload(
   payload: PaymobWebhookPayload,
 ): ParsedPaymentResult {
-  const { obj: transaction } = payload;
+  const transaction = payload.obj as PaymobTransactionData;
 
   return {
     success: transaction.success && !transaction.error_occured,
@@ -147,4 +148,45 @@ export function isValidWebhookPayload(
     typeof p.obj === "object" &&
     typeof (p.obj as Record<string, unknown>).id === "number"
   );
+}
+
+/**
+ * Validates that a webhook payload is a token callback
+ */
+export function isValidTokenWebhookPayload(
+  payload: unknown,
+): payload is PaymobWebhookPayload & { obj: PaymobTokenWebhookData } {
+  if (!payload || typeof payload !== "object") return false;
+
+  const p = payload as Record<string, unknown>;
+
+  return (
+    p.type === "TOKEN" &&
+    p.obj !== null &&
+    typeof p.obj === "object" &&
+    typeof (p.obj as Record<string, unknown>).token === "string"
+  );
+}
+
+export interface ParsedTokenResult {
+  token: string;
+  last4: string;
+  brand: string;
+  email: string;
+}
+
+/**
+ * Parses the token webhook payload
+ */
+export function parseTokenWebhookPayload(
+  payload: PaymobWebhookPayload & { obj: PaymobTokenWebhookData },
+): ParsedTokenResult {
+  const { obj: tokenData } = payload;
+
+  return {
+    token: tokenData.token,
+    last4: tokenData.masked_pan.slice(-4),
+    brand: tokenData.card_subtype,
+    email: tokenData.email,
+  };
 }

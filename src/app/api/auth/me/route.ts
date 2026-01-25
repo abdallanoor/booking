@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
         nationalId: user.nationalId,
         profileCompleted: user.profileCompleted,
         hasPassword: user.hasPassword,
+        savedCards: user.savedCards || [],
       },
     });
   } catch (error) {
@@ -87,6 +88,7 @@ export async function PUT(req: NextRequest) {
         nationalId: user.nationalId,
         profileCompleted: user.profileCompleted,
         hasPassword: user.hasPassword,
+        savedCards: user.savedCards || [],
       },
       message: "Profile updated successfully",
     });

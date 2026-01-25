@@ -56,9 +56,11 @@ export async function createPaymentIntention(
     redirection_url: `${paymobConfig.returnUrl}?bookingId=${params.bookingId}&listingId=${params.listingId}`,
     extras: {
       booking_id: params.bookingId,
-      show_cancel_button: "true",
-      allow_cancel: "true",
     },
+    ...(params.cardTokens &&
+      params.cardTokens.length > 0 && {
+        card_tokens: params.cardTokens,
+      }),
   };
 
   const response = await fetch(
