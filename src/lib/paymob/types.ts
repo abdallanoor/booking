@@ -9,6 +9,7 @@ export type {
   CreateIntentionRequest,
   PaymobIntentionResponse,
   PaymobTransactionData,
+  PaymobTokenWebhookData,
   PaymobWebhookPayload,
   ParsedPaymentResult,
   InitiatePaymentParams,

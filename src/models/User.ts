@@ -79,9 +79,23 @@ const userSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: false,
     },
+    savedCards: {
+      type: [
+        {
+          token: { type: String, required: true },
+          last4: { type: String, required: true },
+          brand: { type: String, required: true },
+          mask: { type: String },
+          createdAt: { type: Date, default: Date.now },
+          _id: false,
+        },
+      ],
+      default: [],
+    },
   },
   {
     timestamps: true,
+    strict: false,
   },
 );
 

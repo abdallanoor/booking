@@ -9,6 +9,7 @@ import { uploadAvatarAction, updateUserAction } from "@/actions";
 import { toast } from "sonner";
 import { PersonalDetails } from "@/components/profile/PersonalDetails";
 import { PasswordSettings } from "@/components/profile/PasswordSettings";
+import { SavedCards } from "@/components/profile/SavedCards";
 import { User } from "@/types";
 import { calculateProfileScore } from "@/lib/profile";
 
@@ -152,6 +153,8 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
           {/* Right Panel: Scrollable Forms */}
           <div>
             <PersonalDetails user={user} refreshUser={handleUserRefresh} />
+
+            <SavedCards user={user} refreshUser={handleUserRefresh} />
 
             <PasswordSettings
               hasPassword={!!user.hasPassword}

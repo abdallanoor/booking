@@ -377,7 +377,7 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
       </CardContent>
 
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent variant="drawer" className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Complete Your Profile</DialogTitle>
             <DialogDescription>

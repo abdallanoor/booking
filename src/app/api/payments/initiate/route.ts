@@ -12,6 +12,7 @@ import {
   paymobConfig,
 } from "@/lib/paymob";
 import { Listing } from "@/types";
+import User from "@/models/User";
 
 /**
  * POST /api/payments/initiate
@@ -30,6 +31,17 @@ export async function POST(req: NextRequest) {
 
     if (!bookingId) {
       return errorResponse("Booking ID is required", 400);
+    }
+
+    const dbUser = await User.findById(user._id);
+
+    const cardTokens: string[] = [];
+    if(dbUser?.savedCards && dbUser.savedCards.length > 0){
+      dbUser.savedCards.forEach((card) => {
+        if(card.token){
+          cardTokens.push(card.token);
+        }
+      });
     }
 
     // Find the booking and verify ownership
@@ -121,6 +133,7 @@ export async function POST(req: NextRequest) {
       customerName: user.name,
       customerPhone: user.phoneNumber,
       listingTitle,
+      cardTokens,
     });
 
     // Create a payment record in our database

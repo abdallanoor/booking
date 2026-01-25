@@ -46,6 +46,13 @@ export interface UserBase {
   profileCompleted: boolean;
   isBlocked: boolean;
   hasPassword?: boolean;
+  savedCards?: {
+    token: string;
+    last4: string;
+    brand: string;
+    mask?: string;
+    createdAt?: string;
+  }[];
 }
 
 /**
@@ -358,6 +365,7 @@ export interface CreateIntentionRequest {
   notification_url?: string;
   redirection_url?: string;
   extras?: Record<string, string>;
+  card_tokens?: string[];
 }
 
 export interface PaymobIntentionResponse {
@@ -412,9 +420,19 @@ export interface PaymobTransactionData {
   };
 }
 
+export interface PaymobTokenWebhookData {
+  token: string;
+  masked_pan: string;
+  merchant_id: number;
+  card_subtype: string;
+  created_at: string;
+  email: string;
+  order_id?: number;
+}
+
 export interface PaymobWebhookPayload {
-  type: string;
-  obj: PaymobTransactionData;
+  type: "TRANSACTION" | "TOKEN" | string;
+  obj: PaymobTransactionData | PaymobTokenWebhookData;
   hmac: string;
 }
 
@@ -441,6 +459,7 @@ export interface InitiatePaymentParams {
   customerName: string;
   customerPhone?: string;
   listingTitle: string;
+  cardTokens?: string[];
 }
 
 export interface InitiatePaymentResult {
