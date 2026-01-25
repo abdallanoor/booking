@@ -43,7 +43,7 @@ export default async function AvailabilityPage({
       <div className="flex items-center gap-4">
         <Link href="/hosting/listings">
           <Button variant="secondary" size="icon" className="rounded-full">
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft />
           </Button>
         </Link>
         <div>

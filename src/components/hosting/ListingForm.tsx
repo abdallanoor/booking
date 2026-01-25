@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "nextjs-toploader/app";
 import NextImage from "next/image";
 import { createListing, updateListing } from "@/services/listings.service";
@@ -20,6 +20,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Listing } from "@/types";
+import { GoogleMapsProvider } from "@/components/maps/GoogleMapsProvider";
+import { LocationPicker, LocationData } from "@/components/maps/LocationPicker";
 
 interface ListingFormProps {
   listing?: Listing;
@@ -34,9 +36,6 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
     title: listing?.title || "",
     description: listing?.description || "",
     listingType: listing?.listingType || "",
-    address: listing?.location?.address || "",
-    city: listing?.location?.city || "",
-    country: listing?.location?.country || "",
     pricePerNight: listing?.pricePerNight?.toString() || "",
     maxGuests: listing?.maxGuests?.toString() || "",
     bedrooms: listing?.bedrooms?.toString() || "",
@@ -50,9 +49,30 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
     amenities: listing?.amenities?.join(", ") || "",
   });
 
+  // Location state - separate from form data for LocationPicker
+  const [locationData, setLocationData] = useState<LocationData | null>(
+    listing?.location
+      ? {
+          streetAddress: listing.location.streetAddress,
+          apt: listing.location.apt,
+          city: listing.location.city,
+          governorate: listing.location.governorate,
+          country: listing.location.country,
+          postalCode: listing.location.postalCode,
+          coordinates: listing.location.coordinates,
+          placeId: listing.location.placeId,
+          formattedAddress: listing.location.formattedAddress,
+        }
+      : null,
+  );
+
+  const handleLocationChange = useCallback((location: LocationData) => {
+    setLocationData(location);
+  }, []);
+
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadedImages, setUploadedImages] = useState<string[]>(
-    listing?.images || []
+    listing?.images || [],
   );
   const [policies, setPolicies] = useState<string[]>(listing?.policies || []);
   const [currentPolicy, setCurrentPolicy] = useState("");
@@ -107,6 +127,21 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
       return;
     }
 
+    if (
+      !locationData ||
+      !locationData.streetAddress ||
+      !locationData.city ||
+      !locationData.country
+    ) {
+      toast.error("Please select a location for your listing");
+      return;
+    }
+
+    if (!locationData.coordinates || locationData.coordinates.lat === 0) {
+      toast.error("Please select a valid location with coordinates");
+      return;
+    }
+
     startTransition(async () => {
       try {
         const listingData = {
@@ -114,9 +149,15 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
           description: formData.description,
           listingType: formData.listingType,
           location: {
-            address: formData.address,
-            city: formData.city,
-            country: formData.country,
+            streetAddress: locationData.streetAddress,
+            apt: locationData.apt,
+            city: locationData.city,
+            governorate: locationData.governorate,
+            country: locationData.country,
+            postalCode: locationData.postalCode,
+            coordinates: locationData.coordinates,
+            placeId: locationData.placeId,
+            formattedAddress: locationData.formattedAddress,
           },
           images: uploadedImages,
           amenities: formData.amenities
@@ -157,11 +198,6 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>
-          {mode === "edit" ? "Edit Listing" : "List a New Listing"}
-        </CardTitle>
-      </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
@@ -236,44 +272,16 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
           {/* Location */}
           <div className="space-y-4">
             <h3 className="font-semibold">Location</h3>
-
-            <div className="space-y-2">
-              <Label htmlFor="address">Address *</Label>
-              <Input
-                id="address"
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-                required
+            <p className="text-sm text-muted-foreground">
+              Search for your property address, use your current location, or
+              enter it manually
+            </p>
+            <GoogleMapsProvider>
+              <LocationPicker
+                value={locationData}
+                onChange={handleLocationChange}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">City *</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) =>
-                    setFormData({ ...formData, city: e.target.value })
-                  }
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
-                <Input
-                  id="country"
-                  value={formData.country}
-                  onChange={(e) =>
-                    setFormData({ ...formData, country: e.target.value })
-                  }
-                  required
-                />
-              </div>
-            </div>
+            </GoogleMapsProvider>
           </div>
 
           {/* Listing Details */}

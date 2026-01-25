@@ -8,7 +8,9 @@ interface HostQuestionsPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function HostQuestionsPage({ params }: HostQuestionsPageProps) {
+export default async function HostQuestionsPage({
+  params,
+}: HostQuestionsPageProps) {
   const { id } = await params;
   const questions = await getHostListingQuestions(id);
   const listing = await getListing(id);

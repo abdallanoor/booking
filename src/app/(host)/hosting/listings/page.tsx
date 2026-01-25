@@ -146,7 +146,7 @@ export default function HostingListingsPage() {
                         </p>
                       </div>
 
-                      <div className="flex flex-wrap justify-end gap-2">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         {/* View Listing */}
                         <Link href={`/listings/${listing._id}`} target="_blank">
                           <Button

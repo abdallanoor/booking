@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getListing } from "@/services/listings.service";
 import { getServerUser } from "@/lib/auth/server-auth";
 import { ListingForm } from "@/components/hosting/ListingForm";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
 
 export default async function EditListingPage({
   params,
@@ -29,7 +32,18 @@ export default async function EditListingPage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Link href="/hosting/listings">
+          <Button variant="secondary" size="icon" className="rounded-full">
+            <ChevronLeft />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Listing</h1>
+          <p className="text-muted-foreground">{listing.title}</p>
+        </div>
+      </div>
       <ListingForm listing={listing} mode="edit" />
     </div>
   );

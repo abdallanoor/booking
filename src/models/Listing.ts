@@ -17,21 +17,46 @@ const listingSchema = new Schema<IListingDocument>(
       required: [true, "Listing type is required"],
     },
     location: {
-      address: {
+      streetAddress: {
         type: String,
-        required: [true, "Address is required"],
+        required: [true, "Street address is required"],
+      },
+      apt: {
+        type: String,
       },
       city: {
         type: String,
         required: [true, "City is required"],
       },
+      governorate: {
+        type: String,
+      },
       country: {
         type: String,
         required: [true, "Country is required"],
       },
+      postalCode: {
+        type: String,
+      },
       coordinates: {
-        lat: Number,
-        lng: Number,
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true },
+      },
+      geometry: {
+        type: {
+          type: String,
+          enum: ["Point"],
+          default: "Point",
+        },
+        coordinates: {
+          type: [Number], // [longitude, latitude] - MongoDB order
+        },
+      },
+      placeId: {
+        type: String,
+      },
+      formattedAddress: {
+        type: String,
       },
     },
     images: {
@@ -104,7 +129,7 @@ const listingSchema = new Schema<IListingDocument>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // Indexes
@@ -112,6 +137,18 @@ listingSchema.index({ "location.city": 1 });
 listingSchema.index({ "location.country": 1 });
 listingSchema.index({ pricePerNight: 1 });
 listingSchema.index({ host: 1 });
+listingSchema.index({ "location.geometry": "2dsphere" });
+
+// Pre-save hook to sync geometry from coordinates
+listingSchema.pre("save", async function () {
+  const doc = this as IListingDocument;
+  if (doc.location?.coordinates?.lat && doc.location?.coordinates?.lng) {
+    doc.location.geometry = {
+      type: "Point",
+      coordinates: [doc.location.coordinates.lng, doc.location.coordinates.lat],
+    };
+  }
+});
 
 const Listing: Model<IListingDocument> =
   mongoose.models.Listing ||
