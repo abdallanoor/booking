@@ -40,6 +40,13 @@ export interface Location {
 // USER TYPES
 // ============================================================================
 
+export interface BankDetails {
+  bankCode: string;
+  accountNumber?: string; // For regular bank account
+  iban?: string; // For IBAN
+  fullName: string;
+}
+
 /**
  * Base User structure shared across DB and API
  */
@@ -64,6 +71,7 @@ export interface UserBase {
     mask?: string;
     createdAt?: string;
   }[];
+  bankDetails?: BankDetails;
 }
 
 /**

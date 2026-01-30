@@ -92,6 +92,12 @@ const userSchema = new Schema<IUserDocument>(
       ],
       default: [],
     },
+    bankDetails: {
+      bankCode: { type: String, required: false },
+      accountNumber: { type: String, required: false },
+      iban: { type: String, required: false },
+      fullName: { type: String, required: false },
+    },
   },
   {
     timestamps: true,

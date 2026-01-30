@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
         profileCompleted: user.profileCompleted,
         hasPassword: user.hasPassword,
         savedCards: user.savedCards || [],
+        bankDetails: user.bankDetails,
       },
     });
   } catch (error) {
@@ -89,6 +90,7 @@ export async function PUT(req: NextRequest) {
         profileCompleted: user.profileCompleted,
         hasPassword: user.hasPassword,
         savedCards: user.savedCards || [],
+        bankDetails: user.bankDetails,
       },
       message: "Profile updated successfully",
     });
