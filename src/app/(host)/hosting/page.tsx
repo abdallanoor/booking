@@ -1,11 +1,12 @@
 import { statsService } from "@/services/stats.service";
 import { formatCurrency } from "@/lib/utils";
+import { WalletAndPayoutsSection } from "@/components/payouts/WalletAndPayoutsSection";
 
 export default async function HostingPage() {
   const stats = await statsService.getHostingStats();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Welcome back!</h1>
         <p className="text-muted-foreground">
@@ -35,6 +36,8 @@ export default async function HostingPage() {
           description="Lifetime earnings"
         />
       </div>
+
+      <WalletAndPayoutsSection />
     </div>
   );
 }

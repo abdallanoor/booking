@@ -72,6 +72,7 @@ export interface UserBase {
     createdAt?: string;
   }[];
   bankDetails?: BankDetails;
+  walletBalanceCents?: number;
 }
 
 /**
@@ -350,6 +351,41 @@ export interface PaymentDetails extends Omit<Payment, "booking"> {
     totalPrice: number;
     status: string;
   };
+}
+
+// ============================================================================
+// PAYOUT TYPES
+// ============================================================================
+
+export type PayoutStatus = "pending" | "processing" | "success" | "failed";
+
+export interface PayoutEventRecord {
+  at: Date;
+  status: string;
+  paymobStatus?: string;
+  paymobMessage?: string;
+  source: "api" | "webhook";
+}
+
+export interface PayoutBase {
+  host: string;
+  amountCents: number;
+  currency: string;
+  status: PayoutStatus;
+  paymobTransactionId?: string;
+  paymobClientReference?: string;
+  paymobStatus?: string;
+  paymobStatusDescription?: string;
+  paymobStatusCode?: string;
+  paymobEventAt?: Date;
+  idempotencyKey: string;
+  events?: PayoutEventRecord[];
+}
+
+export interface Payout extends PayoutBase {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ============================================================================
@@ -633,6 +669,16 @@ export interface IPaymentDocument
   booking: Types.ObjectId;
   guest: Types.ObjectId;
   paidAt?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Mongoose Payout Document
+ */
+export interface IPayoutDocument extends Document, Omit<PayoutBase, "host"> {
+  host: Types.ObjectId;
+  events?: PayoutEventRecord[];
   createdAt: Date;
   updatedAt: Date;
 }

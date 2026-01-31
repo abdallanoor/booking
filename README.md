@@ -211,6 +211,7 @@ src/
 │       ├── hosting/              # Hosting stats
 │       ├── listings/             # Listing CRUD, blocked-dates, questions
 │       ├── payments/             # Payment processing & webhooks
+│       ├── payouts/               # Payout creation & webhook
 │       ├── reviews/              # Review management & notifications
 │       ├── search/               # Search functionality
 │       └── wishlist/             # Wishlist operations
@@ -235,7 +236,9 @@ src/
 ├── lib/                          # Utilities & configurations
 │   ├── auth/                     # JWT utilities, middleware
 │   ├── email/                    # Email templates (nodemailer.ts)
-│   ├── paymob/                   # Payment gateway integration
+│   ├── paymob/                   # Payment gateway (guest payments)
+│   ├── paymob-payouts/            # Paymob Payouts (host withdrawals)
+│   ├── payouts/                  # Payout eligibility helpers
 │   └── validations/              # Zod validation schemas
 │
 ├── models/                       # MongoDB/Mongoose models
@@ -243,6 +246,7 @@ src/
 │   ├── Listing.ts                # Property listing model
 │   ├── Booking.ts                # Booking model
 │   ├── Payment.ts                # Payment transaction model
+│   ├── Payout.ts                 # Payout (host withdrawal) model
 │   ├── Wishlist.ts               # Wishlist model
 │   ├── Review.ts                 # Review model
 │   ├── Question.ts               # Question & Answer model
@@ -253,6 +257,7 @@ src/
 │   ├── blocked-dates.service.ts
 │   ├── bookings.service.ts
 │   ├── listings.service.ts
+│   ├── payouts.service.ts
 │   ├── questions.service.ts
 │   ├── reviews.service.ts
 │   ├── search.service.ts
@@ -305,7 +310,9 @@ src/
 
 ## 💳 Payment System
 
-The application uses **Paymob** payment gateway:
+The application uses **Paymob** for guest payments and **Paymob Payouts** for host withdrawals.
+
+### Guest payments (Paymob Unified Intention API)
 
 | Feature                  | Description                         |
 | ------------------------ | ----------------------------------- |
@@ -316,6 +323,14 @@ The application uses **Paymob** payment gateway:
 | **Transaction Tracking** | Complete payment history            |
 | **Currency**             | EGP (Egyptian Pound) by default     |
 | **HMAC Verification**    | Secure webhook signature validation |
+
+### Host payouts (Paymob Payouts)
+
+- **Wallet**: Hosts have an internal wallet; balance is credited when a guest payment is confirmed.
+- **Payout flow**: Host requests a payout (POST `/api/payouts`) with amount and Idempotency-Key; the system validates balance and bank details, deducts from wallet, and creates a disbursement via Paymob Payouts API.
+- **Source of truth**: Payout status is driven **only by Paymob Payouts webhooks**. The system does not mark payouts as successful without Paymob confirmation.
+- **Webhook URL**: Configure in the Paymob Payouts dashboard: `{APP_URL}/api/payouts/webhook`. Optional: set `PAYMOB_PAYOUTS_WEBHOOK_SECRET` and send `X-Paymob-Payouts-Signature: HMAC-SHA256(rawBody, secret)` for verification.
+- **Reconciliation**: On webhook `success`, the deduction remains; on `failed`, the amount is restored to the host wallet and the failure message is stored for display.
 
 ---
 
@@ -420,6 +435,24 @@ graph LR
 | `POST` | `/api/payments/initiate` | Initiate payment       |
 | `GET`  | `/api/payments/[id]`     | Get payment details    |
 | `POST` | `/api/payments/webhook`  | Paymob webhook handler |
+
+### Payouts (Host)
+
+| Method | Endpoint                 | Description                              |
+| ------ | ------------------------ | ---------------------------------------- |
+| `GET`  | `/api/payouts`           | List payouts (Host/Admin, paginated)     |
+| `POST` | `/api/payouts`           | Create payout (Host/Admin, Idempotency-Key required) |
+| `GET`  | `/api/payouts/[id]`      | Get payout by ID                         |
+| `POST` | `/api/payouts/webhook`  | Paymob Payouts status callback           |
+
+### User / Wallet
+
+| Method | Endpoint                 | Description                     |
+| ------ | ------------------------ | ------------------------------- |
+| `GET`  | `/api/user/wallet`       | Get wallet balance (Host/Admin) |
+| `GET`  | `/api/user/bank-details` | Get bank details                |
+| `POST` | `/api/user/bank-details` | Save bank details               |
+| `DELETE` | `/api/user/bank-details` | Remove bank details           |
 
 ### Reviews
 

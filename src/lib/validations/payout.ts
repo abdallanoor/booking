@@ -22,3 +22,15 @@ export const bankDetailsSchema = z
   });
 
 export type BankDetailsInput = z.infer<typeof bankDetailsSchema>;
+
+/**
+ * Request body for creating a payout
+ */
+export const createPayoutSchema = z.object({
+  amountCents: z
+    .number()
+    .int()
+    .min(100, "Minimum payout is 1 EGP (100 piasters)"),
+});
+
+export type CreatePayoutInput = z.infer<typeof createPayoutSchema>;

@@ -98,6 +98,11 @@ const userSchema = new Schema<IUserDocument>(
       iban: { type: String, required: false },
       fullName: { type: String, required: false },
     },
+    walletBalanceCents: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

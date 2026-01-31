@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
+import Listing from "@/models/Listing";
 import Payment from "@/models/Payment";
+import User from "@/models/User";
 import {
   verifyHmacSignature,
   parseWebhookPayload,
@@ -13,7 +15,6 @@ import type {
   PaymobWebhookPayload,
   PaymobTransactionData,
 } from "@/lib/paymob";
-import User from "@/models/User";
 import { sendBookingConfirmationEmail } from "@/lib/email/nodemailer";
 
 /**
@@ -181,6 +182,18 @@ export async function POST(req: NextRequest) {
         booking.status = "confirmed";
         booking.paymentStatus = "paid";
         await booking.save();
+
+        // Credit host wallet (amount in piasters/cents, same as Payment.amount)
+        const listing = await Listing.findById(booking.listing)
+          .select("host")
+          .lean();
+        const hostId = listing?.host;
+        if (hostId && payment.amount > 0) {
+          await User.updateOne(
+            { _id: hostId },
+            { $inc: { walletBalanceCents: payment.amount } },
+          );
+        }
 
         // Send confirmation email
         try {
