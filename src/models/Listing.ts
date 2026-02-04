@@ -102,11 +102,7 @@ const listingSchema = new Schema<IListingDocument>(
       required: [true, "Number of bathrooms is required"],
       min: 0.5,
     },
-    rooms: {
-      type: Number,
-      required: [true, "Number of rooms is required"],
-      min: 1,
-    },
+
     privacyType: {
       type: String,
       required: [true, "Privacy type is required"],

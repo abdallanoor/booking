@@ -2,7 +2,7 @@
 
 import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
 import type { Booking, ApiResponse, User } from "@/types";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { uploadToCloudinary, deleteImageFromCloudinary } from "@/lib/cloudinary";
 
 // ============================================================================
 // BOOKING ACTIONS
@@ -110,6 +110,16 @@ export async function uploadListingImagesAction(formData: FormData) {
   } catch (error) {
     console.error("Listing images upload failed:", error);
     return { success: false, message: "Failed to upload images" };
+  }
+}
+
+export async function deleteListingImageAction(imageUrl: string) {
+  try {
+    await deleteImageFromCloudinary(imageUrl);
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to delete image:", error);
+    return { success: false, message: "Failed to delete image" };
   }
 }
 

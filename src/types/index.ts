@@ -136,7 +136,6 @@ export interface ListingBase {
   bedrooms: number;
   beds: number;
   bathrooms: number;
-  rooms: number;
   privacyType: PrivacyType;
   status: ListingStatus;
 }

@@ -18,7 +18,7 @@ export const listingSchema = z.object({
     placeId: z.string().optional(),
     formattedAddress: z.string().optional(),
   }),
-  images: z.array(z.string()).min(1, "At least one image is required"),
+  images: z.array(z.string()).min(1, "At least one image is required").max(10, "Maximum 10 images allowed"),
   amenities: z.array(z.string()).default([]),
   policies: z.array(z.string()).default([]),
   pricePerNight: z.number().min(1, "Price must be at least EGP 1"),
@@ -26,7 +26,6 @@ export const listingSchema = z.object({
   bedrooms: z.number().int().min(0, "Bedrooms cannot be negative"),
   beds: z.number().int().min(1, "At least 1 bed required"),
   bathrooms: z.number().min(0.5, "Bathrooms cannot be less than 0.5"),
-  rooms: z.number().int().min(1, "At least 1 room required"),
   privacyType: z.enum(["entire_place", "private_room", "shared_room"], {
     message: "Invalid privacy type",
   }),
