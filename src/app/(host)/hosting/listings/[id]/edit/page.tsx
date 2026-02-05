@@ -33,7 +33,7 @@ export default async function EditListingPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="fixed w-full top-0 z-10 bg-background h-16 flex items-center gap-4">
         <Link href="/hosting/listings">
           <Button variant="secondary" size="icon" className="rounded-full">
             <ChevronLeft />
@@ -41,7 +41,6 @@ export default async function EditListingPage({
         </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Edit Listing</h1>
-          <p className="text-muted-foreground">{listing.title}</p>
         </div>
       </div>
       <ListingForm listing={listing} mode="edit" />

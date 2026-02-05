@@ -4,6 +4,7 @@ import { SectionProvider } from "@/contexts/SectionContext";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { LayoutDashboard, Building2, Calendar, ListTodo } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const hostingLinks = [
   {
@@ -29,6 +30,18 @@ const hostingLinks = [
 ];
 
 export function HostingLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isWizardPage =
+    pathname?.includes("/listings/new") || pathname?.endsWith("/edit");
+
+  if (isWizardPage) {
+    return (
+      <SectionProvider section="hosting">
+        <main className="min-h-screen container">{children}</main>
+      </SectionProvider>
+    );
+  }
+
   return (
     <SectionProvider section="hosting">
       <div className="min-h-screen pb-20">

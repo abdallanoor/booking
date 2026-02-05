@@ -18,7 +18,7 @@ export default async function NewListingPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
+      <div className="fixed w-full top-0 z-10 bg-background h-16 flex items-center gap-4">
         <Link href="/hosting/listings">
           <Button variant="secondary" size="icon" className="rounded-full">
             <ChevronLeft />
@@ -26,7 +26,6 @@ export default async function NewListingPage() {
         </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Create Listing</h1>
-          <p className="text-muted-foreground">Add a new listing</p>
         </div>
       </div>
       <ListingForm mode="create" />
