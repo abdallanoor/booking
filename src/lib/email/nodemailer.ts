@@ -25,70 +25,29 @@ function getTransporter() {
   });
 }
 
-export async function sendVerificationEmail(email: string, token: string) {
-  const verificationUrl = `${APP_URL}/verify-email?token=${token}`;
+export async function sendOtpEmail(email: string, otp: string) {
+  const html = `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;margin:0;background:#f4f7f6;">
+<div style="max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+<div style="background:#000;color:#fff;padding:30px;text-align:center;"><h1 style="margin:0;font-size:22px;">Verification Code</h1></div>
+<div style="padding:30px;text-align:center;">
+<p style="color:#4a4a4a;margin:0 0 25px;">Use this code to verify your email:</p>
+<div style="background:#f9f9f9;border:2px dashed #e5e5e5;border-radius:10px;padding:25px;margin:0 0 25px;">
+<span style="font-size:36px;font-weight:800;letter-spacing:10px;font-family:monospace;color:#000;">${otp}</span>
+</div>
+<p style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 15px;font-size:13px;color:#856404;margin:0 0 20px;">Expires in <strong>10 minutes</strong></p>
+<p style="font-size:12px;color:#888;margin:0;">Didn't request this? Ignore this email.</p>
+</div>
+<div style="text-align:center;padding:15px;font-size:11px;color:#999;border-top:1px solid #eee;">&copy; ${new Date().getFullYear()} Booking Platform</div>
+</div></body></html>`;
 
-  const mailOptions = {
-    from: `"Booking Platform" <${EMAIL_USER}>`,
-    to: email,
-    subject: "Verify Your Email Address",
-    html: `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              line-height: 1.6;
-              color: #333;
-            }
-            .container {
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 20px;
-            }
-            .button {
-              display: inline-block;
-              padding: 12px 24px;
-              background-color: #000;
-              color: #fff!;
-              text-decoration: none;
-              border-radius: 4px;
-              margin: 20px 0;
-            }
-            .footer {
-              margin-top: 30px;
-              padding-top: 20px;
-              border-top: 1px solid #eee;
-              font-size: 12px;
-              color: #666;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <h1>Verify Your Email Address</h1>
-            <p>Thank you for signing up! Please verify your email address by clicking the button below:</p>
-            <a href="${verificationUrl}" class="button">Verify Email</a>
-            <p>Or copy and paste this link into your browser:</p>
-            <p style="word-break: break-all;">${verificationUrl}</p>
-            <div class="footer">
-              <p>If you didn't create an account, you can safely ignore this email.</p>
-              <p>This link will expire in 24 hours.</p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `,
-  };
+  const mailOptions = { from: `"Booking Platform" <${EMAIL_USER}>`, to: email, subject: "Your Verification Code", html };
 
   try {
     const transporter = getTransporter();
     await transporter.sendMail(mailOptions);
-    // console.log("Verification email sent to:", email);
   } catch (error) {
-    console.error("Error sending verification email:", error);
-    throw new Error("Failed to send verification email");
+    console.error("Error sending OTP email:", error);
+    throw new Error("Failed to send verification code");
   }
 }
 

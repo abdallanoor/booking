@@ -42,9 +42,6 @@ const userSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: false,
     },
-    verificationToken: {
-      type: String,
-    },
     resetPasswordToken: {
       type: String,
     },
@@ -98,6 +95,18 @@ const userSchema = new Schema<IUserDocument>(
       iban: { type: String, required: false },
       fullName: { type: String, required: false },
     },
+    // OTP fields for signup verification
+    otp: {
+      type: String,
+    },
+    otpExpires: {
+      type: Date,
+    },
+    pendingSignupData: {
+      name: { type: String },
+      password: { type: String }, // Pre-hashed password
+      role: { type: String, enum: ["Guest", "Host"] },
+    },
   },
   {
     timestamps: true,
@@ -107,9 +116,18 @@ const userSchema = new Schema<IUserDocument>(
 
 // Hash password and validate before saving
 userSchema.pre("save", async function () {
+  // Allow saving without password if it's a pending signup with OTP
+  if (this.pendingSignupData || this.otp) {
+    if (!this.isModified("password")) {
+      return;
+    }
+  }
+
   // Validation for local provider
   if (this.provider === "local") {
-    if (!this.password && this.isNew) {
+    // Skip checking password if it's a pending signup (checked above, but double safety)
+    if (!this.password && this.isNew && !this.pendingSignupData && !this.otp) {
+      // console.log("Password missing for new user", { otp: this.otp, pending: this.pendingSignupData });
       throw new Error("Password is required");
     }
     // Only check length if password is being modified
@@ -125,6 +143,12 @@ userSchema.pre("save", async function () {
   // Update profileCompleted flag logic
   const score = calculateProfileScore(this);
   this.profileCompleted = score >= 100;
+
+  // Check for skip hashing flag (used when transferring hashed password from pendingSignupData)
+  if ((this as any)._skipHashing) {
+    delete (this as any)._skipHashing;
+    return;
+  }
 
   if (!this.isModified("password") || !this.password) {
     return;
@@ -172,7 +196,6 @@ userSchema.methods.checkProfileCompletion = function (
 
 // Indexes
 // userSchema.index({ email: 1 }); // Removed to avoid duplicate index warning as unique:true already creates one
-userSchema.index({ verificationToken: 1 });
 userSchema.index({ resetPasswordToken: 1 });
 
 const User: Model<IUserDocument> =

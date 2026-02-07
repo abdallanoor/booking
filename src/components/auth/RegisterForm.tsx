@@ -15,11 +15,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { GoogleLoginBtn } from "./GoogleLoginBtn";
 import { useRouter } from "nextjs-toploader/app";
-import { useAuth } from "@/contexts/AuthContext";
+import { authService } from "@/services/auth.service";
 
 export function RegisterForm() {
   const router = useRouter();
-  const { register } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,12 +30,12 @@ export function RegisterForm() {
 
     startTransition(async () => {
       try {
-        await register(name, email, password, role);
-        toast.success("Account created! Please check your email to verify.");
-        router.push(`/auth/verification-pending?email=${encodeURIComponent(email)}`);
+        await authService.register({ name, email, password, role });
+        toast.success("Verification code sent! Please check your email.");
+        router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Registration failed"
+          error instanceof Error ? error.message : "Registration failed",
         );
       }
     });
@@ -62,6 +61,7 @@ export function RegisterForm() {
               onChange={(e) => setName(e.target.value)}
               required
               minLength={2}
+              disabled={isPending}
             />
           </div>
 
@@ -74,6 +74,7 @@ export function RegisterForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isPending}
             />
           </div>
 
@@ -87,6 +88,7 @@ export function RegisterForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              disabled={isPending}
             />
           </div>
 
@@ -98,8 +100,12 @@ export function RegisterForm() {
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="Guest">Book listings</TabsTrigger>
-                <TabsTrigger value="Host">List my listing</TabsTrigger>
+                <TabsTrigger value="Guest" disabled={isPending}>
+                  Book listings
+                </TabsTrigger>
+                <TabsTrigger value="Host" disabled={isPending}>
+                  List my listing
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -118,13 +124,13 @@ export function RegisterForm() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
+              <span className="bg-card px-2 text-muted-foreground">
                 Or continue with
               </span>
             </div>
           </div>
 
-          <GoogleLoginBtn />
+          <GoogleLoginBtn disabled={isPending} />
         </form>
       </CardContent>
     </Card>

@@ -574,9 +574,16 @@ export interface ApiError {
 export interface IUserDocument extends Document, Omit<UserBase, "hasPassword"> {
   password?: string;
   hasPassword?: boolean;
-  verificationToken?: string;
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
+  // OTP fields for signup verification
+  otp?: string;
+  otpExpires?: Date;
+  pendingSignupData?: {
+    name: string;
+    password: string; // Will be hashed
+    role: "Guest" | "Host";
+  };
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;

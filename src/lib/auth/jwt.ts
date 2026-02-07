@@ -34,6 +34,7 @@ export function verifyToken(token: string): JWTPayload | null {
   }
 }
 
-export function generateVerificationToken(): string {
-  return crypto.randomBytes(32).toString("hex");
+export function generateOtp(): string {
+  // Generate a 6-digit numeric OTP
+  return crypto.randomInt(100000, 999999).toString();
 }

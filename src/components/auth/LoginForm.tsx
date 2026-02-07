@@ -58,6 +58,7 @@ export function LoginForm() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               required
+              disabled={isPending}
             />
           </div>
 
@@ -80,6 +81,7 @@ export function LoginForm() {
               required
               minLength={6}
               autoComplete="current-password"
+              disabled={isPending}
             />
           </div>
 
@@ -103,7 +105,7 @@ export function LoginForm() {
             </div>
           </div>
 
-          <GoogleLoginBtn />
+          <GoogleLoginBtn disabled={isPending} />
         </form>
       </CardContent>
     </Card>

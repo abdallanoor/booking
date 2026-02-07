@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
+import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import { registerSchema } from "@/lib/validations/auth";
-import { generateToken, generateVerificationToken } from "@/lib/auth/jwt";
+import { generateToken, generateOtp } from "@/lib/auth/jwt";
 import { setAuthCookie } from "@/lib/auth/cookies";
-import { sendVerificationEmail } from "@/lib/email/nodemailer";
+import { sendOtpEmail } from "@/lib/email/nodemailer";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 export async function POST(req: NextRequest) {
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     const validatedData = registerSchema.parse(body);
 
-    // Check if user already exists
+    // Check if user already exists with verified email
     const existingUser = await User.findOne({ email: validatedData.email });
     if (existingUser) {
       if (existingUser.isBlocked) {
@@ -31,73 +32,117 @@ export async function POST(req: NextRequest) {
           403
         );
       }
-      if (existingUser.provider === "google" && !existingUser.password) {
-        // Link account: Add password to existing Google account
-        existingUser.password = validatedData.password;
-        existingUser.hasPassword = true;
-        await existingUser.save();
+      
+      // If user exists and email is verified, they can't register again
+      if (existingUser.emailVerified) {
+        if (existingUser.provider === "google" && !existingUser.password) {
+          // Link account: Add password to existing Google account
+          existingUser.password = validatedData.password;
+          existingUser.hasPassword = true;
+          await existingUser.save();
 
-        // Generate JWT token
-        const token = generateToken(
-          existingUser._id.toString(),
-          existingUser.email,
-          existingUser.role
-        );
+          // Generate JWT token
+          const token = generateToken(
+            existingUser._id.toString(),
+            existingUser.email,
+            existingUser.role
+          );
 
-        // Set HTTP-only cookie
-        await setAuthCookie(token);
+          // Set HTTP-only cookie
+          await setAuthCookie(token);
 
-        return successResponse(
-          {
-            user: {
-              id: existingUser._id,
-              name: existingUser.name,
-              email: existingUser.email,
-              role: existingUser.role,
-              emailVerified: existingUser.emailVerified,
+          return successResponse(
+            {
+              user: {
+                id: existingUser._id,
+                name: existingUser.name,
+                email: existingUser.email,
+                role: existingUser.role,
+                emailVerified: existingUser.emailVerified,
+              },
             },
-          },
-          "Account linked successfully. You can now login with password or Google.",
-          200
-        );
+            "Account linked successfully. You can now login with password or Google.",
+            200
+          );
+        }
+        return errorResponse("Email already registered", 400);
       }
-      return errorResponse("Email already registered", 400);
+      
+      // User exists but email not verified - update pending signup data and send new OTP
+      const otp = generateOtp();
+      const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      
+      // Hash password before storing
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(validatedData.password, salt);
+      
+      existingUser.otp = otp;
+      existingUser.otpExpires = otpExpires;
+      existingUser.pendingSignupData = {
+        name: validatedData.name,
+        password: hashedPassword,
+        role: validatedData.role || "Guest",
+      };
+      await existingUser.save();
+      
+      // Send OTP email
+      try {
+        await sendOtpEmail(existingUser.email, otp);
+      } catch (emailError) {
+        console.error("Failed to send OTP email:", emailError);
+        return errorResponse("Failed to send verification code. Please try again.", 500);
+      }
+      
+      return successResponse(
+        {
+          email: existingUser.email,
+        },
+        "Verification code sent! Please check your email.",
+        200
+      );
     }
 
-    // Generate verification token
-    const verificationToken = generateVerificationToken();
+    // Generate OTP for new user
+    const otp = generateOtp();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    
+    // Hash password before storing
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(validatedData.password, salt);
 
-    // Create user
-    // role is guaranteed to be Guest or Host by Zod schema, or undefined (defaults to Guest in model)
+    // Create user with pending signup data (not fully registered yet)
     const user = await User.create({
-      name: validatedData.name,
       email: validatedData.email,
-      password: validatedData.password,
-      role: validatedData.role || "Guest",
-      verificationToken,
       emailVerified: false,
       isBlocked: false,
-      hasPassword: true,
+      hasPassword: false,
+      provider: "local",
+      role: "Guest", // Temporary, will be set from pendingSignupData on verification
+      name: validatedData.name, // Temporary, will be set from pendingSignupData on verification
+      otp,
+      otpExpires,
+      pendingSignupData: {
+        name: validatedData.name,
+        password: hashedPassword,
+        role: validatedData.role || "Guest",
+      },
     });
 
-    // Send verification email
+    // Send OTP email
     try {
-      await sendVerificationEmail(user.email, verificationToken);
+      await sendOtpEmail(user.email, otp);
     } catch (emailError) {
-      console.error("Failed to send verification email:", emailError);
-      // Continue registration even if email fails
+      console.error("Failed to send OTP email:", emailError);
+      // Delete the user if email fails
+      await User.deleteOne({ _id: user._id });
+      return errorResponse("Failed to send verification code. Please try again.", 500);
     }
 
-    // Don't set auth cookie - user must verify email first
     return successResponse(
       {
-        user: {
-          id: user._id,
-          email: user.email,
-          emailVerified: false,
-        },
+        email: user.email,
       },
-      "Registration successful! Please check your email to verify your account before logging in.",
+      "Verification code sent! Please check your email.",
       201
     );
   } catch (error) {
