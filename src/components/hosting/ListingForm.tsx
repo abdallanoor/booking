@@ -1423,7 +1423,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
         {/* Form Content */}
         <div className="flex-1 overflow-hidden">
           <form className="h-full flex flex-col">
-            <div className="flex-1 overflow-y-auto pt-20 pb-40 md:pb-24">
+            <div className="flex-1 overflow-y-auto pb-40 md:pb-24">
               <div className="max-w-2xl mx-auto">
                 <div
                   key={currentStep}
