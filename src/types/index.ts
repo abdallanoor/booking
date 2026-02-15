@@ -132,6 +132,11 @@ export interface ListingBase {
   amenities: string[];
   policies: string[];
   pricePerNight: number;
+  weekendPrice?: number;
+  discounts: {
+    weekly: number;
+    monthly: number;
+  };
   maxGuests: number;
   bedrooms: number;
   beds: number;
@@ -665,54 +670,60 @@ export interface IQuestionDocument extends Document, QuestionBase {
 }
 
 // ============================================================================
-// BLOCKED DATE TYPES
+// BLOCKED DATE TYPES (Removed - Replaced by CalendarDate)
+// ============================================================================
+
+// ============================================================================
+// CALENDAR DATE TYPES (Per-Day Pricing & Availability)
 // ============================================================================
 
 /**
- * Base BlockedDate structure
+ * Base CalendarDate structure for per-day overrides
  */
-export interface BlockedDateBase {
-  startDate: string | Date;
-  endDate: string | Date;
-  reason?: string;
+export interface CalendarDateBase {
+  date: string | Date;
+  isBlocked: boolean;
+  customPrice?: number;
+  note?: string;
 }
 
 /**
- * BlockedDate as returned by the API
+ * CalendarDate as returned by the API
  */
-export interface BlockedDate extends Omit<
-  BlockedDateBase,
-  "startDate" | "endDate"
-> {
+export interface CalendarDate extends Omit<CalendarDateBase, "date"> {
   _id: string;
   listing: string;
-  startDate: string;
-  endDate: string;
-  reason?: string;
+  date: string;
+  isBlocked: boolean;
+  customPrice?: number;
+  note?: string;
   createdBy: string;
   createdAt: string;
   updatedAt: string;
 }
 
 /**
- * Input for creating a blocked date range
+ * Input for bulk updating calendar dates
  */
-export interface CreateBlockedDateInput {
-  startDate: string;
-  endDate: string;
-  reason?: string;
+export interface BulkUpdateCalendarDatesInput {
+  dates: string[]; // Array of date strings (YYYY-MM-DD)
+  isBlocked?: boolean;
+  customPrice?: number | null; // null to remove custom price
+  note?: string | null; // null to remove note
 }
 
 /**
- * Mongoose BlockedDate Document
+ * Mongoose CalendarDate Document
  */
-export interface IBlockedDateDocument
-  extends Document, Omit<BlockedDateBase, "startDate" | "endDate"> {
+export interface ICalendarDateDocument
+  extends Document, Omit<CalendarDateBase, "date"> {
   listing: Types.ObjectId;
-  startDate: Date;
-  endDate: Date;
-  reason?: string;
+  date: Date;
+  isBlocked: boolean;
+  customPrice?: number;
+  note?: string;
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
+

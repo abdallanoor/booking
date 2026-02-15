@@ -36,8 +36,6 @@ export async function GET(req: NextRequest) {
       filter.maxGuests = { $gte: parseInt(guests) };
     }
 
-    let listings = await Listing.find(filter).populate("host", "name avatar");
-
     // Filter out listings that are already booked for the selected dates
     // Only confirmed bookings block dates; pending_payment bookings don't reserve dates
     if (checkIn && checkOut) {
@@ -54,15 +52,32 @@ export async function GET(req: NextRequest) {
           },
         ],
       }).distinct("listing");
-      // console.log("Blocked Listings:", bookedListings);
 
-      listings = listings.filter(
-        (listing) =>
-          !bookedListings.some(
-            (bookedId) => bookedId.toString() === listing._id.toString()
-          )
+      const blockedCalendarListings = await import("@/models/CalendarDate").then(
+        (mod) =>
+          mod.default
+            .find({
+              isBlocked: true,
+              date: {
+                $gte: checkInDate,
+                $lt: checkOutDate,
+              },
+            })
+            .distinct("listing")
       );
+
+      const allBlockedListings = [
+        ...bookedListings,
+        ...blockedCalendarListings,
+      ];
+
+      if (allBlockedListings.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (filter as any)._id = { $nin: allBlockedListings };
+      }
     }
+
+    const listings = await Listing.find(filter).populate("host", "name avatar");
 
     return successResponse({ listings, count: listings.length });
   } catch (error) {

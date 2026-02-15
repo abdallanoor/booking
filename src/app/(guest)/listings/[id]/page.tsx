@@ -4,6 +4,7 @@ import {
   getListingBookedDates,
   Listing,
 } from "@/services/listings.service";
+import { getCalendarDates } from "@/services/calendar-dates.service";
 import { getWishlist } from "@/services/wishlist.service";
 import { getReviews } from "@/services/reviews.server";
 import { BookingForm } from "@/components/booking/BookingForm";
@@ -31,13 +32,41 @@ export default async function ListingDetailPage({
   const { id } = await params;
 
   let listing: Listing;
-  let bookedDates: { from: string; to: string }[] = [];
+  let bookedDates: {
+    from: string;
+    to: string;
+    type?: "booking" | "blocked";
+  }[] = [];
+  let customPrices: Record<string, number> = {};
   let isInWishlist = false;
   let reviews: Review[] | undefined = [];
 
   try {
     listing = await getListing(id);
     bookedDates = await getListingBookedDates(id);
+
+    // Fetch custom prices for the next year
+    try {
+      const today = new Date();
+      const nextYear = new Date(today);
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+
+      const calendarData = await getCalendarDates(
+        id,
+        today.toISOString(),
+        nextYear.toISOString(),
+      );
+
+      calendarData.forEach((cd) => {
+        if (cd.customPrice) {
+          // cd.date is string from API
+          const dateKey = cd.date.toString().split("T")[0];
+          customPrices[dateKey] = cd.customPrice;
+        }
+      });
+    } catch (error) {
+      console.error("Failed to fetch calendar dates:", error);
+    }
 
     // Fetch reviews for the listing
     try {
@@ -52,7 +81,7 @@ export default async function ListingDetailPage({
       const wishlist = await getWishlist();
       const validWishlist = wishlist.filter((item) => item.listing !== null);
       isInWishlist = validWishlist.some(
-        (item) => item.listing._id === listing._id
+        (item) => item.listing._id === listing._id,
       );
     } catch {
       // User not logged in - wishlist check skipped
@@ -114,8 +143,8 @@ export default async function ListingDetailPage({
               {listing.privacyType === "entire_place"
                 ? "Entire home"
                 : listing.privacyType === "private_room"
-                ? "Private room"
-                : "Shared room"}{" "}
+                  ? "Private room"
+                  : "Shared room"}{" "}
               in {listing.location.city}, {listing.location.country}
             </h2>
             <div className="flex gap-1 text-sm text-muted-foreground">
@@ -149,7 +178,7 @@ export default async function ListingDetailPage({
                     {
                       month: "long",
                       year: "numeric",
-                    }
+                    },
                   )}
                 </span>
               )}
@@ -223,7 +252,11 @@ export default async function ListingDetailPage({
         {/* Right Column: Sticky Booking Card */}
         <div className="relative">
           <div className="sticky top-8">
-            <BookingForm listing={listing} bookedDates={bookedDates} />
+            <BookingForm
+              listing={listing}
+              bookedDates={bookedDates}
+              customPrices={customPrices}
+            />
           </div>
         </div>
       </div>

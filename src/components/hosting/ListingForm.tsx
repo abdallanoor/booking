@@ -118,20 +118,22 @@ const WIZARD_STEPS = [
   { id: 1, title: "Basics", shortTitle: "Basics" },
   { id: 2, title: "Location", shortTitle: "Location" },
   { id: 3, title: "Details", shortTitle: "Details" },
-  { id: 4, title: "Amenities", shortTitle: "Amenities" },
-  { id: 5, title: "Policies", shortTitle: "Policies" },
-  { id: 6, title: "Photos", shortTitle: "Photos" },
-  { id: 7, title: "Preview", shortTitle: "Preview" },
+  { id: 4, title: "Pricing", shortTitle: "Pricing" },
+  { id: 5, title: "Amenities", shortTitle: "Amenities" },
+  { id: 6, title: "Policies", shortTitle: "Policies" },
+  { id: 7, title: "Photos", shortTitle: "Photos" },
+  { id: 8, title: "Preview", shortTitle: "Preview" },
 ] as const;
 
 /** Maps form fields to their corresponding wizard step for error navigation */
 const STEP_FIELDS_MAP: Record<number, (keyof ListingInput)[]> = {
   1: ["title", "description", "listingType", "privacyType"],
   2: ["location"],
-  3: ["maxGuests", "bedrooms", "beds", "bathrooms", "pricePerNight"],
-  4: ["amenities"],
-  5: ["policies"],
-  6: ["images"],
+  3: ["maxGuests", "bedrooms", "beds", "bathrooms"],
+  4: ["pricePerNight", "weekendPrice", "discounts"],
+  5: ["amenities"],
+  6: ["policies"],
+  7: ["images"],
 };
 
 // =============================================================================
@@ -415,10 +417,32 @@ function StepDetails() {
             </p>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
 
-        {/* Price Input */}
-        <div className="space-y-2 col-span-2 pt-6 border-t">
-          <Label htmlFor="pricePerNight">Price per Night (EGP)</Label>
+/** Step 4: Pricing strategy */
+function StepPricing() {
+  const {
+    register,
+    formState: { errors },
+    watch,
+  } = useFormContext<FrontendListingInput>();
+
+  return (
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold">Pricing</h2>
+        <p className="text-muted-foreground">
+          Set your price and offer discounts to attract more guests.
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        {/* Base Price */}
+        <div className="space-y-2">
+          <Label htmlFor="pricePerNight">Base Price per Night (EGP)</Label>
           <Input
             id="pricePerNight"
             type="number"
@@ -432,6 +456,83 @@ function StepDetails() {
               {errors.pricePerNight.message}
             </p>
           )}
+        </div>
+
+        {/* Weekend Price */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="weekendPrice">
+              Weekend Price (Friday & Saturday)
+            </Label>
+            <span className="text-xs text-muted-foreground">
+              Optional. Set 0 to use base price.
+            </span>
+          </div>
+          <Input
+            id="weekendPrice"
+            type="number"
+            min="0"
+            {...register("weekendPrice", { valueAsNumber: true })}
+            className="h-12"
+            placeholder="0"
+          />
+        </div>
+
+        <div className="border-t pt-6 space-y-4">
+          <h3 className="font-medium text-lg">Discounts</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Weekly Discount */}
+            <div className="space-y-2">
+              <Label htmlFor="weeklyDiscount">Weekly Discount (%)</Label>
+              <p className="text-xs text-muted-foreground">
+                For stays of 7 nights or more
+              </p>
+              <div className="relative">
+                <Input
+                  id="weeklyDiscount"
+                  type="number"
+                  min="0"
+                  max="99"
+                  {...register("discounts.weekly", { valueAsNumber: true })}
+                  className="h-12 pr-8"
+                />
+                <span className="absolute right-3 top-3.5 text-muted-foreground">
+                  %
+                </span>
+              </div>
+              {errors.discounts?.weekly && (
+                <p className="text-sm text-destructive">
+                  {errors.discounts.weekly.message}
+                </p>
+              )}
+            </div>
+
+            {/* Monthly Discount */}
+            <div className="space-y-2">
+              <Label htmlFor="monthlyDiscount">Monthly Discount (%)</Label>
+              <p className="text-xs text-muted-foreground">
+                For stays of 28 nights or more
+              </p>
+              <div className="relative">
+                <Input
+                  id="monthlyDiscount"
+                  type="number"
+                  min="0"
+                  max="99"
+                  {...register("discounts.monthly", { valueAsNumber: true })}
+                  className="h-12 pr-8"
+                />
+                <span className="absolute right-3 top-3.5 text-muted-foreground">
+                  %
+                </span>
+              </div>
+              {errors.discounts?.monthly && (
+                <p className="text-sm text-destructive">
+                  {errors.discounts.monthly.message}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1036,6 +1137,8 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
       beds: listing?.beds || 1,
       bathrooms: listing?.bathrooms || 1,
       pricePerNight: listing?.pricePerNight || undefined,
+      weekendPrice: listing?.weekendPrice || 0,
+      discounts: listing?.discounts || { weekly: 0, monthly: 0 },
       location: defaultLocation,
       amenities: listing?.amenities || [],
       policies: listing?.policies || [],
@@ -1375,6 +1478,8 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
       case 3:
         return <StepDetails />;
       case 4:
+        return <StepPricing />;
+      case 5:
         return (
           <StepAmenities
             currentAmenity={currentAmenity}
@@ -1384,7 +1489,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
             onToggleAmenity={toggleAmenity}
           />
         );
-      case 5:
+      case 6:
         return (
           <StepPolicies
             currentPolicy={currentPolicy}
@@ -1394,7 +1499,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
             onTogglePolicy={togglePolicy}
           />
         );
-      case 6:
+      case 7:
         return (
           <StepPhotos
             newFiles={newFiles}
@@ -1406,7 +1511,7 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
             isDragActive={isDragActive}
           />
         );
-      case 7:
+      case 8:
         return <StepPreview previewUrls={previewUrls} />;
       default:
         return null;

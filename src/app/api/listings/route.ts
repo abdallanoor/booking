@@ -44,26 +44,55 @@ export async function GET(req: NextRequest) {
     // Date Availability Filtering
     // Only confirmed bookings block dates; pending_payment bookings don't reserve dates
     if (checkIn && checkOut) {
+      const checkInDate = new Date(checkIn);
+      const checkOutDate = new Date(checkOut);
+
+      // 1. Check existing bookings
       const conflictingBookings = await import("@/models/Booking").then((mod) =>
         mod.default
           .find({
             status: "confirmed",
             $or: [
               {
-                checkIn: { $lt: new Date(checkOut) },
-                checkOut: { $gt: new Date(checkIn) },
+                checkIn: { $lt: checkOutDate },
+                checkOut: { $gt: checkInDate },
               },
             ],
           })
           .select("listing")
       );
 
+      // 2. Check blocked dates in Calendar
+      // We look for any blocked date that falls within the requested [checkIn, checkOut) range.
+      // Since CalendarDate stores specific nights (dates), if a blocked date exists such that
+      // checkIn <= blockedDate < checkOut, the listing is unavailable.
+      const blockedCalendarDates = await import("@/models/CalendarDate").then(
+        (mod) =>
+          mod.default
+            .find({
+              isBlocked: true,
+              date: {
+                $gte: checkInDate,
+                $lt: checkOutDate,
+              },
+            })
+            .select("listing")
+      );
+
       const bookedListingIds = conflictingBookings.map((b) =>
         b.listing.toString()
       );
+      const blockedListingIds = blockedCalendarDates.map((b) =>
+        b.listing.toString()
+      );
 
-      if (bookedListingIds.length > 0) {
-        filter._id = { $nin: bookedListingIds };
+      // Combine and deduplicate
+      const allUnavailableListingIds = Array.from(
+        new Set([...bookedListingIds, ...blockedListingIds])
+      );
+
+      if (allUnavailableListingIds.length > 0) {
+        filter._id = { $nin: allUnavailableListingIds };
       }
     }
 

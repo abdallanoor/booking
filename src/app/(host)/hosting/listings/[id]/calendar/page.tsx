@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getListing, getListingBookedDates } from "@/services/listings.service";
-import { getBlockedDates } from "@/services/blocked-dates.service";
 import { getServerUser } from "@/lib/auth/server-auth";
-import { AvailabilityCalendar } from "@/components/hosting/AvailabilityCalendar";
+import { ListingCalendar } from "@/components/hosting/ListingCalendar";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
-export default async function AvailabilityPage({
+export default async function CalendarPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -32,11 +31,8 @@ export default async function AvailabilityPage({
     redirect("/hosting/listings");
   }
 
-  // Fetch booked dates (bookings + blocked) for calendar view
+  // Fetch booked dates (bookings) for showing on calendar
   const bookedDates = await getListingBookedDates(id);
-
-  // Fetch specific blocked date objects for management list
-  const blockedDates = await getBlockedDates(id);
 
   return (
     <div className="space-y-6">
@@ -48,16 +44,16 @@ export default async function AvailabilityPage({
         </Link>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Manage Availability
+            Calendar ({listing.title})
           </h1>
-          <p className="text-muted-foreground">{listing.title}</p>
         </div>
       </div>
 
-      <AvailabilityCalendar
+      <ListingCalendar
         listingId={id}
+        basePrice={listing.pricePerNight}
+        weekendPrice={listing.weekendPrice}
         bookedDates={bookedDates}
-        initialBlockedDates={blockedDates}
       />
     </div>
   );

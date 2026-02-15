@@ -148,16 +148,16 @@ export default function ListingsClient({
                           </Button>
                         </Link>
 
-                        {/* Availability */}
+                        {/* Calendar */}
                         <Link
-                          href={`/hosting/listings/${listing._id}/availability`}
+                          href={`/hosting/listings/${listing._id}/calendar`}
                         >
                           <Button
                             size="sm"
                             variant="outline"
                             className="rounded-full"
                           >
-                            <CalendarOff /> Availability
+                            <CalendarOff /> Calendar
                           </Button>
                         </Link>
 

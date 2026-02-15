@@ -1,5 +1,5 @@
 import Booking from "@/models/Booking";
-import BlockedDate from "@/models/BlockedDate";
+import CalendarDate from "@/models/CalendarDate";
 
 export interface AvailabilityResult {
   isAvailable: boolean;
@@ -12,20 +12,22 @@ export async function checkAvailability(
   checkOut: Date,
   excludeBookingId?: string,
 ): Promise<AvailabilityResult> {
-  const [overlappingBooking, overlappingBlocked] = await Promise.all([
+  const [overlappingBooking, blockedCalendarDates] = await Promise.all([
     Booking.findOne({
       listing: listingId,
       status: "confirmed",
       _id: { $ne: excludeBookingId },
       $or: [{ checkIn: { $lt: checkOut }, checkOut: { $gt: checkIn } }],
     }),
-    BlockedDate.findOne({
+    // Check for any blocked individual calendar dates in the range
+    CalendarDate.findOne({
       listing: listingId,
-      $or: [{ startDate: { $lt: checkOut }, endDate: { $gt: checkIn } }],
+      isBlocked: true,
+      date: { $gte: checkIn, $lt: checkOut },
     }),
   ]);
 
-  if (overlappingBooking || overlappingBlocked) {
+  if (overlappingBooking || blockedCalendarDates) {
     return {
       isAvailable: false,
       error: "Sorry, these dates are no longer available.",
@@ -34,3 +36,4 @@ export async function checkAvailability(
 
   return { isAvailable: true };
 }
+

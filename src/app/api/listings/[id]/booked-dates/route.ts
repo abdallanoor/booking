@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
-import BlockedDate from "@/models/BlockedDate";
+import CalendarDate from "@/models/CalendarDate";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 export async function GET(
@@ -18,10 +18,11 @@ export async function GET(
       status: "confirmed",
     }).select("checkIn checkOut");
 
-    // Fetch blocked dates for this listing
-    const blockedDates = await BlockedDate.find({
+    // Fetch blocked calendar dates for this listing
+    const blockedDates = await CalendarDate.find({
       listing: id,
-    }).select("startDate endDate");
+      isBlocked: true,
+    }).select("date");
 
     // Format the booked dates from bookings
     const bookedFromBookings = bookings.map((booking) => ({
@@ -31,11 +32,19 @@ export async function GET(
     }));
 
     // Format the blocked dates
-    const bookedFromBlocked = blockedDates.map((blocked) => ({
-      from: blocked.startDate,
-      to: blocked.endDate,
-      type: "blocked" as const,
-    }));
+    // CalendarDate represents a single blocked night. 
+    // For the frontend logic (day >= start && day < end), we represent a single night as [date, date+1]
+    const bookedFromBlocked = blockedDates.map((blocked) => {
+      const start = new Date(blocked.date);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      
+      return {
+        from: start,
+        to: end,
+        type: "blocked" as const,
+      };
+    });
 
     // Merge both sources
     const bookedDates = [...bookedFromBookings, ...bookedFromBlocked];

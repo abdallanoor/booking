@@ -35,9 +35,14 @@ import { authService } from "@/services/auth.service";
 interface BookingFormProps {
   listing: Listing;
   bookedDates?: { from: string; to: string; type?: "booking" | "blocked" }[];
+  customPrices?: Record<string, number>;
 }
 
-export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
+export function BookingForm({
+  listing,
+  bookedDates = [],
+  customPrices = {},
+}: BookingFormProps) {
   const { user, refreshUser } = useAuth();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -177,18 +182,121 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
     executeBooking();
   };
 
-  const nights =
-    date?.from && date?.to ? differenceInCalendarDays(date.to, date.from) : 0;
+  // Calculate price breakdown
+  const calculatePrice = () => {
+    if (!date?.from || !date?.to) return null;
+
+    let baseTotal = 0;
+    const current = new Date(date.from);
+    // Loop through each night
+    while (current < date.to) {
+      const dateKey = format(current, "yyyy-MM-dd");
+      let nightlyRate = listing.pricePerNight;
+
+      // Custom price overrides everything
+      if (customPrices && customPrices[dateKey] !== undefined) {
+        nightlyRate = customPrices[dateKey];
+      } else {
+        const day = current.getDay();
+        const isWeekend = day === 5 || day === 6; // Friday (5) or Saturday (6)
+
+        if (isWeekend && listing.weekendPrice && listing.weekendPrice > 0) {
+          nightlyRate = listing.weekendPrice;
+        }
+      }
+
+      baseTotal += nightlyRate;
+      current.setDate(current.getDate() + 1);
+    }
+
+    const nights = differenceInCalendarDays(date.to, date.from);
+
+    // Apply discounts
+    let discountPercent = 0;
+    let discountName = "";
+
+    if (nights >= 28 && listing.discounts?.monthly) {
+      discountPercent = listing.discounts.monthly;
+      discountName = "Monthly discount";
+    } else if (nights >= 7 && listing.discounts?.weekly) {
+      discountPercent = listing.discounts.weekly;
+      discountName = "Weekly discount";
+    }
+
+    const discountAmount = Math.round(baseTotal * (discountPercent / 100));
+    const total = Math.max(0, baseTotal - discountAmount);
+
+    return {
+      nights,
+      baseTotal,
+      discountAmount,
+      discountName,
+      total,
+    };
+  };
+
+  const priceBreakdown = calculatePrice();
 
   return (
     <Card className="border shadow-xl">
       <CardHeader>
-        <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-bold">
-            {formatCurrency(listing.pricePerNight)}
-          </span>
-          <span className="text-muted-foreground"> night</span>
-        </div>
+        {priceBreakdown && priceBreakdown.nights > 0 ? (
+          <div className="flex items-baseline flex-wrap gap-x-2">
+            {priceBreakdown.discountAmount > 0 && (
+              <span className="text-base text-muted-foreground line-through decoration-1">
+                {formatCurrency(priceBreakdown.baseTotal)}
+              </span>
+            )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="text-xl font-bold underline decoration-1 underline-offset-4 outline-none cursor-pointer">
+                  {formatCurrency(priceBreakdown.total)}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-96" align="end">
+                <div className="font-semibold text-lg pb-3 mb-3">
+                  Price details
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      {priceBreakdown.nights} nights x{" "}
+                      {formatCurrency(
+                        Math.round(
+                          priceBreakdown.baseTotal / priceBreakdown.nights,
+                        ),
+                      )}
+                    </span>
+                    <span>{formatCurrency(priceBreakdown.baseTotal)}</span>
+                  </div>
+
+                  {priceBreakdown.discountAmount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>{priceBreakdown.discountName || "Discount"}</span>
+                      <span>
+                        -{formatCurrency(priceBreakdown.discountAmount)}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="border-t pt-4 flex justify-between font-bold text-lg">
+                    <span>
+                      {priceBreakdown.discountAmount > 0
+                        ? "Price after discount"
+                        : "Total"}
+                    </span>
+                    <span>{formatCurrency(priceBreakdown.total)}</span>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <span className="text-base text-muted-foreground">
+              for {priceBreakdown.nights} nights
+            </span>
+          </div>
+        ) : (
+          <div className="text-2xl font-bold">Add dates for prices</div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="border rounded-xl bg-background overflow-hidden relative">
@@ -359,21 +467,6 @@ export function BookingForm({ listing, bookedDates = [] }: BookingFormProps) {
         >
           {isPending ? "Booking..." : "Reserve"}
         </Button>
-
-        {date?.from && date?.to && nights > 0 && (
-          <div className="space-y-3 pt-4">
-            <div className="flex justify-between text-muted-foreground">
-              <span className="underline">
-                {formatCurrency(listing.pricePerNight)} x {nights} nights
-              </span>
-              <span>{formatCurrency(listing.pricePerNight * nights)}</span>
-            </div>
-            <div className="pt-4 border-t flex justify-between font-semibold text-foreground text-lg">
-              <span>Total</span>
-              <span>{formatCurrency(listing.pricePerNight * nights)}</span>
-            </div>
-          </div>
-        )}
       </CardContent>
 
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>

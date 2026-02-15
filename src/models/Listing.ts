@@ -102,7 +102,24 @@ const listingSchema = new Schema<IListingDocument>(
       required: [true, "Number of bathrooms is required"],
       min: 0.5,
     },
-
+    weekendPrice: {
+      type: Number,
+      default: 0,
+    },
+    discounts: {
+      weekly: {
+        type: Number,
+        min: 0,
+        max: 99,
+        default: 0,
+      },
+      monthly: {
+        type: Number,
+        min: 0,
+        max: 99,
+        default: 0,
+      },
+    },
     privacyType: {
       type: String,
       required: [true, "Privacy type is required"],
