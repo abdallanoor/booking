@@ -21,3 +21,17 @@ export async function getBooking(id: string): Promise<Booking> {
 
   return response.data.booking;
 }
+// Get host bookings with pagination
+export async function getHostBookings(
+  page: number = 1,
+  limit: number = 10
+): Promise<{ bookings: Booking[]; pagination: any }> {
+  const response = await apiGet<{
+    data: { bookings: Booking[]; pagination: any };
+  }>(`/bookings?view=host&page=${page}&limit=${limit}`);
+
+  return {
+    bookings: response.data.bookings,
+    pagination: response.data.pagination,
+  };
+}

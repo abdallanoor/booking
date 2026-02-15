@@ -18,6 +18,9 @@ export async function GET(req: NextRequest) {
 
     const searchParams = req.nextUrl.searchParams;
     const view = searchParams.get("view"); // "guest" or "host"
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
 
     let query = {};
 
@@ -28,7 +31,10 @@ export async function GET(req: NextRequest) {
       // HOST VIEW: Strict personal scoping
       // Even Admins should only see their own listings' bookings here
       const listingIds = await Listing.find({ host: user._id }).distinct("_id");
-      query = { listing: { $in: listingIds } };
+      query = { 
+        listing: { $in: listingIds },
+        status: "confirmed" // User requested confirmed only for host view
+      };
     } else {
       // GLOBAL/ADMIN VIEW (or legacy fallback)
       if (user.role === "Admin") {
@@ -44,12 +50,23 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const total = await Booking.countDocuments(query);
     const bookings = await Booking.find(query)
       .populate("listing")
       .populate("guest", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return successResponse({ bookings });
+    return successResponse({
+      bookings,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        page,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("Get bookings error:", error);
     const message =

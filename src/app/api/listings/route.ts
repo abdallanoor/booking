@@ -143,11 +143,26 @@ export async function GET(req: NextRequest) {
     }
     if (guests) filter.maxGuests = { $gte: parseInt(guests) };
 
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
+
+    const total = await Listing.countDocuments(filter);
     const listings = await Listing.find(filter)
       .populate("host", "name avatar")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return successResponse({ listings });
+    return successResponse({
+      listings,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        page,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("Get listings error:", error);
     const message =

@@ -157,6 +157,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
         try {
           const response = await geocoder.geocode({
             location: { lat: latitude, lng: longitude },
+            language: "en",
           });
 
           if (response.results[0]) {
