@@ -52,7 +52,7 @@ export default function ListingsPage() {
   const fetchListings = useCallback(async (pageNum: number) => {
     setLoading(true);
     try {
-      const data = await getHostListings(pageNum, 2);
+      const data = await getHostListings(pageNum, 5);
       setListings(data.listings);
       setPagination(data.pagination);
     } catch (error) {

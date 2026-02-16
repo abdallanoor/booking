@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import {
   Loader2,
   User as UserIcon,
-  Phone,
   Globe,
   CreditCard,
   Save as SaveIcon,
@@ -18,6 +17,7 @@ import {
 } from "lucide-react";
 import type { User } from "@/types";
 import { cn } from "@/lib/utils";
+import { PhoneVerification } from "./PhoneVerification";
 
 // User type from AuthContext uses 'id' instead of '_id'
 export type ClientUser = Omit<User, "_id"> & { id?: string; _id?: string };
@@ -40,12 +40,12 @@ export function ProfileForm({
 
   // validation state
   const [isValid, setIsValid] = useState(() => {
-    return !!(user.name && user.phoneNumber && user.country && user.nationalId);
+    return !!(user.name && user.country && user.nationalId);
   });
 
+  const [verifiedPhone, setVerifiedPhone] = useState(user.phoneNumber || "");
+
   const formRef = useRef<HTMLFormElement>(null);
-
-
 
   const handleFormChange = () => {
     if (!formRef.current) return;
@@ -53,14 +53,12 @@ export function ProfileForm({
 
     const currentValues = {
       name: (formData.get("name") as string).trim(),
-      phoneNumber: (formData.get("phoneNumber") as string).trim(),
       country: (formData.get("country") as string).trim(),
       nationalId: (formData.get("nationalId") as string).trim(),
     };
 
     const initialValues = {
       name: (user.name || "").trim(),
-      phoneNumber: (user.phoneNumber || "").trim(),
       country: (user.country || "").trim(),
       nationalId: (user.nationalId || "").trim(),
     };
@@ -73,7 +71,6 @@ export function ProfileForm({
     // Validate
     const valid = !!(
       currentValues.name &&
-      currentValues.phoneNumber &&
       currentValues.country &&
       currentValues.nationalId
     );
@@ -88,7 +85,6 @@ export function ProfileForm({
 
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
-    const phoneNumber = formData.get("phoneNumber") as string;
     const country = formData.get("country") as string;
     const nationalId = formData.get("nationalId") as string;
 
@@ -96,7 +92,7 @@ export function ProfileForm({
       const result = await updateUserAction({
         name,
         avatar: user.avatar,
-        phoneNumber,
+        phoneNumber: verifiedPhone || user.phoneNumber,
         country,
         nationalId,
       });
@@ -195,21 +191,10 @@ export function ProfileForm({
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="phoneNumber" className="text-sm font-medium">
-              Phone Number
-            </Label>
-            <div className="relative group">
-              <Phone className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-              <Input
-                id="phoneNumber"
-                name="phoneNumber"
-                defaultValue={user.phoneNumber}
-                className="pl-9"
-                placeholder="+1 (555) 000-0000"
-              />
-            </div>
-          </div>
+          <PhoneVerification
+            currentPhone={verifiedPhone || user.phoneNumber}
+            onVerified={(phone) => setVerifiedPhone(phone)}
+          />
 
           <div className="space-y-2">
             <Label htmlFor="country" className="text-sm font-medium">
