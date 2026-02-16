@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Booking } from "@/types";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -24,9 +24,6 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
   if (!bookings?.length) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Bookings</CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="text-sm text-muted-foreground">
             No bookings found yet.
@@ -38,9 +35,6 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Recent Bookings</CardTitle>
-      </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
@@ -58,11 +52,12 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      {/* Placeholder since booking.guest might not have avatar in Booking type yet, 
-                           checking type def I see guest has name and email but not avatar explicitly 
-                           in the truncated view, but let's assume or fall back */}
+                      <AvatarImage
+                        src={booking.guest?.avatar}
+                        alt={booking.guest?.name}
+                      />
                       <AvatarFallback>
-                        {booking.guest.name?.[0]?.toUpperCase() || "G"}
+                        {booking.guest?.name?.[0]?.toUpperCase() || "G"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
@@ -98,8 +93,8 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
                       booking.status === "confirmed"
                         ? "default" // or success if available? using default (primary) often green or black
                         : booking.status === "cancelled"
-                        ? "destructive"
-                        : "secondary"
+                          ? "destructive"
+                          : "secondary"
                     }
                   >
                     {booking.status}

@@ -413,8 +413,8 @@ function useListingCalendar(
 
   const handleSetPrice = useCallback(() => {
     const price = parseFloat(customPriceInput);
-    if (isNaN(price) || price < 0) {
-      toast.error("Please enter a valid price");
+    if (isNaN(price) || price < 10 || price > 100000) {
+      toast.error("Price must be between 10 and 100,000");
       return;
     }
     updateDates(
@@ -887,7 +887,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
         />
         <LegendItem
           label="Booked"
-          className="bg-destructive/5 border-border decoration-destructive/30 aspect-square"
+          className="bg-destructive/5 border-none text-destructive/60 cursor-not-allowed decoration-destructive/30 aspect-square"
         />
         <LegendItem
           label="Has note"
@@ -1028,7 +1028,8 @@ export function ListingCalendar(props: ListingCalendarProps) {
                     handleSetPrice()
                   }
                   className="pl-1 h-6 w-16 border-0 bg-transparent focus-visible:ring-0 shadow-none text-xs py-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  min={0}
+                  min={10}
+                  max={100000}
                   step="0.01"
                 />
 

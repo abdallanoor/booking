@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     const total = await Booking.countDocuments(query);
     const bookings = await Booking.find(query)
       .populate("listing")
-      .populate("guest", "name email")
+      .populate("guest", "name email avatar")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
@@ -90,6 +90,13 @@ export async function POST(req: NextRequest) {
 
     if (!listing) {
       return errorResponse("Listing not found", 404);
+    }
+
+    if (listing.status === "pending") {
+      return errorResponse(
+        "Property turned off: This property is currently not accepting reservations.",
+        403,
+      );
     }
 
     // Check if listing can accommodate guests

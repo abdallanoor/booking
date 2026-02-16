@@ -15,10 +15,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { GoogleLoginBtn } from "./GoogleLoginBtn";
 import { useRouter } from "nextjs-toploader/app";
+import { useSearchParams } from "next/navigation";
 import { authService } from "@/services/auth.service";
 
 export function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,7 +35,9 @@ export function RegisterForm() {
       try {
         await authService.register({ name, email, password, role });
         toast.success("Verification code sent! Please check your email.");
-        router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}`);
+        router.push(
+          `/auth/verify-otp?email=${encodeURIComponent(email)}&callbackUrl=${encodeURIComponent(callbackUrl)}`,
+        );
       } catch (error) {
         toast.error(
           error instanceof Error ? error.message : "Registration failed",
@@ -130,7 +135,7 @@ export function RegisterForm() {
             </div>
           </div>
 
-          <GoogleLoginBtn disabled={isPending} />
+          <GoogleLoginBtn disabled={isPending} callbackUrl={callbackUrl} />
         </form>
       </CardContent>
     </Card>

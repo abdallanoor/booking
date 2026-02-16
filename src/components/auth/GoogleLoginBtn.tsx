@@ -6,15 +6,21 @@ import Image from "next/image";
 
 interface GoogleLoginBtnProps {
   disabled?: boolean;
+  callbackUrl?: string;
 }
 
-export function GoogleLoginBtn({ disabled }: GoogleLoginBtnProps) {
+export function GoogleLoginBtn({
+  disabled,
+  callbackUrl = "/",
+}: GoogleLoginBtnProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
     // Redirect to Google OAuth - same tab, no popup
-    window.location.href = "/api/auth/google/redirect";
+    // Pass callbackUrl to the redirect route
+    const redirectUrl = `/api/auth/google/redirect?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    window.location.href = redirectUrl;
   };
 
   const isDisabled = disabled || isLoading;

@@ -186,13 +186,36 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
         }
         setIsDetectingLocation(false);
       },
-      (error) => {
-        console.error("Geolocation error:", error);
-        alert("Unable to detect your location. Please try another method.");
+      (error: GeolocationPositionError) => {
+        console.error("Geolocation error details:", {
+          code: error.code,
+          message: error.message,
+        });
+
+        let errorMessage = "Unable to detect your location.";
+
+        // Handle specific error codes
+        switch (error.code) {
+          case 1: // PERMISSION_DENIED
+            errorMessage =
+              "Location permission denied. Please enable location services in your browser settings.";
+            break;
+          case 2: // POSITION_UNAVAILABLE
+            errorMessage =
+              "Location information is unavailable. Please check your device settings.";
+            break;
+          case 3: // TIMEOUT
+            errorMessage = "The location request timed out. Please try again.";
+            break;
+          default:
+            errorMessage = `Location error: ${error.message}`;
+        }
+
+        alert(errorMessage);
         setIsDetectingLocation(false);
         setInputMode(null);
       },
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   }, [parseAddressComponents]);
 
@@ -295,7 +318,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
               {isDetectingLocation ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
-                <Navigation className="h-4 w-4 mr-2" />
+                <Navigation />
               )}
               <span className="text-sm">Use Current Location</span>
             </Button>
@@ -306,7 +329,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
               onClick={startManualEntry}
               className="h-auto py-3"
             >
-              <Edit3 className="h-4 w-4 mr-2" />
+              <Edit3 />
               <span className="text-sm">Enter Manually</span>
             </Button>
           </div>

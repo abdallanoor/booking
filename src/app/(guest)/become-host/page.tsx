@@ -13,7 +13,7 @@ export default function BecomeHostPage() {
 
   const handleBecomeHost = async () => {
     if (!user) {
-      router.push("/auth/register?role=Host");
+      router.push("/auth/register");
       return;
     }
 

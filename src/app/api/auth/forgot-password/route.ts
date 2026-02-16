@@ -30,12 +30,9 @@ export async function POST(req: NextRequest) {
 
     // Only allow password reset for local provider users
     if (user.provider !== "local") {
-      return successResponse(
-        {
-          message:
-            "If your email is registered, you will receive a password reset link.",
-        },
-        "Password reset email sent"
+      return errorResponse(
+        "This account uses Google Sign-In. Please login with Google.",
+        400
       );
     }
 

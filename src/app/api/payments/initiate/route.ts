@@ -58,12 +58,25 @@ export async function POST(req: NextRequest) {
 
     // Check if listing is still available (double-booking check)
     // FINAL GUARD: Validate one last time before taking money
-    const listingIdStr =
+      const listingIdStr =
       booking.listing &&
       typeof booking.listing === "object" &&
       "_id" in booking.listing
         ? (booking.listing as unknown as Listing)._id.toString()
         : String(booking.listing);
+
+    // Check if listing is pending
+    if (
+      booking.listing &&
+      typeof booking.listing === "object" &&
+      "status" in booking.listing &&
+      (booking.listing as unknown as Listing).status === "pending"
+    ) {
+      return errorResponse(
+        "Property turned off: This property is currently not accepting reservations.",
+        400,
+      );
+    }
 
     const { isAvailable, error } = await checkAvailability(
       listingIdStr,

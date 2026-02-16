@@ -31,7 +31,9 @@ export default async function HostRouteLayout({
 
   // Restrict access to Host and Admin only
   if (user.role !== "Host" && user.role !== "Admin") {
-    redirect("/become-host");
+    // Clear the auth token to ensure clean session state
+    cookieStore.delete("auth_token");
+    redirect("/");
   }
 
   return <HostingLayout>{children}</HostingLayout>;

@@ -6,11 +6,11 @@ import { sendReviewInvitationEmail } from "@/lib/email/nodemailer";
 import { differenceInHours } from "date-fns";
 
 /**
- * POST /api/reviews/send-notifications
+ * GET /api/reviews/send-notifications
  * Cron job endpoint to send review invitation emails
  * Should be called periodically (e.g., hourly or daily)
  */
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     // Optional: Add authentication/authorization for cron job
     // For example, check for a secret token in headers

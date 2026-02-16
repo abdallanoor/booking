@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get("code");
     const error = searchParams.get("error");
+    const state = searchParams.get("state");
 
     if (error) {
       console.error("Google OAuth error:", error);
@@ -113,8 +114,28 @@ export async function GET(req: NextRequest) {
     // Set HTTP-only cookie
     await setAuthCookie(jwtToken);
 
-    // Redirect to home page
-    return NextResponse.redirect(`${APP_URL}/`);
+    // Redirect to returnTo or home
+    let returnTo = "/";
+    if (state) {
+      try {
+        const decodedState = JSON.parse(
+          Buffer.from(state, "base64").toString()
+        );
+        returnTo = decodedState.returnTo || "/";
+      } catch (e) {
+        console.error("Failed to decode state:", e);
+      }
+    }
+    
+    // Ensure returnTo is a valid relative path
+    if (returnTo.startsWith("http") || !returnTo.startsWith("/")) {
+      returnTo = "/";
+    }
+
+    // Remove double slashes if any (though unlikely if APP_URL doesn't have trailing slash)
+    const redirectUrl = `${APP_URL}${returnTo}`.replace(/([^:]\/)\/+/g, "$1/");
+
+    return NextResponse.redirect(redirectUrl);
   } catch (error) {
     console.error("Google OAuth callback error:", error);
     return NextResponse.redirect(`${APP_URL}/auth/login?error=oauth_failed`);

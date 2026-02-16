@@ -4,7 +4,7 @@ import dbConnect from "@/lib/mongodb";
 import CalendarDate from "@/models/CalendarDate";
 import Listing from "@/models/Listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { requireAuth } from "@/lib/auth/auth-middleware";
+import { requireAuth, getCurrentUser } from "@/lib/auth/auth-middleware";
 import { z } from "zod";
 
 // Validation schema for bulk update
@@ -21,7 +21,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireAuth(req);
+    const user = await getCurrentUser(req);
     await dbConnect();
 
     const { id: listingId } = await params;
@@ -29,18 +29,16 @@ export async function GET(
     const from = searchParams.get("from");
     const to = searchParams.get("to");
 
-    // Verify listing exists and user owns it
+    // Verify listing exists
     const listing = await Listing.findById(listingId);
     if (!listing) {
       return errorResponse("Listing not found", 404);
     }
 
-    if (
-      listing.host.toString() !== user._id.toString() &&
-      user.role !== "Admin"
-    ) {
-      return errorResponse("Forbidden", 403);
-    }
+    const isHostOrAdmin =
+      user &&
+      (listing.host.toString() === user._id.toString() ||
+        user.role === "Admin");
 
     // Build date query
     const query: Record<string, unknown> = { listing: listingId };
@@ -59,6 +57,16 @@ export async function GET(
     const calendarDates = await CalendarDate.find(query)
       .sort({ date: 1 })
       .lean();
+
+    if (!isHostOrAdmin) {
+      calendarDates.forEach((cd: any) => {
+        delete cd.note;
+        delete cd.listing;
+        delete cd.createdAt;
+        delete cd.updatedAt;
+        delete cd.createdBy;
+      });
+    }
 
     return successResponse({ calendarDates });
   } catch (error) {

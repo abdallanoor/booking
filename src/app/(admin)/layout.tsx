@@ -31,7 +31,9 @@ export default async function AdminRouteLayout({
 
   // Restrict access to Admin only
   if (user.role !== "Admin") {
-    redirect("/");
+    // Clear the auth token to ensure clean session state
+    cookieStore.delete("auth_token");
+    redirect("/auth/login");
   }
 
   return <AdminLayout>{children}</AdminLayout>;

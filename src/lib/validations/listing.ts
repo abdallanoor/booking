@@ -21,8 +21,8 @@ export const listingSchema = z.object({
   images: z.array(z.string()).min(1, "At least one image is required").max(10, "Maximum 10 images allowed"),
   amenities: z.array(z.string()).default([]),
   policies: z.array(z.string()).default([]),
-  pricePerNight: z.number({ message: "Price is required" }).min(1, "Price must be at least EGP 1"),
-  weekendPrice: z.number().min(0).optional().default(0),
+  pricePerNight: z.number({ message: "Price is required" }).min(10, "Price must be at least 10 EGP").max(100000, "Price cannot exceed 100,000 EGP"),
+  weekendPrice: z.number().min(0).max(100000, "Price cannot exceed 100,000 EGP").optional().default(0),
   discounts: z.object({
     weekly: z.number().min(0).max(99).optional().default(0),
     monthly: z.number().min(0).max(99).optional().default(0),

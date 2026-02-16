@@ -22,8 +22,10 @@ export async function GET(req: NextRequest) {
   });
 
   // Store the original referrer to redirect back after auth (optional)
-  const referer = req.headers.get("referer") || "/";
-  const state = Buffer.from(JSON.stringify({ returnTo: referer })).toString("base64");
+  const { searchParams } = new URL(req.url);
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  // const referer = req.headers.get("referer") || "/";
+  const state = Buffer.from(JSON.stringify({ returnTo: callbackUrl })).toString("base64");
   params.set("state", state);
 
   const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;

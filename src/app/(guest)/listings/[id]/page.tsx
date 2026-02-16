@@ -64,7 +64,10 @@ export default async function ListingDetailPage({
           customPrices[dateKey] = cd.customPrice;
         }
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+        throw error;
+      }
       console.error("Failed to fetch calendar dates:", error);
     }
 
@@ -87,7 +90,10 @@ export default async function ListingDetailPage({
       // User not logged in - wishlist check skipped
       isInWishlist = false;
     }
-  } catch {
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
     notFound();
   }
 

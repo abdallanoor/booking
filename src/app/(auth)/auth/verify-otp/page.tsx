@@ -30,6 +30,7 @@ function VerifyOtpContent() {
   const router = useRouter();
   const { refreshUser } = useAuth();
   const email = searchParams.get("email") || "";
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -75,7 +76,7 @@ function VerifyOtpContent() {
 
       await refreshUser();
       toast.success("Verified successfully");
-      router.push("/");
+      router.push(callbackUrl);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Invalid verification code",
@@ -178,7 +179,7 @@ function VerifyOtpContent() {
           <div className="text-center text-sm text-muted-foreground">
             Wrong email address?{" "}
             <Link
-              href="/auth/register"
+              href={`/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
               className="underline underline-offset-4 hover:text-primary transition-colors"
             >
               Back to Sign Up

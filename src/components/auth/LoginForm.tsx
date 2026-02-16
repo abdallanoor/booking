@@ -16,9 +16,12 @@ import {
 import { toast } from "sonner";
 import { GoogleLoginBtn } from "./GoogleLoginBtn";
 import { useRouter } from "nextjs-toploader/app";
+import { useSearchParams } from "next/navigation";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const { login } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
@@ -31,7 +34,7 @@ export function LoginForm() {
       try {
         await login(email, password);
         toast.success("Logged in successfully");
-        router.push("/");
+        router.push(callbackUrl);
       } catch (error) {
         toast.error(error instanceof Error ? error.message : "Login failed");
       }
@@ -105,7 +108,7 @@ export function LoginForm() {
             </div>
           </div>
 
-          <GoogleLoginBtn disabled={isPending} />
+          <GoogleLoginBtn disabled={isPending} callbackUrl={callbackUrl} />
         </form>
       </CardContent>
     </Card>

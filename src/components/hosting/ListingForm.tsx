@@ -426,9 +426,84 @@ function StepDetails() {
 function StepPricing() {
   const {
     register,
+    control,
     formState: { errors },
     watch,
   } = useFormContext<FrontendListingInput>();
+
+  const pricePerNight = watch("pricePerNight");
+  const weeklyDiscount = watch("discounts.weekly");
+  const monthlyDiscount = watch("discounts.monthly");
+
+  const weeklyPrice =
+    pricePerNight && weeklyDiscount > 0
+      ? Math.round(pricePerNight * (1 - weeklyDiscount / 100))
+      : null;
+
+  const monthlyPrice =
+    pricePerNight && monthlyDiscount > 0
+      ? Math.round(pricePerNight * (1 - monthlyDiscount / 100))
+      : null;
+
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    event.target.select();
+  };
+
+  const handleDiscountChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: number) => void,
+  ) => {
+    const inputValue = e.target.value;
+
+    // If input is empty, default to 0
+    if (inputValue === "") {
+      onChange(0);
+      return;
+    }
+
+    // Parse integer, clamping leading zeros automatically via parseInt
+    let value = parseInt(inputValue, 10);
+
+    // Handle invalid number
+    if (isNaN(value)) {
+      onChange(0);
+      return;
+    }
+
+    // Clamp value between 0 and 99
+    if (value > 99) value = 99;
+    if (value < 0) value = 0;
+
+    onChange(value);
+  };
+
+  const handleWeekendPriceChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: number) => void,
+  ) => {
+    const inputValue = e.target.value;
+
+    // If input is empty, default to 0
+    if (inputValue === "") {
+      onChange(0);
+      return;
+    }
+
+    // Parse integer, clamping leading zeros automatically via parseInt
+    let value = parseInt(inputValue, 10);
+
+    // Handle invalid number
+    if (isNaN(value)) {
+      onChange(0);
+      return;
+    }
+
+    // Ensure range [0, 100000]
+    if (value < 0) value = 0;
+    if (value > 100000) value = 100000;
+
+    onChange(value);
+  };
 
   return (
     <div className="space-y-8">
@@ -446,7 +521,8 @@ function StepPricing() {
           <Input
             id="pricePerNight"
             type="number"
-            min="1"
+            min="10"
+            max="100000"
             {...register("pricePerNight", { valueAsNumber: true })}
             className="h-12"
             aria-invalid={!!errors.pricePerNight}
@@ -468,13 +544,24 @@ function StepPricing() {
               Optional. Set 0 to use base price.
             </span>
           </div>
-          <Input
-            id="weekendPrice"
-            type="number"
-            min="0"
-            {...register("weekendPrice", { valueAsNumber: true })}
-            className="h-12"
-            placeholder="0"
+          <Controller
+            control={control}
+            name="weekendPrice"
+            render={({ field }) => (
+              <Input
+                {...field}
+                id="weekendPrice"
+                type="text"
+                inputMode="numeric"
+                min="0"
+                max="100000"
+                className="h-12"
+                placeholder="0"
+                onFocus={handleFocus}
+                onChange={(e) => handleWeekendPriceChange(e, field.onChange)}
+                value={field.value ?? 0}
+              />
+            )}
           />
         </div>
 
@@ -488,18 +575,36 @@ function StepPricing() {
                 For stays of 7 nights or more
               </p>
               <div className="relative">
-                <Input
-                  id="weeklyDiscount"
-                  type="number"
-                  min="0"
-                  max="99"
-                  {...register("discounts.weekly", { valueAsNumber: true })}
-                  className="h-12 pr-8"
+                <Controller
+                  control={control}
+                  name="discounts.weekly"
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="weeklyDiscount"
+                      type="text"
+                      inputMode="numeric"
+                      min="0"
+                      max="99"
+                      className="h-12 pr-8"
+                      onFocus={handleFocus}
+                      onChange={(e) => handleDiscountChange(e, field.onChange)}
+                      value={field.value ?? 0}
+                    />
+                  )}
                 />
                 <span className="absolute right-3 top-3.5 text-muted-foreground">
                   %
                 </span>
               </div>
+              {weeklyPrice !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Price after discount:{" "}
+                  <span className="font-medium text-foreground">
+                    {weeklyPrice} EGP
+                  </span>
+                </p>
+              )}
               {errors.discounts?.weekly && (
                 <p className="text-sm text-destructive">
                   {errors.discounts.weekly.message}
@@ -514,18 +619,36 @@ function StepPricing() {
                 For stays of 28 nights or more
               </p>
               <div className="relative">
-                <Input
-                  id="monthlyDiscount"
-                  type="number"
-                  min="0"
-                  max="99"
-                  {...register("discounts.monthly", { valueAsNumber: true })}
-                  className="h-12 pr-8"
+                <Controller
+                  control={control}
+                  name="discounts.monthly"
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="monthlyDiscount"
+                      type="text"
+                      inputMode="numeric"
+                      min="0"
+                      max="99"
+                      className="h-12 pr-8"
+                      onFocus={handleFocus}
+                      onChange={(e) => handleDiscountChange(e, field.onChange)}
+                      value={field.value ?? 0}
+                    />
+                  )}
                 />
                 <span className="absolute right-3 top-3.5 text-muted-foreground">
                   %
                 </span>
               </div>
+              {monthlyPrice !== null && (
+                <p className="text-sm text-muted-foreground">
+                  Price after discount:{" "}
+                  <span className="font-medium text-foreground">
+                    {monthlyPrice} EGP
+                  </span>
+                </p>
+              )}
               {errors.discounts?.monthly && (
                 <p className="text-sm text-destructive">
                   {errors.discounts.monthly.message}

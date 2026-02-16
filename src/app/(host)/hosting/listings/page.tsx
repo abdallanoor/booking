@@ -174,7 +174,7 @@ export default function ListingsPage() {
                       <TableHead className="w-[80px] px-6">Listing</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Price</TableHead>
+                      <TableHead>Price per night</TableHead>
                       <TableHead className="text-right px-6">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -219,7 +219,7 @@ export default function ListingsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="whitespace-nowrap font-bold text-primary">
-                          {formatCurrency(listing.pricePerNight)} EGP
+                          {formatCurrency(listing.pricePerNight)}
                         </TableCell>
                         <TableCell className="text-right px-6">
                           <div className="grid grid-cols-2 lg:flex lg:flex-row items-center justify-end gap-2.5 min-w-20 py-2">

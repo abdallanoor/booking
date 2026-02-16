@@ -39,9 +39,8 @@ export async function fetchAPI<T>(
     redirect("/api/auth/logout?redirect=/");
   }
 
-  if (response.status === 403) {
-    redirect("/");
-  }
+  // Note: 403 errors are handled by layout-level permission checks
+  // Removing redirect here prevents infinite loops during SSR
 
   if (!response.ok) {
     const error = await response

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { cn, formatCurrency } from "@/lib/utils";
 import { format, differenceInCalendarDays } from "date-fns";
-import { Minus, Plus, ChevronDown } from "lucide-react";
+import { Minus, Plus, ChevronDown, Ban } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { apiClient } from "@/lib/api-client";
 import type { ApiResponse } from "@/types";
@@ -169,7 +169,8 @@ export function BookingForm({
   const handleBooking = () => {
     if (!user) {
       toast.error("Please login to book");
-      router.push("/auth/login");
+      const callbackUrl = encodeURIComponent(window.location.pathname);
+      router.push(`/auth/login?callbackUrl=${callbackUrl}`);
       return;
     }
 
@@ -462,10 +463,19 @@ export function BookingForm({
         <Button
           className="w-full font-semibold text-lg py-6 rounded-full"
           onClick={handleBooking}
-          disabled={isPending || !date?.from || !date?.to}
+          disabled={
+            isPending ||
+            !date?.from ||
+            !date?.to ||
+            listing.status === "pending"
+          }
           size="lg"
         >
-          {isPending ? "Booking..." : "Reserve"}
+          {listing.status === "pending"
+            ? "Listing turned off"
+            : isPending
+              ? "Booking..."
+              : "Reserve"}
         </Button>
       </CardContent>
 
