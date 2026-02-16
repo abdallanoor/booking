@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
 import Booking from "@/models/Booking";
 import User from "@/models/User";
+import IdentityVerification from "@/models/IdentityVerification";
 import { requireRole } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
@@ -18,6 +19,7 @@ export async function GET(req: NextRequest) {
       pendingListingCount,
       bookingCount,
       revenueAggregation,
+      pendingVerificationCount,
     ] = await Promise.all([
       User.countDocuments(),
       Listing.countDocuments({ status: "approved" }), // "Active" listings
@@ -32,6 +34,7 @@ export async function GET(req: NextRequest) {
           },
         },
       ]),
+      IdentityVerification.countDocuments({ status: "pending" }),
     ]);
 
     const totalRevenue =
@@ -44,6 +47,7 @@ export async function GET(req: NextRequest) {
         pendingListings: pendingListingCount,
         totalBookings: bookingCount,
         revenue: totalRevenue,
+        pendingVerifications: pendingVerificationCount,
       },
     });
   } catch (error) {

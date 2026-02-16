@@ -11,6 +11,7 @@ import { PersonalDetails } from "@/components/profile/PersonalDetails";
 import { PasswordSettings } from "@/components/profile/PasswordSettings";
 import { SavedCards } from "@/components/profile/SavedCards";
 import { BankDetails } from "@/components/profile/BankDetails";
+import { IdentityVerification } from "@/components/profile/IdentityVerification";
 import { User } from "@/types";
 import { calculateProfileScore } from "@/lib/profile";
 
@@ -154,6 +155,12 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
           {/* Right Panel: Scrollable Forms */}
           <div>
             <PersonalDetails user={user} refreshUser={handleUserRefresh} />
+
+            <IdentityVerification
+              identityVerified={user.identityVerified}
+              nationalId={user.nationalId}
+              onVerified={handleUserRefresh}
+            />
 
             <BankDetails
               bankDetails={user.bankDetails}

@@ -10,7 +10,6 @@ import {
   Loader2,
   User as UserIcon,
   Globe,
-  CreditCard,
   Save as SaveIcon,
   Mail,
   CheckCircle2,
@@ -40,7 +39,7 @@ export function ProfileForm({
 
   // validation state
   const [isValid, setIsValid] = useState(() => {
-    return !!(user.name && user.country && user.nationalId);
+    return !!(user.name && user.country);
   });
 
   const [verifiedPhone, setVerifiedPhone] = useState(user.phoneNumber || "");
@@ -54,13 +53,11 @@ export function ProfileForm({
     const currentValues = {
       name: (formData.get("name") as string).trim(),
       country: (formData.get("country") as string).trim(),
-      nationalId: (formData.get("nationalId") as string).trim(),
     };
 
     const initialValues = {
       name: (user.name || "").trim(),
       country: (user.country || "").trim(),
-      nationalId: (user.nationalId || "").trim(),
     };
 
     // Check if distinct
@@ -69,11 +66,7 @@ export function ProfileForm({
     setIsDirty(hasChanged);
 
     // Validate
-    const valid = !!(
-      currentValues.name &&
-      currentValues.country &&
-      currentValues.nationalId
-    );
+    const valid = !!(currentValues.name && currentValues.country);
     setIsValid(valid);
   };
 
@@ -86,7 +79,6 @@ export function ProfileForm({
     const formData = new FormData(e.currentTarget);
     const name = formData.get("name") as string;
     const country = formData.get("country") as string;
-    const nationalId = formData.get("nationalId") as string;
 
     try {
       const result = await updateUserAction({
@@ -94,7 +86,6 @@ export function ProfileForm({
         avatar: user.avatar,
         phoneNumber: verifiedPhone || user.phoneNumber,
         country,
-        nationalId,
       });
       if (result.success) {
         if (!isDialog) {
@@ -210,22 +201,6 @@ export function ProfileForm({
                 placeholder="e.g. United States"
               />
             </div>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="nationalId" className="text-sm font-medium">
-            National ID / Passport Number
-          </Label>
-          <div className="relative group">
-            <CreditCard className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-            <Input
-              id="nationalId"
-              name="nationalId"
-              defaultValue={user.nationalId}
-              className="pl-9"
-              placeholder="Provide your ID number for verification"
-            />
           </div>
         </div>
 
