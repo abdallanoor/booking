@@ -58,7 +58,7 @@ export function PhoneVerification({
 
     setLoading(true);
     try {
-      await apiClient.post("/phone/send-otp", { phone: cleaned });
+      await apiClient.post("/user/phone/send-otp", { phone: cleaned });
       toast.success("Verification code sent!");
       setStep("otp");
       setCountdown(30);
@@ -77,7 +77,10 @@ export function PhoneVerification({
     const cleaned = phone.replace(/\s/g, "");
     setLoading(true);
     try {
-      await apiClient.post("/phone/verify-otp", { phone: cleaned, code: otp });
+      await apiClient.post("/user/phone/verify-otp", {
+        phone: cleaned,
+        code: otp,
+      });
       toast.success("Phone number verified!");
       onVerified(cleaned);
       setStep("display");
@@ -97,7 +100,7 @@ export function PhoneVerification({
     setLoading(true);
     try {
       const cleaned = phone.replace(/\s/g, "");
-      await apiClient.post("/phone/send-otp", { phone: cleaned });
+      await apiClient.post("/user/phone/send-otp", { phone: cleaned });
       toast.success("New verification code sent!");
       setCountdown(30);
       setOtp("");
@@ -243,14 +246,7 @@ export function PhoneVerification({
         disabled={loading || otp.length !== 6}
         className={cn("w-full", loading && "opacity-70")}
       >
-        {loading ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Verifying...
-          </>
-        ) : (
-          "Verify Phone Number"
-        )}
+        {loading ? "Verifying..." : "Verify Phone Number"}
       </Button>
     </div>
   );
