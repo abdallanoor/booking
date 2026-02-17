@@ -2,7 +2,7 @@
 
 import { apiGet, apiPost, apiPatch, apiDelete, apiPut } from "@/lib/api";
 import type { Booking, ApiResponse, User } from "@/types";
-import { uploadToCloudinary, deleteImageFromCloudinary } from "@/lib/cloudinary";
+import { uploadImages, deleteImageFromCloudinary } from "@/lib/cloudinary";
 
 // ============================================================================
 // BOOKING ACTIONS
@@ -82,33 +82,19 @@ export async function logoutAction() {
   await apiPost("/auth/logout", {});
 }
 
-export async function uploadAvatarAction(formData: FormData) {
-  const file = formData.get("file") as File;
-  if (!file) {
-    return { success: false, message: "No file provided" };
-  }
-
-  try {
-    const imageUrl = await uploadToCloudinary(file);
-    return { success: true, url: imageUrl };
-  } catch (error) {
-    console.error("Avatar upload failed:", error);
-    return { success: false, message: "Failed to upload avatar" };
-  }
-}
-
-export async function uploadListingImagesAction(formData: FormData) {
+export async function uploadImagesAction(formData: FormData) {
   const files = formData.getAll("files") as File[];
   if (!files || files.length === 0) {
     return { success: false, message: "No files provided" };
   }
 
+  const folder = (formData.get("folder") as string) || undefined;
+
   try {
-    const uploadPromises = files.map((file) => uploadToCloudinary(file));
-    const urls = await Promise.all(uploadPromises);
+    const urls = await uploadImages(files, folder);
     return { success: true, urls };
   } catch (error) {
-    console.error("Listing images upload failed:", error);
+    console.error("Image upload failed:", error);
     return { success: false, message: "Failed to upload images" };
   }
 }
@@ -156,7 +142,7 @@ export async function submitIdentityVerificationAction(formData: FormData) {
   }
 
   try {
-    const imageUrl = await uploadToCloudinary(file);
+    const [imageUrl] = await uploadImages([file], "booking-app/identity");
 
     const result = await apiPost<ApiResponse<{ verification: unknown }>>(
       "/user/identity-verification",

@@ -22,7 +22,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDropzone } from "react-dropzone";
 import { createListing, updateListing } from "@/services/listings.service";
-import { uploadListingImagesAction, deleteListingImageAction } from "@/actions";
+import { uploadImagesAction, deleteListingImageAction } from "@/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -905,7 +905,7 @@ function StepPhotos({
               {isDragActive ? "Drop your photos here" : "Add photos"}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              or click to browse • JPG, PNG, WEBP up to 5MB
+              or click to browse • JPG, PNG, WEBP up to 1MB
             </p>
           </div>
         </div>
@@ -1339,14 +1339,14 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
       "image/png": [],
       "image/webp": [],
     },
-    maxSize: 5 * 1024 * 1024, // 5MB
+    maxSize: 1 * 1024 * 1024, // 1MB
     maxFiles: 10,
     onDropRejected: (fileRejections) => {
       fileRejections.forEach((rejection) => {
         const { errors } = rejection;
         errors.forEach((error) => {
           if (error.code === "file-too-large") {
-            toast.error(`File ${rejection.file.name} is too large. Max 5MB.`);
+            toast.error(`File ${rejection.file.name} is too large. Max 1MB.`);
           } else if (error.code === "too-many-files") {
             toast.error("Max 10 images allowed.");
           } else {
@@ -1460,7 +1460,8 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
   const uploadFile = async (file: File) => {
     const formData = new FormData();
     formData.append("files", file);
-    return uploadListingImagesAction(formData);
+    formData.append("folder", "booking-app/listings");
+    return uploadImagesAction(formData);
   };
 
   const onSubmit: SubmitHandler<FrontendListingInput> = async (data) => {

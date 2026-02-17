@@ -8,27 +8,38 @@ cloudinary.config({
 
 export default cloudinary;
 
-export async function uploadToCloudinary(file: File): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+/**
+ * Upload one or more images to Cloudinary.
+ * Cloudinary handles compression (q_auto) and WebP conversion (f_auto) automatically.
+ */
+export async function uploadImages(
+  files: File[],
+  folder = "booking-app"
+): Promise<string[]> {
+  const uploadOne = (file: File): Promise<string> => {
+    return new Promise(async (resolve, reject) => {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader
-      .upload_stream(
-        {
-          folder: "booking-app",
-          resource_type: "auto",
-        },
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(result!.secure_url);
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder,
+            resource_type: "auto",
+            quality: "auto:eco",
+            format: "webp",
+            transformation: [{ width: 1200, crop: "limit" }],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result!.secure_url);
           }
-        }
-      )
-      .end(buffer);
-  });
+        )
+        .end(buffer);
+    });
+  };
+
+  return Promise.all(files.map(uploadOne));
 }
 
 export async function deleteImageFromCloudinary(

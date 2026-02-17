@@ -96,8 +96,8 @@ export function IdentityVerification({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error("File size must be less than 1MB");
       return;
     }
 
@@ -144,8 +144,10 @@ export function IdentityVerification({
       } else {
         toast.error(result.message || "Failed to submit");
       }
-    } catch {
-      toast.error("An unexpected error occurred");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "An unexpected error occurred";
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -408,7 +410,7 @@ export function IdentityVerification({
                 <span className="text-sm font-medium">
                   Upload document image
                 </span>
-                <span className="text-xs">PNG, JPG up to 5MB</span>
+                <span className="text-xs">PNG, JPG up to 1MB</span>
               </button>
             )}
 

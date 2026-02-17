@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { Camera, Shield, Loader2 } from "lucide-react";
-import { uploadAvatarAction, updateUserAction } from "@/actions";
+import { uploadImagesAction, updateUserAction } from "@/actions";
 import { toast } from "sonner";
 import { PersonalDetails } from "@/components/profile/PersonalDetails";
 import { PasswordSettings } from "@/components/profile/PasswordSettings";
@@ -31,36 +31,38 @@ export default function ProfileClient({ initialUser }: ProfileClientProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+    if (file.size > 1 * 1024 * 1024) {
+      toast.error("File size must be less than 1MB");
       return;
     }
 
     setUploading(true);
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("files", file);
+    formData.append("folder", "booking-app/avatars");
 
     try {
-      const uploadResult = await uploadAvatarAction(formData);
+      const uploadResult = await uploadImagesAction(formData);
 
-      if (!uploadResult.success || !uploadResult.url) {
+      if (!uploadResult.success || !uploadResult.urls?.[0]) {
         throw new Error(uploadResult.message || "Failed to upload image");
       }
 
       const updateResult = await updateUserAction({
         name: user.name,
-        avatar: uploadResult.url,
+        avatar: uploadResult.urls[0],
       });
 
       if (updateResult.success) {
         toast.success("Profile photo updated");
-        const updatedUser = { ...user, avatar: uploadResult.url };
+        const updatedUser = { ...user, avatar: uploadResult.urls[0] };
         setUser(updatedUser);
         await refreshUser();
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Error uploading photo");
+      const message =
+        error instanceof Error ? error.message : "Error uploading photo";
+      toast.error(message);
     } finally {
       setUploading(false);
     }
