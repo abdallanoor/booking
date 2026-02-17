@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -43,10 +43,14 @@ import { formatCurrency } from "@/lib/utils";
 
 export default function ListingsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const currentPage = Math.max(
+    1,
+    parseInt(searchParams.get("page") || "1", 10),
+  );
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const fetchListings = useCallback(async (pageNum: number) => {
@@ -64,12 +68,15 @@ export default function ListingsPage() {
   }, []);
 
   useEffect(() => {
-    fetchListings(page);
-  }, [page, fetchListings]);
+    fetchListings(currentPage);
+  }, [currentPage, fetchListings]);
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(newPage));
+    router.push(`/hosting/listings?${params.toString()}`, {
+      scroll: false,
+    });
   };
 
   const handleDelete = async (id: string) => {
@@ -334,7 +341,7 @@ export default function ListingsPage() {
       {pagination && pagination.pages > 1 && (
         <div className="mt-8 flex justify-center">
           <Paginator
-            currentPage={pagination.page}
+            currentPage={currentPage}
             totalPages={pagination.pages}
             onPageChange={handlePageChange}
           />

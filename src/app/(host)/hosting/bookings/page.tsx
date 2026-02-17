@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -16,10 +17,15 @@ import type { Booking } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BookingsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const currentPage = Math.max(
+    1,
+    parseInt(searchParams.get("page") || "1", 10),
+  );
   const limit = 10;
 
   const fetchBookings = useCallback(async (pageNum: number) => {
@@ -36,12 +42,15 @@ export default function BookingsPage() {
   }, []);
 
   useEffect(() => {
-    fetchBookings(page);
-  }, [page, fetchBookings]);
+    fetchBookings(currentPage);
+  }, [currentPage, fetchBookings]);
 
   const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", String(newPage));
+    router.push(`/hosting/bookings?${params.toString()}`, {
+      scroll: false,
+    });
   };
 
   const BookingSkeleton = () => (
@@ -58,7 +67,7 @@ export default function BookingsPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {[...Array(5)].map((_, i) => (
+          {[...Array(10)].map((_, i) => (
             <TableRow key={i}>
               <TableCell>
                 <Skeleton className="h-4 w-[150px]" />
@@ -169,7 +178,7 @@ export default function BookingsPage() {
           {pagination && pagination.pages > 1 && (
             <div className="mt-8 flex justify-center">
               <Paginator
-                currentPage={pagination.page}
+                currentPage={currentPage}
                 totalPages={pagination.pages}
                 onPageChange={handlePageChange}
               />
