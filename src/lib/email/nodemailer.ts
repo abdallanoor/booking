@@ -714,3 +714,180 @@ export async function sendQuestionReplyEmail(
     console.error("Error sending question reply email:", error);
   }
 }
+
+export async function sendIdentityApprovedEmail(
+  email: string,
+  details: { userName: string; idType: string; idNumber: string }
+) {
+  const docLabel =
+    details.idType === "national_id" ? "National ID" : "Passport";
+
+  const mailOptions = {
+    from: `"Booking Platform" <${EMAIL_USER}>`,
+    to: email,
+    subject: "Identity Verified Successfully ✅",
+    html: `<!DOCTYPE html><html><head>
+      <style>
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; line-height:1.6; color:#1a1a1a; margin:0; padding:0; background-color:#f4f7f6; }
+        .wrapper { width:100%; table-layout:fixed; background-color:#f4f7f6; padding-bottom:40px; }
+        .container { max-width:600px; margin:40px auto 0; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .header { background:#000; color:#fff; padding:40px 20px; text-align:center; }
+        .success-icon { font-size:48px; margin-bottom:10px; display:block; }
+        h1 { margin:0; font-size:24px; font-weight:700; letter-spacing:-0.5px; }
+        .content { padding:40px 30px; }
+        p { margin:0 0 20px; color:#4a4a4a; }
+        .details-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:24px; margin:24px 0; }
+        .detail-label { font-size:13px; color:#888; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+        .detail-value { font-size:15px; color:#1a1a1a; font-weight:500; }
+        .status-badge { display:inline-block; background:#16a34a; color:#fff; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:600; margin-bottom:10px; }
+        .btn { display:block; background:#000; color:#fff !important; text-decoration:none; text-align:center; padding:16px 20px; border-radius:8px; font-weight:600; margin-top:20px; }
+        .footer { text-align:center; padding:20px; font-size:13px; color:#999; }
+      </style>
+    </head><body>
+      <div class="wrapper"><div class="container">
+        <div class="header">
+          <div class="success-icon">✅</div>
+          <h1>Identity Verified</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${details.userName},</p>
+          <p>Great news! Your identity has been successfully verified.</p>
+
+          <div class="details-box">
+            <div style="text-align:center; margin-bottom:16px;">
+              <span class="status-badge">Approved</span>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+              <tr>
+                <td style="padding:10px 0; border-bottom:1px solid #dcfce7;">
+                  <span class="detail-label">Document Type</span>
+                </td>
+                <td style="padding:10px 0; border-bottom:1px solid #dcfce7; text-align:right;">
+                  <span class="detail-value">${docLabel}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;">
+                  <span class="detail-label">ID Number</span>
+                </td>
+                <td style="padding:10px 0; text-align:right;">
+                  <span class="detail-value">${details.idNumber}</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <a href="${APP_URL}/profile" class="btn">Go to Your Profile</a>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Booking Platform. All rights reserved.</p>
+        </div>
+      </div></div>
+    </body></html>`,
+  };
+
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("Error sending identity approved email:", error);
+  }
+}
+
+export async function sendIdentityRejectedEmail(
+  email: string,
+  details: {
+    userName: string;
+    idType: string;
+    idNumber: string;
+    rejectionReason?: string;
+  }
+) {
+  const docLabel =
+    details.idType === "national_id" ? "National ID" : "Passport";
+
+  const mailOptions = {
+    from: `"Booking Platform" <${EMAIL_USER}>`,
+    to: email,
+    subject: "Identity Verification Update",
+    html: `<!DOCTYPE html><html><head>
+      <style>
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; line-height:1.6; color:#1a1a1a; margin:0; padding:0; background-color:#f4f7f6; }
+        .wrapper { width:100%; table-layout:fixed; background-color:#f4f7f6; padding-bottom:40px; }
+        .container { max-width:600px; margin:40px auto 0; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .header { background:#000; color:#fff; padding:40px 20px; text-align:center; }
+        .icon { font-size:48px; margin-bottom:10px; display:block; }
+        h1 { margin:0; font-size:24px; font-weight:700; letter-spacing:-0.5px; }
+        .content { padding:40px 30px; }
+        p { margin:0 0 20px; color:#4a4a4a; }
+        .details-box { background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:24px; margin:24px 0; }
+        .detail-label { font-size:13px; color:#888; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+        .detail-value { font-size:15px; color:#1a1a1a; font-weight:500; }
+        .status-badge { display:inline-block; background:#dc2626; color:#fff; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:600; margin-bottom:10px; }
+        .reason-box { background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:16px; margin:16px 0 0; }
+        .reason-label { font-size:12px; color:#9a3412; text-transform:uppercase; letter-spacing:0.5px; font-weight:700; margin-bottom:6px; display:block; }
+        .reason-text { font-size:14px; color:#9a3412; }
+        .btn { display:block; background:#000; color:#fff !important; text-decoration:none; text-align:center; padding:16px 20px; border-radius:8px; font-weight:600; margin-top:20px; }
+        .footer { text-align:center; padding:20px; font-size:13px; color:#999; }
+      </style>
+    </head><body>
+      <div class="wrapper"><div class="container">
+        <div class="header">
+          <div class="icon">⚠️</div>
+          <h1>Verification Not Approved</h1>
+        </div>
+        <div class="content">
+          <p>Hello ${details.userName},</p>
+          <p>Unfortunately, we were unable to verify your identity based on the documents you submitted. Please review the details below and resubmit your verification request.</p>
+
+          <div class="details-box">
+            <div style="text-align:center; margin-bottom:16px;">
+              <span class="status-badge">Rejected</span>
+            </div>
+            <table style="width:100%; border-collapse:collapse;">
+              <tr>
+                <td style="padding:10px 0; border-bottom:1px solid #fecaca;">
+                  <span class="detail-label">Document Type</span>
+                </td>
+                <td style="padding:10px 0; border-bottom:1px solid #fecaca; text-align:right;">
+                  <span class="detail-value">${docLabel}</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:10px 0;">
+                  <span class="detail-label">ID Number</span>
+                </td>
+                <td style="padding:10px 0; text-align:right;">
+                  <span class="detail-value">${details.idNumber}</span>
+                </td>
+              </tr>
+            </table>
+            ${
+              details.rejectionReason
+                ? `<div class="reason-box">
+                    <span class="reason-label">Reason</span>
+                    <span class="reason-text">${details.rejectionReason}</span>
+                  </div>`
+                : ""
+            }
+          </div>
+
+          <p>You can update your documents and resubmit from your profile page.</p>
+
+          <a href="${APP_URL}/profile" class="btn">Update Your Documents</a>
+        </div>
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Booking Platform. All rights reserved.</p>
+          <p>If you believe this is an error, please contact our support team.</p>
+        </div>
+      </div></div>
+    </body></html>`,
+  };
+
+  try {
+    const transporter = getTransporter();
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("Error sending identity rejected email:", error);
+  }
+}

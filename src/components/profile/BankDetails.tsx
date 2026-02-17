@@ -234,6 +234,19 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
             </Button>
           </div>
         )}
+        {isEditing && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setIsEditing(false);
+              reset();
+            }}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+        )}
       </div>
 
       {isEditing ? (
@@ -383,26 +396,8 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setIsEditing(false);
-                  reset();
-                }}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
               <Button type="submit" disabled={isSubmitting || !isDirty}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  "Save Details"
-                )}
+                {isSubmitting ? "Saving..." : "Save Details"}
               </Button>
             </div>
           </div>

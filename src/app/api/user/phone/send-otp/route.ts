@@ -38,10 +38,23 @@ export async function POST(req: NextRequest) {
       return errorResponse("Unauthorized", 401);
     }
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Failed to send verification code";
-    return errorResponse(message, 500);
+    const errorMsg =
+      error instanceof Error ? error.message : "";
+
+    // Twilio blocks certain phone prefixes due to fraud — give a friendly message
+    if (
+      errorMsg.includes("temporarily blocked") ||
+      errorMsg.includes("fraudulent")
+    ) {
+      return errorResponse(
+        "This phone number is temporarily unavailable for verification. Please try again later.",
+        429
+      );
+    }
+
+    return errorResponse(
+      errorMsg || "Failed to send verification code",
+      500
+    );
   }
 }

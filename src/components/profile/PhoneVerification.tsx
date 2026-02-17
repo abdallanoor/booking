@@ -61,7 +61,7 @@ export function PhoneVerification({
       await apiClient.post("/user/phone/send-otp", { phone: cleaned });
       toast.success("Verification code sent!");
       setStep("otp");
-      setCountdown(30);
+      setCountdown(60);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Failed to send code",
@@ -102,7 +102,7 @@ export function PhoneVerification({
       const cleaned = phone.replace(/\s/g, "");
       await apiClient.post("/user/phone/send-otp", { phone: cleaned });
       toast.success("New verification code sent!");
-      setCountdown(30);
+      setCountdown(60);
       setOtp("");
     } catch (error) {
       toast.error(
@@ -149,25 +149,23 @@ export function PhoneVerification({
     return (
       <div className="space-y-2">
         <Label className="text-sm font-medium">Phone Number</Label>
-        <div className="flex gap-2">
-          <div className="relative group flex-1">
-            <Phone className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-            <Input
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="pl-9"
-              placeholder="+201234567890"
-              disabled={loading}
-            />
-          </div>
+        <div className="relative group">
+          <Phone className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+          <Input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="pl-9 pr-20"
+            placeholder="+201234567890"
+            disabled={loading}
+          />
           <Button
             type="button"
             onClick={handleSendOtp}
             disabled={loading || !phone.trim()}
-            size="default"
-            className="shrink-0"
+            size="sm"
+            className="absolute right-1 top-2/4 -translate-y-2/4 h-7 px-3 text-xs font-semibold rounded-md"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
+            {loading ? "Verify..." : "Verify"}
           </Button>
         </div>
         <p className="text-[0.75rem] text-muted-foreground">

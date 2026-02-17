@@ -4,6 +4,10 @@ import IdentityVerification from "@/models/IdentityVerification";
 import User from "@/models/User";
 import { requireRole } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import {
+  sendIdentityApprovedEmail,
+  sendIdentityRejectedEmail,
+} from "@/lib/email/nodemailer";
 
 // PATCH: Approve or reject a verification request
 export async function PATCH(
@@ -22,7 +26,10 @@ export async function PATCH(
 
     await dbConnect();
 
-    const verification = await IdentityVerification.findById(id);
+    const verification = await IdentityVerification.findById(id).populate(
+      "user",
+      "name email"
+    );
     if (!verification) {
       return errorResponse("Verification request not found", 404);
     }
@@ -34,6 +41,13 @@ export async function PATCH(
       );
     }
 
+    // Extract user info for email
+    const user = verification.user as unknown as {
+      _id: string;
+      name: string;
+      email: string;
+    };
+
     if (action === "approve") {
       // Update the verification request
       verification.status = "approved";
@@ -42,10 +56,19 @@ export async function PATCH(
       await verification.save();
 
       // Save the ID to the user record and mark as verified
-      await User.findByIdAndUpdate(verification.user, {
+      await User.findByIdAndUpdate(user._id, {
         nationalId: verification.idNumber,
         identityVerified: true,
       });
+
+      // Send approval email (non-blocking)
+      sendIdentityApprovedEmail(user.email, {
+        userName: user.name,
+        idType: verification.type,
+        idNumber: verification.idNumber,
+      }).catch((err) =>
+        console.error("Failed to send identity approved email:", err)
+      );
 
       return successResponse(
         { verification },
@@ -58,6 +81,16 @@ export async function PATCH(
       verification.reviewedAt = new Date();
       verification.rejectionReason = rejectionReason || "";
       await verification.save();
+
+      // Send rejection email (non-blocking)
+      sendIdentityRejectedEmail(user.email, {
+        userName: user.name,
+        idType: verification.type,
+        idNumber: verification.idNumber,
+        rejectionReason: rejectionReason || undefined,
+      }).catch((err) =>
+        console.error("Failed to send identity rejected email:", err)
+      );
 
       return successResponse(
         { verification },

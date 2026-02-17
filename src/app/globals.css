@@ -122,6 +122,9 @@
     @apply bg-background text-foreground;
     scroll-behavior: smooth;
   }
+  button{
+    cursor: pointer;
+  }
 }
 
 @layer utilities {
