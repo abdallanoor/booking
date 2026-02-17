@@ -34,7 +34,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { Section, HeaderUser } from "@/types";
 
-const emptySubscribe = () => () => { };
+const emptySubscribe = () => () => {};
 
 interface HeaderProps {
   links?: { href: string; label: string; icon?: LucideIcon }[];
@@ -50,7 +50,7 @@ export function Header({ links }: HeaderProps) {
   const isClient = useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 
   const handleLogout = () => {
@@ -65,7 +65,7 @@ export function Header({ links }: HeaderProps) {
           loading: "Logging out...",
           success: "Logged out successfully",
           error: "Failed to logout",
-        }
+        },
       );
     });
   };
@@ -146,7 +146,7 @@ function SectionNavigation({
             pathname === route.href ||
               (route.href !== baseRoute && pathname?.startsWith(route.href))
               ? "text-primary bg-accent"
-              : "text-muted-foreground"
+              : "text-muted-foreground",
           )}
         >
           {route.label}
@@ -190,13 +190,7 @@ function NavActions({
                 </Button>
               </Link>
             </>
-          ) : (
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                Switch to travelling
-              </Button>
-            </Link>
-          )}
+          ) : null}
         </>
       )}
 
