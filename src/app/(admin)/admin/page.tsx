@@ -1,6 +1,8 @@
 import { statsService } from "@/services/stats.service";
 import { formatCurrency } from "@/lib/utils";
 import { AlertCircle } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function AdminDashboardPage() {
   const stats = await statsService.getAdminStats();
@@ -44,6 +46,24 @@ export default async function AdminDashboardPage() {
           title="Revenue"
           value={formatCurrency(stats.revenue)}
           description="Platform earnings"
+        />
+        <AdminCard
+          title="Identity Verifications"
+          value={stats.pendingVerifications.toLocaleString()}
+          description={
+            <span className="flex items-center justify-between">
+              <span>
+                {stats.pendingVerifications > 0
+                  ? "Pending review"
+                  : "No pending requests"}
+              </span>
+              <Link href="/admin/verifications">
+                <Button size="sm" variant="outline" className="h-7 text-xs">
+                  Review
+                </Button>
+              </Link>
+            </span>
+          }
         />
       </div>
     </div>

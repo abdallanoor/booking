@@ -145,3 +145,34 @@ export async function changePasswordAction(
     };
   }
 }
+
+export async function submitIdentityVerificationAction(formData: FormData) {
+  const file = formData.get("image") as File;
+  const type = formData.get("type") as string;
+  const idNumber = formData.get("idNumber") as string;
+
+  if (!file || !type || !idNumber) {
+    return { success: false, message: "All fields are required" };
+  }
+
+  try {
+    const imageUrl = await uploadToCloudinary(file);
+
+    const result = await apiPost<ApiResponse<{ verification: unknown }>>(
+      "/user/identity-verification",
+      { type, idNumber, imageUrl },
+    );
+
+    return result;
+  } catch (error) {
+    console.error("Identity verification submission error:", error);
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to submit verification",
+    };
+  }
+}
+

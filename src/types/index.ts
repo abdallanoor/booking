@@ -12,6 +12,8 @@ export type BookingStatus = "pending_payment" | "confirmed" | "cancelled";
 export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
 export type AuthProvider = "local" | "google";
 export type Section = "guest" | "hosting" | "admin";
+export type IdentityVerificationStatus = "pending" | "approved" | "rejected";
+export type IdentityVerificationType = "national_id" | "passport";
 
 export interface Coordinates {
   lat: number;
@@ -61,6 +63,7 @@ export interface UserBase {
   phoneNumber?: string;
   country?: string;
   nationalId?: string;
+  identityVerified?: boolean;
   profileCompleted: boolean;
   isBlocked: boolean;
   hasPassword?: boolean;
@@ -520,6 +523,7 @@ export interface AdminStats {
   pendingListings: number;
   totalBookings: number;
   revenue: number;
+  pendingVerifications: number;
 }
 
 export interface HostingStats {
@@ -593,6 +597,44 @@ export interface IUserDocument extends Document, Omit<UserBase, "hasPassword"> {
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
   checkProfileCompletion(action: "book" | "withdraw"): boolean;
+}
+
+/**
+ * Identity Verification (API shape)
+ */
+export interface IdentityVerification {
+  _id: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  type: IdentityVerificationType;
+  idNumber: string;
+  imageUrl: string;
+  status: IdentityVerificationStatus;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Mongoose IdentityVerification Document
+ */
+export interface IIdentityVerificationDocument extends Document {
+  user: Types.ObjectId;
+  type: IdentityVerificationType;
+  idNumber: string;
+  imageUrl: string;
+  status: IdentityVerificationStatus;
+  reviewedBy?: Types.ObjectId;
+  reviewedAt?: Date;
+  rejectionReason?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**

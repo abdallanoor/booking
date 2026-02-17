@@ -72,6 +72,10 @@ const userSchema = new Schema<IUserDocument>(
       type: String,
       required: false,
     },
+    identityVerified: {
+      type: Boolean,
+      default: false,
+    },
     profileCompleted: {
       type: Boolean,
       default: false,
