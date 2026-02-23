@@ -769,3 +769,75 @@ export interface ICalendarDateDocument
   updatedAt: Date;
 }
 
+// ============================================================================
+// CHAT TYPES
+// ============================================================================
+
+export interface ConversationBase {
+  participants: string[];
+  booking: string;
+  lastMessageAt: string | Date;
+}
+
+export interface Conversation extends Omit<ConversationBase, "participants" | "booking" | "lastMessageAt"> {
+  _id: string;
+  participants: {
+    _id: string;
+    name: string;
+    avatar?: string;
+    role?: string;
+  }[];
+  booking: {
+    _id: string;
+    listing: {
+      _id: string;
+      title: string;
+    };
+    checkIn: string;
+    checkOut: string;
+    status: string;
+  };
+  lastMessageAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MessageBase {
+  conversation: string;
+  sender: string;
+  content: string;
+  isRead: boolean;
+}
+
+export interface Message extends Omit<MessageBase, "conversation" | "sender"> {
+  _id: string;
+  conversation: string;
+  sender: {
+    _id: string;
+    name: string;
+    avatar?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Mongoose Conversation Document
+ */
+export interface IConversationDocument extends Document, Omit<ConversationBase, "participants" | "booking" | "lastMessageAt"> {
+  participants: Types.ObjectId[];
+  booking: Types.ObjectId;
+  lastMessageAt: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Mongoose Message Document
+ */
+export interface IMessageDocument extends Document, Omit<MessageBase, "conversation" | "sender"> {
+  conversation: Types.ObjectId;
+  sender: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}

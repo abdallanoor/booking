@@ -14,6 +14,7 @@ import type { Booking } from "@/services/bookings.service";
 import { formatCurrency } from "@/lib/utils";
 import { CancellationModal } from "../../../../components/booking/CancellationModal";
 import { Host } from "@/types";
+import { StartChatButton } from "@/components/chat/StartChatButton";
 
 // We need to hint that listing has these extra fields
 type BookingWithHost = Omit<Booking, "listing"> & {
@@ -166,6 +167,11 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                   )}
                 </div>
               </CardContent>
+              {status === "confirmed" && (
+                <div className="px-6 pb-6 pt-0">
+                  <StartChatButton bookingId={_id} />
+                </div>
+              )}
             </Card>
           )}
         </div>

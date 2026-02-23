@@ -3,7 +3,13 @@
 import { SectionProvider } from "@/contexts/SectionContext";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { LayoutDashboard, Building2, Calendar, ListTodo } from "lucide-react";
+import {
+  LayoutDashboard,
+  Building2,
+  Calendar,
+  ListTodo,
+  MessageSquare,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const hostingLinks = [
@@ -26,6 +32,11 @@ const hostingLinks = [
     href: "/hosting/bookings",
     label: "Bookings",
     icon: Calendar,
+  },
+  {
+    href: "/hosting/messages",
+    label: "Messages",
+    icon: MessageSquare,
   },
 ];
 

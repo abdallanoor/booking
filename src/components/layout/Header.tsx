@@ -26,6 +26,7 @@ import {
   Shield,
   Map,
   Building2,
+  MessageSquare,
 } from "lucide-react";
 import { useTransition, useSyncExternalStore } from "react";
 import { toast } from "sonner";
@@ -284,6 +285,11 @@ function AuthenticatedMenu({
       <DropdownMenuSeparator />
 
       <MenuItem href="/profile" icon={User} label="Profile" />
+      <MenuItem
+        href={section === "hosting" ? "/hosting/messages" : "/messages"}
+        icon={MessageSquare}
+        label="Messages"
+      />
       <MenuItem href="/bookings" icon={Calendar} label="My Bookings" />
       <MenuItem href="/wishlist" icon={Heart} label="Wishlist" />
 

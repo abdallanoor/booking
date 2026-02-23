@@ -15,6 +15,7 @@ import { Paginator } from "@/components/ui/paginator";
 import { getHostBookings } from "@/services/bookings.service";
 import type { Booking } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StartChatButton } from "@/components/chat/StartChatButton";
 
 export default function BookingsPage() {
   const router = useRouter();
@@ -64,6 +65,7 @@ export default function BookingsPage() {
             <TableHead>Check Out</TableHead>
             <TableHead>Guests</TableHead>
             <TableHead className="text-right">Total Price</TableHead>
+            <TableHead className="w-[50px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -89,6 +91,9 @@ export default function BookingsPage() {
               </TableCell>
               <TableCell className="text-right">
                 <Skeleton className="h-4 w-[70px] ml-auto" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-8 rounded-md" />
               </TableCell>
             </TableRow>
           ))}
@@ -134,6 +139,7 @@ export default function BookingsPage() {
                       <TableHead>Check Out</TableHead>
                       <TableHead>Guests</TableHead>
                       <TableHead className="text-right">Total Price</TableHead>
+                      <TableHead className="w-[50px]"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -166,6 +172,15 @@ export default function BookingsPage() {
                         </TableCell>
                         <TableCell className="text-right font-bold text-primary">
                           {booking.totalPrice} EGP
+                        </TableCell>
+                        <TableCell>
+                          {booking.status === "confirmed" && (
+                            <StartChatButton
+                              bookingId={booking._id}
+                              isHost
+                              iconOnly
+                            />
+                          )}
                         </TableCell>
                       </TableRow>
                     ))}
