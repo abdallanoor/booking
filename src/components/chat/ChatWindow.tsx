@@ -12,9 +12,11 @@ import { format } from "date-fns";
 export function ChatWindow({
   conversation,
   onBack,
+  onMessageSent,
 }: {
   conversation: any;
   onBack: () => void;
+  onMessageSent?: () => void;
 }) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<any[]>([]);
@@ -74,17 +76,21 @@ export function ChatWindow({
       const data = await res.json();
       if (data.success) {
         setMessages((prev) => [...prev, data.data.message]);
+        if (onMessageSent) {
+          onMessageSent();
+        }
       }
     } catch (error) {
       console.error("Failed to send message", error);
       // Optional: restore message if failed
+      setNewMessage(content);
     } finally {
       setSending(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full animate-in fade-in duration-300">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">
         <Button variant="secondary" size="icon" onClick={onBack}>
@@ -125,9 +131,17 @@ export function ChatWindow({
             </div>
           </div>
         ) : messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-            <p>No messages yet.</p>
-            <p className="text-sm">Send a message to start the conversation!</p>
+          <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
+            <h3 className="text-2xl font-semibold mb-2 text-foreground tracking-tight">
+              Say hello! 👋
+            </h3>
+            <p className="text-muted-foreground max-w-sm mx-auto text-base">
+              This is the beginning of your conversation with{" "}
+              <span className="font-medium text-foreground">
+                {otherParticipant?.name}
+              </span>
+              . Send a message to start planning!
+            </p>
           </div>
         ) : (
           messages.map((msg) => {

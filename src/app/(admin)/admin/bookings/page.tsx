@@ -49,7 +49,7 @@ export default function AdminBookingsPage() {
     try {
       await cancelBookingAction(id);
       setBookings((prev) =>
-        prev.map((b) => (b._id === id ? { ...b, status: "cancelled" } : b))
+        prev.map((b) => (b._id === id ? { ...b, status: "cancelled" } : b)),
       );
       toast.success("Booking cancelled");
     } catch {
@@ -62,8 +62,12 @@ export default function AdminBookingsPage() {
   const filteredBookings = bookings.filter((booking) => {
     const matchesTab = activeTab === "all" || booking.status === activeTab;
     const matchesSearch =
-      (booking.guest?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (booking.listing?.title || "").toLowerCase().includes(searchQuery.toLowerCase());
+      (booking.guest?.name || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      (booking.listing?.title || "")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
   });
 
@@ -134,13 +138,18 @@ export default function AdminBookingsPage() {
                   <CardContent>
                     <div className="flex flex-col sm:flex-row gap-6">
                       {/* Left: Listing Image */}
-                      <div className="relative w-full sm:w-48 h-32 shrink-0">
-                        <Image
-                          src={booking.listing?.images?.[0]}
-                          alt={booking.listing?.title || "Listing"}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
+                      <div className="relative w-full sm:w-48 h-32 shrink-0 bg-muted/30 rounded-lg overflow-hidden flex items-center justify-center border">
+                        {typeof booking.listing?.images?.[0] === "string" &&
+                        booking.listing.images[0].trim() !== "" ? (
+                          <Image
+                            src={booking.listing.images[0]}
+                            alt={booking.listing?.title || "Listing"}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <MapPin className="h-8 w-8 text-muted-foreground opacity-20" />
+                        )}
                       </div>
 
                       {/* Right: Content */}
@@ -152,8 +161,11 @@ export default function AdminBookingsPage() {
                             </h3>
                             <div className="flex items-center text-sm text-muted-foreground mt-1">
                               <MapPin className="mr-1 h-3 w-3" />
-                              {booking.listing?.location?.city || "Unknown City"},{" "}
-                              {booking.listing?.location?.country || "Unknown Country"}
+                              {booking.listing?.location?.city ||
+                                "Unknown City"}
+                              ,{" "}
+                              {booking.listing?.location?.country ||
+                                "Unknown Country"}
                             </div>
                           </div>
 
@@ -176,7 +188,8 @@ export default function AdminBookingsPage() {
                             <Avatar className="h-10 w-10">
                               <AvatarImage src={booking.guest?.avatar} />
                               <AvatarFallback>
-                                {booking.guest?.name?.charAt(0).toUpperCase() || "?"}
+                                {booking.guest?.name?.charAt(0).toUpperCase() ||
+                                  "?"}
                               </AvatarFallback>
                             </Avatar>
                             <div>

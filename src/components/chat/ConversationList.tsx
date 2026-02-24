@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { MessageSquare, MessagesSquare } from "lucide-react";
 
 export function ConversationList({
   conversations,
@@ -38,8 +39,17 @@ export function ConversationList({
 
   if (conversations.length === 0) {
     return (
-      <div className="p-4 text-center text-sm text-muted-foreground">
-        No conversations yet
+      <div className="flex flex-col gap-2 p-4 overflow-y-auto w-full h-full">
+        <h2 className="text-xl font-semibold mb-2">Messages</h2>
+        <div className="flex flex-col items-center justify-center p-8 text-center">
+          <MessagesSquare className="h-12 w-12 text-foreground mb-4 stroke-[1.5]" />
+          <h3 className="text-md font-semibold text-foreground mb-2 tracking-tight">
+            You don't have any messages
+          </h3>
+          <p className="text-sm text-muted-foreground">
+            When you receive a new message, it will appear here.
+          </p>
+        </div>
       </div>
     );
   }

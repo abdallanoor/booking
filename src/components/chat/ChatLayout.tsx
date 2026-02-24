@@ -85,8 +85,10 @@ function ChatLayoutContent() {
       >
         {selectedConversation ? (
           <ChatWindow
+            key={selectedConversation._id}
             conversation={selectedConversation}
             onBack={() => setSelectedConversationId(null)}
+            onMessageSent={fetchConversations}
           />
         ) : (
           <div className="flex h-full flex-col items-center justify-center text-muted-foreground p-8 text-center bg-accent/10">
@@ -96,10 +98,7 @@ function ChatLayoutContent() {
             <h3 className="text-xl font-semibold text-foreground mb-2">
               Your Messages
             </h3>
-            <p>
-              Select a conversation from the sidebar to start chatting with your
-              host or guest.
-            </p>
+            <p>Select a conversation to start messaging</p>
           </div>
         )}
       </div>
