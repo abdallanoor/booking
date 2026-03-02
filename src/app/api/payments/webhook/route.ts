@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongodb";
 import Booking from "@/models/Booking";
 import Payment from "@/models/Payment";
+import Conversation from "@/models/Conversation";
 import {
   verifyHmacSignature,
   parseWebhookPayload,
@@ -181,6 +182,27 @@ export async function POST(req: NextRequest) {
         booking.status = "confirmed";
         booking.paymentStatus = "paid";
         await booking.save();
+
+        // Auto-create a chat conversation between guest and host for this booking
+        try {
+          const listingObj = booking.listing as any;
+          const guestObj = booking.guest as any;
+          if (listingObj && listingObj.host && guestObj && guestObj._id) {
+            const existingConversation = await Conversation.findOne({
+              booking: booking._id,
+            });
+
+            if (!existingConversation) {
+              await Conversation.create({
+                participants: [guestObj._id, listingObj.host],
+                booking: booking._id,
+              });
+              // console.log("[Paymob Webhook] Auto-created conversation for booking:", booking._id);
+            }
+          }
+        } catch (convError) {
+          console.error("[Paymob Webhook] Failed to auto-create conversation:", convError);
+        }
 
         // Send confirmation email
         try {
