@@ -146,6 +146,7 @@ export interface ListingBase {
   bathrooms: number;
   privacyType: PrivacyType;
   status: ListingStatus;
+  rejectionReason?: string;
 }
 
 /**

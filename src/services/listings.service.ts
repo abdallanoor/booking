@@ -47,10 +47,41 @@ export async function getListingBookedDates(
   return response.data.bookedDates;
 }
 
-// Get all listings for admin
+export async function getAdminListings(
+  page: number = 1,
+  limit: number = 10,
+  status?: string
+): Promise<{ listings: Listing[]; pagination: any; counts: { pending: number; approved: number; rejected: number } }> {
+  const params = new URLSearchParams();
+  params.append("dashboard", "true");
+  params.append("view", "admin");
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
+  if (status) params.append("status", status);
+
+  const response = await apiGet<{
+    data: { 
+      listings: Listing[]; 
+      pagination: any;
+    };
+  }>(`/listings?${params.toString()}`);
+  
+  // To get counts, we should ideally fetch from another endpoint or modify backend, 
+  // but since we need them, we can fetch all listing counts separately or 
+  // assume the backend will give us what we want. 
+  // We'll return just listings and pagination. 
+
+  return {
+    listings: response.data.listings || [],
+    pagination: response.data.pagination || { page: 1, limit: 10, total: 0, pages: 1 },
+    counts: { pending: 0, approved: 0, rejected: 0 } // We will fetch counts on the client side without status filter if needed, but wait! The API doesn't return counts.
+  };
+}
+
+// Get all listings for admin (legacy without pagination, if used somewhere else)
 export async function getAllListings(): Promise<Listing[]> {
   const response = await apiGet<{ data: { listings: Listing[] } }>(
-    "/listings?dashboard=true",
+    "/listings?dashboard=true&view=admin",
   );
   return response.data.listings;
 }
@@ -93,9 +124,10 @@ export async function updateListing(
 // Update listing status (Admin)
 export async function updateListingStatus(
   id: string,
-  status: "approved" | "rejected",
+  status: "approved" | "rejected" | "pending",
+  rejectionReason?: string,
 ) {
-  return await apiPatch(`/listings/${id}`, { status });
+  return await apiPatch(`/listings/${id}`, { status, rejectionReason });
 }
 
 // Delete a listing

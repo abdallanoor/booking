@@ -70,7 +70,8 @@ export async function POST(req: NextRequest) {
       booking.listing &&
       typeof booking.listing === "object" &&
       "status" in booking.listing &&
-      (booking.listing as unknown as Listing).status === "pending"
+      (booking.listing as unknown as Listing).status === "pending" ||
+      (booking.listing as unknown as Listing).status === "rejected"
     ) {
       return errorResponse(
         "Property turned off: This property is currently not accepting reservations.",

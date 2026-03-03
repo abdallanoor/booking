@@ -55,7 +55,7 @@ export default function BookingsPage() {
   };
 
   const BookingSkeleton = () => (
-    <div className="rounded-md border bg-card">
+    <div className="rounded-2xl border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
@@ -129,10 +129,10 @@ export default function BookingsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="rounded-md border bg-card overflow-hidden">
+              <div className="rounded-2xl border bg-card overflow-hidden">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/30">
+                    <TableRow className="bg-muted!">
                       <TableHead>Listing</TableHead>
                       <TableHead>Guest</TableHead>
                       <TableHead>Check In</TableHead>
@@ -144,10 +144,7 @@ export default function BookingsPage() {
                   </TableHeader>
                   <TableBody>
                     {bookings.map((booking) => (
-                      <TableRow
-                        key={booking._id}
-                        className="hover:bg-muted/10 transition-colors"
-                      >
+                      <TableRow key={booking._id}>
                         <TableCell className="font-semibold text-primary">
                           {booking.listing?.title || "Unknown Listing"}
                         </TableCell>

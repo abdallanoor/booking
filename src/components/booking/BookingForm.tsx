@@ -467,11 +467,12 @@ export function BookingForm({
             isPending ||
             !date?.from ||
             !date?.to ||
-            listing.status === "pending"
+            listing.status === "pending" ||
+            listing.status === "rejected"
           }
           size="lg"
         >
-          {listing.status === "pending"
+          {listing.status === "pending" || listing.status === "rejected"
             ? "Listing turned off"
             : isPending
               ? "Booking..."

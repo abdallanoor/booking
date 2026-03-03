@@ -17,7 +17,7 @@ export default async function HostingPage() {
             dashboard.
           </p>
         </div>
-        <Button asChild>
+        <Button asChild size="lg">
           <Link href="/hosting/listings/new">
             <HousePlus />
             Add Listing

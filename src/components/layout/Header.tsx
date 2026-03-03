@@ -79,7 +79,7 @@ export function Header({ links }: HeaderProps) {
       <div className="container py-2.5 relative">
         <div className="flex items-center justify-between">
           <Logo />
-          <SectionNavigation section={section} customLinks={links} />
+          <SectionNavigation customLinks={links} />
           <div className="flex items-center gap-3">
             <NavActions user={user as HeaderUser | null} section={section} />
             <AuthNavigation user={user as HeaderUser | null} />
@@ -123,10 +123,8 @@ function HeaderSkeleton() {
 }
 
 function SectionNavigation({
-  section,
   customLinks,
 }: {
-  section: Section;
   customLinks?: { href: string; label: string; icon?: LucideIcon }[];
 }) {
   const pathname = usePathname();
@@ -134,7 +132,14 @@ function SectionNavigation({
 
   if (routes.length === 0) return null;
 
-  const baseRoute = section === "hosting" ? "/hosting" : "/admin";
+  // Find the best matching link (the longest one that matches the current pathname)
+  const activeLink = routes
+    .filter(
+      (l) =>
+        pathname === l.href ||
+        (l.href !== "/" && pathname?.startsWith(l.href + "/")),
+    )
+    .sort((a, b) => b.href.length - a.href.length)[0];
 
   return (
     <nav className="hidden md:flex items-center gap-px absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -144,8 +149,7 @@ function SectionNavigation({
           href={route.href}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary hover:bg-accent py-1.5 px-3 rounded-full leading-normal dark:hover:bg-accent/50",
-            pathname === route.href ||
-              (route.href !== baseRoute && pathname?.startsWith(route.href))
+            activeLink?.href === route.href
               ? "text-primary bg-accent"
               : "text-muted-foreground",
           )}

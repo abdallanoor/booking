@@ -38,7 +38,13 @@ export async function GET(req: NextRequest) {
     } else {
       // GLOBAL/ADMIN VIEW (or legacy fallback)
       if (user.role === "Admin") {
-        query = {};
+        const statusParam = searchParams.get("status");
+        if (statusParam && statusParam !== "all") {
+          query = { status: statusParam };
+        } else {
+          // Exclude pending_payment explicitly per request to only show confirmed and canceled
+          query = { status: { $in: ["confirmed", "cancelled"] } };
+        }
       } else {
         // Fallback for non-admin on generic view: show relevant stuff
         const listingIds = await Listing.find({ host: user._id }).distinct(

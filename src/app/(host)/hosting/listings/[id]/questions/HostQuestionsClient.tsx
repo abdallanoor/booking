@@ -223,7 +223,7 @@ export default function HostQuestionsClient({
         </Dialog>
       </div>
 
-      <div className="rounded-lg border overflow-hidden">
+      <div className="rounded-2xl border overflow-hidden">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>

@@ -95,7 +95,7 @@ export default function ListingsPage() {
   };
 
   const ListingSkeleton = () => (
-    <div className="rounded-md border bg-card">
+    <div className="rounded-2xl border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
@@ -145,7 +145,7 @@ export default function ListingsPage() {
           </p>
         </div>
         <Link href="/hosting/listings/new">
-          <Button className="rounded-full px-6 shadow-sm">
+          <Button size="lg">
             <HousePlus /> Add Listing
           </Button>
         </Link>
@@ -173,11 +173,11 @@ export default function ListingsPage() {
               </Link>
             </div>
           ) : (
-            <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-muted/30">
+                    <TableRow className="bg-muted!">
                       <TableHead className="w-[80px] px-6">Listing</TableHead>
                       <TableHead>Title</TableHead>
                       <TableHead>Status</TableHead>
@@ -187,10 +187,7 @@ export default function ListingsPage() {
                   </TableHeader>
                   <TableBody>
                     {listings.map((listing) => (
-                      <TableRow
-                        key={listing._id}
-                        className="hover:bg-muted/10 transition-colors"
-                      >
+                      <TableRow key={listing._id}>
                         <TableCell className="px-6">
                           <div className="relative h-12 w-20 overflow-hidden rounded-lg border bg-muted group">
                             <Image
@@ -209,6 +206,12 @@ export default function ListingsPage() {
                             <span className="text-xs text-muted-foreground font-medium">
                               {listing.location.city}
                             </span>
+                            {listing.status === "rejected" &&
+                              listing.rejectionReason && (
+                                <span className="text-xs text-red-500 font-medium mt-1">
+                                  Reason: {listing.rejectionReason}
+                                </span>
+                              )}
                           </div>
                         </TableCell>
                         <TableCell>

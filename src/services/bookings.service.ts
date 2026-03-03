@@ -35,3 +35,24 @@ export async function getHostBookings(
     pagination: response.data.pagination,
   };
 }
+
+export async function getAdminBookings(
+  page: number = 1,
+  limit: number = 10,
+  status?: string
+): Promise<{ bookings: Booking[]; pagination: any }> {
+  const params = new URLSearchParams();
+  params.append("view", "admin");
+  params.append("page", page.toString());
+  params.append("limit", limit.toString());
+  if (status) params.append("status", status);
+
+  const response = await apiGet<{
+    data: { bookings: Booking[]; pagination: any };
+  }>(`/bookings?${params.toString()}`);
+
+  return {
+    bookings: response.data.bookings || [],
+    pagination: response.data.pagination || { page: 1, limit: 10, total: 0, pages: 1 }
+  };
+}

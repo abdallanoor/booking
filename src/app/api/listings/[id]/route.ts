@@ -80,6 +80,13 @@ export async function PUT(
     }
 
     Object.assign(listing, validatedData);
+    
+    // If a Host modifies a listing, set its status to "pending" for Admin review
+    // We intentionally DO NOT clear rejectionReason so the admin can remember why it was rejected
+    if (user.role === "Host") {
+      listing.status = "pending";
+    }
+
     await listing.save();
 
     return successResponse({ listing }, "Listing updated successfully");
@@ -118,14 +125,16 @@ export async function PATCH(
 
     // Permission Logic
     if (body.status) {
-      // Status changes are typically Admin only, unless we allow Host to "cancel/hide"
       if (user.role !== "Admin") {
-        // For now, strict: only Admin changes status
         return errorResponse("Forbidden: Only Admin can change status", 403);
       }
+      
       if (!["approved", "rejected", "pending"].includes(body.status)) {
         return errorResponse("Invalid status", 400);
       }
+      
+      // Note: We intentionally don't clear rejectionReason automatically here 
+      // so Admins can reference the past rejection reason even after resubmission.
     } else {
       // Other partial updates?
       // Ensure user is owner or admin

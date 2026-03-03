@@ -194,7 +194,7 @@ export default function VerificationsPage() {
           </div>
         </div>
         {/* Filter */}
-        <div className="flex items-center justify-end gap-4">
+        <div className="flex items-center justify-end gap-4 ms-auto">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
@@ -211,7 +211,7 @@ export default function VerificationsPage() {
 
       {/* Table */}
       {loading && verifications.length === 0 ? (
-        <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+        <div className="rounded-2xl border bg-card overflow-hidden shadow-sm">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
@@ -268,7 +268,7 @@ export default function VerificationsPage() {
             }
           >
             {verifications.length === 0 ? (
-              <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+              <div className="rounded-2xl border bg-card overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
@@ -292,7 +292,7 @@ export default function VerificationsPage() {
                 </Table>
               </div>
             ) : (
-              <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
+              <div className="rounded-2xl border bg-card overflow-hidden shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">

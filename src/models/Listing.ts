@@ -134,6 +134,9 @@ const listingSchema = new Schema<IListingDocument>(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+    rejectionReason: {
+      type: String,
+    },
     host: {
       type: Schema.Types.ObjectId,
       ref: "User",

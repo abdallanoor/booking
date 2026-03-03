@@ -9,9 +9,40 @@ export async function GET(req: NextRequest) {
     await requireRole(req, ["Admin"]);
     await dbConnect();
 
-    const users = await User.find({}).sort({ createdAt: -1 });
+    const searchParams = req.nextUrl.searchParams;
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const skip = (page - 1) * limit;
+    const status = searchParams.get("status");
+    const search = searchParams.get("search");
 
-    return successResponse({ users });
+    let query: any = {};
+    if (status === "blocked") {
+      query.isBlocked = true;
+    }
+
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    const total = await User.countDocuments(query);
+    const users = await User.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return successResponse({
+      users,
+      pagination: {
+        total,
+        pages: Math.ceil(total / limit),
+        page,
+        limit,
+      },
+    });
   } catch (error) {
     console.error("Get admin users error:", error);
     const message =
