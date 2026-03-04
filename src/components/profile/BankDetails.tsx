@@ -268,7 +268,7 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
                         role="combobox"
                         aria-expanded={openCombobox}
                         className={cn(
-                          "w-full justify-between rounded-md! px-3 h-12",
+                          "w-full justify-between px-3 h-12",
                           "grid grid-cols-[1fr_20px] gap-2 items-center", // Grid layout for strict width
                           !field.value && "text-muted-foreground",
                           errors.bankCode && "border-destructive",
