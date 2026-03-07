@@ -150,11 +150,11 @@ export function PhoneVerification({
       <div className="space-y-2">
         <Label className="text-sm font-medium">Phone Number</Label>
         <div className="relative group">
-          <Phone className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+          <Phone className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
           <Input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="pl-9 pr-20"
+            className="ps-9 pe-20"
             placeholder="+201234567890"
             disabled={loading}
           />
@@ -163,7 +163,7 @@ export function PhoneVerification({
             onClick={handleSendOtp}
             disabled={loading || !phone.trim()}
             size="sm"
-            className="absolute right-1 top-2/4 -translate-y-2/4 h-7 px-3 text-xs font-semibold rounded-md"
+            className="absolute end-2 top-2/4 -translate-y-2/4 h-7 px-3 text-xs font-semibold"
           >
             {loading ? "Verify..." : "Verify"}
           </Button>

@@ -322,7 +322,10 @@ export function IdentityVerification({
           </div>
         )
       ) : (
-        <div className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300"
+        >
           {/* Document Type */}
           <div className="space-y-2">
             <Label className="text-sm font-medium">Document Type</Label>
@@ -434,7 +437,7 @@ export function IdentityVerification({
               {loading ? "Submitting..." : "Submit for Verification"}
             </Button>
           </div>
-        </div>
+        </form>
       )}
     </div>
   );
