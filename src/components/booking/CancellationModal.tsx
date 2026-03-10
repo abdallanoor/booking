@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cancelBookingAction } from "@/actions";
+import { useTranslations } from "next-intl";
 
 interface CancellationModalProps {
   bookingId: string;
@@ -38,6 +39,7 @@ export function CancellationModal({
   open,
   onOpenChange,
 }: CancellationModalProps) {
+  const t = useTranslations("bookings");
   const [step, setStep] = useState<"policy" | "reason" | "confirm">("policy");
   const [reason, setReason] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -62,15 +64,15 @@ export function CancellationModal({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result: any = await cancelBookingAction(bookingId);
       if (result.success || result.data) {
-        toast.success("Booking cancelled successfully");
+        toast.success(t("cancel_success"));
         handleClose();
       } else {
-        toast.error(result.message || "Failed to cancel booking");
+        toast.error(result.message || t("cancel_failed"));
       }
     } catch (error) {
       // Extract error message if possible
       const msg =
-        error instanceof Error ? error.message : "An unexpected error occurred";
+        error instanceof Error ? error.message : t("unexpected_error");
       toast.error(msg);
     } finally {
       setIsSubmitting(false);
@@ -82,53 +84,43 @@ export function CancellationModal({
       <DialogContent className="sm:max-w-[500px]">
         {step === "policy" && (
           <>
-            <DialogHeader>
-              <DialogTitle>Cancel Booking</DialogTitle>
-              <DialogDescription>
-                Please review our cancellation policy before proceeding.
-              </DialogDescription>
+            <DialogHeader className="text-start">
+              <DialogTitle>{t("title_cancel")}</DialogTitle>
+              <DialogDescription>{t("review_policy")}</DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-4">
+            <div className="py-4 space-y-4 text-start">
               {isTooLate ? (
                 <div className="bg-destructive/10 border border-destructive/20 p-4 rounded-md text-sm">
                   <div className="flex items-start gap-2 mb-2">
                     <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
                     <p className="font-semibold text-destructive">
-                      No Refund Available
+                      {t("no_refund")}
                     </p>
                   </div>
-                  <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                  <ul className="list-disc ps-5 space-y-1 text-muted-foreground">
                     <li>
-                      You are cancelling less than 48 hours before check-in ({format(checkIn, "PPP p")}).
+                      {t("cancelling_48h_less", {
+                        time: format(checkIn, "PPP p"),
+                      })}
                     </li>
                     <li className="font-semibold text-destructive">
-                      No refund will be issued for this cancellation.
+                      {t("no_refund_issued")}
                     </li>
+                    <li>{t("cancellation_rule")}</li>
                     <li>
-                      According to our policy, free cancellations must be made at least 48 hours before check-in.
-                    </li>
-                    <li>
-                      Time remaining: {hoursUntilCheckIn.toFixed(1)} hours
+                      {t("time_remaining", {
+                        hours: hoursUntilCheckIn.toFixed(1),
+                      })}
                     </li>
                   </ul>
                 </div>
               ) : (
                 <div className="bg-muted p-4 rounded-md text-sm">
-                  <p className="font-semibold mb-2">
-                    Policy: 48-Hour Free Cancellation
-                  </p>
-                  <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                    <li>
-                      You are cancelling more than 48 hours before check-in.
-                    </li>
-                    <li>
-                      You are eligible for a refund according to the host&apos;s
-                      policy.
-                    </li>
-                    <li>
-                      Refunds may take 5-10 business days to appear on your
-                      statement.
-                    </li>
+                  <p className="font-semibold mb-2">{t("policy_48h")}</p>
+                  <ul className="list-disc ps-5 space-y-1 text-muted-foreground">
+                    <li>{t("cancelling_48h_more")}</li>
+                    <li>{t("eligible_refund")}</li>
+                    <li>{t("refund_time")}</li>
                   </ul>
                 </div>
               )}
@@ -137,12 +129,12 @@ export function CancellationModal({
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="mr-auto"
+                className="ms-auto"
               >
-                Keep Booking
+                {t("keep_booking")}
               </Button>
               <Button onClick={() => setStep("reason")}>
-                Next: Select Reason
+                {t("next_reason")}
               </Button>
             </DialogFooter>
           </>
@@ -150,46 +142,47 @@ export function CancellationModal({
 
         {step === "reason" && (
           <>
-            <DialogHeader>
-              <DialogTitle>Reason for Cancellation</DialogTitle>
-              <DialogDescription>
-                Please tell us why you are cancelling. This helps us improve.
-              </DialogDescription>
+            <DialogHeader className="text-start">
+              <DialogTitle>{t("title_reason")}</DialogTitle>
+              <DialogDescription>{t("why_cancelling")}</DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-4">
+            <div className="py-4 space-y-4 text-start">
               <div className="space-y-2">
-                <Label>Reason</Label>
+                <Label>{t("reason")}</Label>
                 <Select value={reason} onValueChange={setReason}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a reason" />
+                    <SelectValue placeholder={t("select_reason")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="change_of_plans">
-                      Change of plans
+                      {t("change_plans")}
                     </SelectItem>
                     <SelectItem value="found_better_place">
-                      Found a better place
+                      {t("better_place")}
                     </SelectItem>
                     <SelectItem value="financial_reasons">
-                      Financial reasons
+                      {t("financial")}
                     </SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="other">{t("other")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {reason === "other" && (
                 <div className="space-y-2">
-                  <Label>Details (Optional)</Label>
-                  <Textarea placeholder="Please provide more details..." />
+                  <Label>{t("details_optional")}</Label>
+                  <Textarea
+                    placeholder={t("provide_details")}
+                    className="text-start"
+                  />
                 </div>
               )}
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setStep("policy")}>
-                Back
+                {t("back")}
               </Button>
               <Button onClick={() => setStep("confirm")} disabled={!reason}>
-                Next
+                {t("next")}
               </Button>
             </DialogFooter>
           </>
@@ -197,18 +190,15 @@ export function CancellationModal({
 
         {step === "confirm" && (
           <>
-            <DialogHeader>
-              <DialogTitle>Confirm Cancellation</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to cancel this booking? This action cannot
-                be undone.
-              </DialogDescription>
+            <DialogHeader className="text-start">
+              <DialogTitle>{t("title_confirm")}</DialogTitle>
+              <DialogDescription>{t("are_you_sure")}</DialogDescription>
             </DialogHeader>
 
-            <div className="py-2">
-              <p className="text-sm text-muted-foreground">
-                Check-in:{" "}
-                <span className="font-medium text-foreground">
+            <div className="py-2 text-start">
+              <p className="text-sm text-muted-foreground flexitems-center gap-1">
+                {t("check_in_date")}:{" "}
+                <span className="font-medium text-foreground mx-1" dir="ltr">
                   {format(checkIn, "PPP")}
                 </span>
               </p>
@@ -220,7 +210,7 @@ export function CancellationModal({
                 onClick={() => setStep("reason")}
                 disabled={isSubmitting}
               >
-                Back
+                {t("back")}
               </Button>
               <Button
                 variant="destructive"
@@ -229,11 +219,11 @@ export function CancellationModal({
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Cancelling...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin rtl:ml-2 rtl:mr-0" />
+                    {t("cancelling")}
                   </>
                 ) : (
-                  "Confirm Cancellation"
+                  t("confirm_cancellation")
                 )}
               </Button>
             </DialogFooter>

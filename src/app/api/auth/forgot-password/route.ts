@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Only allow password reset for local provider users
-    if (user.provider !== "local") {
+    // Check if user has a non-local provider and no password
+    if (user.provider !== "local" && !user.password) {
       return errorResponse(
         "This account uses Google Sign-In. Please login with Google.",
         400

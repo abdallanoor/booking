@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+
 
 // Client-side API utilities (for use in browser/client components)
 
@@ -16,11 +16,13 @@ async function fetchAPIClient<T>(
   });
 
   if (response.status === 401) {
-    redirect("/api/auth/logout?redirect=/auth/login");
+    window.location.href = "/api/auth/logout?redirect=/auth/login";
+    return Promise.reject(new Error("Unauthorized"));
   }
 
   if (response.status === 403) {
-    redirect("/");
+    window.location.href = "/";
+    return Promise.reject(new Error("Forbidden"));
   }
 
   if (!response.ok) {

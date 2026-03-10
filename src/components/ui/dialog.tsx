@@ -69,7 +69,7 @@ function DialogContent({
 
           // Default variant: centered dialog
           variant === "default" && [
-            "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
+            "top-1/2 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 -translate-y-1/2",
             "max-w-[calc(100%-2rem)] sm:max-w-md",
             "rounded-4xl",
             "data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
@@ -79,13 +79,13 @@ function DialogContent({
           // Drawer variant: bottom on mobile, centered on desktop
           variant === "drawer" && [
             // Mobile & Tablet: bottom drawer with full width
-            "bottom-0 left-0 right-0 max-w-full",
+            "bottom-0 inset-x-0 max-w-full",
             "rounded-t-4xl max-h-[85vh] border-t border-foreground/5",
             "data-[state=open]:slide-in-from-bottom data-[state=closed]:slide-out-to-bottom",
 
             // Desktop: centered dialog
-            "md:bottom-auto md:left-1/2 md:top-1/2 md:right-auto",
-            "md:max-w-md md:-translate-x-1/2 md:-translate-y-1/2",
+            "md:bottom-auto md:start-1/2 md:top-1/2 md:end-auto",
+            "md:max-w-md md:-translate-x-1/2 md:rtl:translate-x-1/2 md:-translate-y-1/2",
             "md:rounded-4xl md:border-t-0",
             "md:data-[state=open]:slide-in-from-bottom-[5%] md:data-[state=closed]:slide-out-to-top-[-5%]",
             "md:data-[state=open]:fade-in-0 md:data-[state=closed]:fade-out-0",
@@ -100,7 +100,7 @@ function DialogContent({
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
             <Button
               variant="ghost"
-              className="absolute top-4 right-4"
+              className="absolute top-4 end-4"
               size="icon-sm"
             >
               <XIcon />

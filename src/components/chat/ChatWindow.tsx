@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send } from "lucide-react";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 
 export function ChatWindow({
   conversation,
@@ -19,6 +20,7 @@ export function ChatWindow({
   onMessageSent?: () => void;
 }) {
   const { user } = useAuth();
+  const t = useTranslations("chat");
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -94,7 +96,7 @@ export function ChatWindow({
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b">
         <Button variant="secondary" size="icon" onClick={onBack}>
-          <ArrowLeft />
+          <ArrowLeft className="rtl:rotate-180" />
         </Button>
         <Avatar className="h-10 w-10 border">
           <AvatarImage src={otherParticipant?.avatar} />
@@ -133,14 +135,14 @@ export function ChatWindow({
         ) : messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-500">
             <h3 className="text-2xl font-semibold mb-2 text-foreground tracking-tight">
-              Say hello! 👋
+              {t("say_hello")}
             </h3>
             <p className="text-muted-foreground max-w-sm mx-auto text-base">
-              This is the beginning of your conversation with{" "}
+              {t("convo_start")}{" "}
               <span className="font-medium text-foreground">
                 {otherParticipant?.name}
               </span>
-              . Send a message to start planning!
+              {t("send_to_start")}
             </p>
           </div>
         ) : (
@@ -187,7 +189,7 @@ export function ChatWindow({
           <Input
             type="text"
             className="flex-1 rounded-full px-4 h-10"
-            placeholder="Type your message..."
+            placeholder={t("type_message")}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             disabled={sending}
@@ -198,8 +200,8 @@ export function ChatWindow({
             className="rounded-full shrink-0"
             disabled={!newMessage.trim() || sending}
           >
-            <Send />
-            <span className="sr-only">Send</span>
+            <Send className="rtl:-scale-x-100" />
+            <span className="sr-only">{t("send")}</span>
           </Button>
         </form>
       </div>

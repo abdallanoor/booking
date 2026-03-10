@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface StartChatButtonProps {
   bookingId: string;
@@ -18,6 +19,7 @@ export function StartChatButton({
   iconOnly = false,
 }: StartChatButtonProps) {
   const router = useRouter();
+  const t = useTranslations("chat");
   const [loading, setLoading] = useState(false);
 
   const startChat = async () => {
@@ -37,10 +39,10 @@ export function StartChatButton({
             : `/messages?chatId=${data.data.conversation._id}`,
         );
       } else {
-        toast.error(data.message || "Failed to start chat");
+        toast.error(data.message || t("failed_start"));
       }
     } catch (error) {
-      toast.error("Failed to start chat. Please try again.");
+      toast.error(t("failed_start_retry"));
     } finally {
       setLoading(false);
     }
@@ -53,10 +55,10 @@ export function StartChatButton({
       variant="outline"
       size={iconOnly ? "icon" : "default"}
       className={iconOnly ? "" : "w-full mt-4"}
-      title={isHost ? "Message Guest" : "Message Host"}
+      title={isHost ? t("message_guest") : t("message_host")}
     >
       <MessageSquare className={iconOnly ? "h-4 w-4" : "mr-2 h-4 w-4"} />
-      {!iconOnly && (isHost ? "Message Guest" : "Message Host")}
+      {!iconOnly && (isHost ? t("message_guest") : t("message_host"))}
     </Button>
   );
 }

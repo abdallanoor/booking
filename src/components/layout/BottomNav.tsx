@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/navigation";
+import { usePathname } from "@/navigation";
 import { cn } from "@/lib/utils";
 import type { BottomNavLink } from "@/types";
 
@@ -30,6 +30,7 @@ export function BottomNav({ links }: BottomNavProps) {
           <Link
             key={link.href}
             href={link.href}
+            prefetch={false}
             className={cn(
               "flex flex-col items-center justify-center gap-1 w-full h-full",
               isActive

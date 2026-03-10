@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import type { User } from "@/types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { PhoneVerification } from "./PhoneVerification";
 
 // User type from AuthContext uses 'id' instead of '_id'
@@ -34,6 +35,7 @@ export function ProfileForm({
   className,
   isDialog = false,
 }: ProfileFormProps) {
+  const t = useTranslations("personal_details");
   const [loading, setLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -89,17 +91,17 @@ export function ProfileForm({
       });
       if (result.success) {
         if (!isDialog) {
-          toast.success("Personal details updated successfully");
+          toast.success(t("update_success"));
         }
         setIsDirty(false);
         if (onSuccess) {
           onSuccess();
         }
       } else {
-        toast.error(result.message || "Failed to update profile");
+        toast.error(result.message || t("update_failed"));
       }
     } catch {
-      toast.error("An unexpected error occurred");
+      toast.error(t("unexpected_error"));
     } finally {
       setLoading(false);
     }
@@ -110,12 +112,8 @@ export function ProfileForm({
       {!isDialog && (
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h3 className="text-xl font-bold text-foreground">
-              Personal Details
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Update your account information and contact details.
-            </p>
+            <h3 className="text-xl font-bold text-foreground">{t("title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
           <Button
             form="personal-details-form"
@@ -125,7 +123,7 @@ export function ProfileForm({
             variant="secondary"
           >
             {loading ? <Loader2 className="animate-spin" /> : <SaveIcon />}
-            <span className="hidden sm:inline">Save</span>
+            <span className="hidden sm:inline">{t("save")}</span>
           </Button>
         </div>
       )}
@@ -138,43 +136,43 @@ export function ProfileForm({
         className="space-y-6"
       >
         <div className="grid gap-6">
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <Label htmlFor="name" className="text-sm font-medium">
-              Full Name
+              {t("full_name")}
             </Label>
             <div className="relative group">
-              <UserIcon className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <UserIcon className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 id="name"
                 name="name"
                 defaultValue={user.name}
-                className="pl-9"
-                placeholder="Your full name"
+                className="ps-9"
+                placeholder={t("name_placeholder")}
               />
             </div>
           </div>
 
           {!isDialog && (
-            <div className="space-y-2">
+            <div className="space-y-2 text-start">
               <div className="flex items-center justify-between">
                 <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address
+                  {t("email")}
                 </Label>
                 {user.emailVerified && (
                   <div className="flex items-center gap-1 text-xs font-bold text-green-600 px-1.5 py-0.5 tracking-tight">
                     <CheckCircle2 className="h-3 w-3" />
-                    Verified
+                    {t("verified")}
                   </div>
                 )}
               </div>
               <div className="relative group">
-                <Mail className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Mail className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   id="email"
                   value={user.email}
                   readOnly
                   disabled
-                  className="pl-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed"
+                  className="ps-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed text-start text-foreground/70"
                 />
               </div>
             </div>
@@ -187,18 +185,18 @@ export function ProfileForm({
             onVerified={(phone) => setVerifiedPhone(phone)}
           />
 
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <Label htmlFor="country" className="text-sm font-medium">
-              Country
+              {t("country")}
             </Label>
             <div className="relative group">
-              <Globe className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <Globe className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 id="country"
                 name="country"
                 defaultValue={user.country}
-                className="pl-9"
-                placeholder="e.g. United States"
+                className="ps-9"
+                placeholder={t("country_placeholder")}
               />
             </div>
           </div>
@@ -214,10 +212,10 @@ export function ProfileForm({
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" />
-                  Saving...
+                  {t("saving")}
                 </>
               ) : (
-                "Save & Continue"
+                t("save_continue")
               )}
             </Button>
           </div>

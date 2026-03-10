@@ -11,7 +11,7 @@ export default async function QuestionList({ listingId }: QuestionListProps) {
   const { questions, hasAskedQuestion } = await getListingQuestions(listingId);
 
   return (
-    <Suspense fallback={<p>Loading...</p>}>
+    <Suspense fallback={null}>
       <QuestionsDisplay
         questions={questions}
         listingId={listingId}

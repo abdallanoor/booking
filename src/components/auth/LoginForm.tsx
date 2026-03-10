@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { GoogleLoginBtn } from "./GoogleLoginBtn";
 import { useRouter } from "nextjs-toploader/app";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export function LoginForm() {
   const router = useRouter();
@@ -26,6 +27,7 @@ export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const t = useTranslations("auth");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,10 +35,10 @@ export function LoginForm() {
     startTransition(async () => {
       try {
         await login(email, password);
-        toast.success("Logged in successfully");
+        toast.success(t("login_success"));
         router.push(callbackUrl);
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : "Login failed");
+        toast.error(error instanceof Error ? error.message : t("login_failed"));
       }
     });
   };
@@ -44,19 +46,17 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Login</CardTitle>
-        <CardDescription>
-          Enter your credentials to access your account
-        </CardDescription>
+        <CardTitle>{t("login_title")}</CardTitle>
+        <CardDescription>{t("login_desc")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("email_label")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder={t("email_placeholder")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -66,19 +66,11 @@ export function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Password</Label>
-              <Link
-                href="/auth/forgot-password"
-                className="text-xs text-muted-foreground hover:text-primary"
-              >
-                Forgot password?
-              </Link>
-            </div>
+            <Label htmlFor="password">{t("password_label")}</Label>
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t("password_placeholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -86,6 +78,14 @@ export function LoginForm() {
               autoComplete="current-password"
               disabled={isPending}
             />
+            <div className="flex mt-1 justify-end">
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs text-muted-foreground hover:text-primary hover:underline"
+              >
+                {t("forgot_password_link")}
+              </Link>
+            </div>
           </div>
 
           <Button
@@ -94,7 +94,7 @@ export function LoginForm() {
             className="w-full"
             disabled={isPending}
           >
-            {isPending ? "Logging in..." : "Login"}
+            {isPending ? t("logging_in") : t("login_title")}
           </Button>
 
           <div className="relative">
@@ -103,7 +103,7 @@ export function LoginForm() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
-                Or continue with
+                {t("or_continue_with")}
               </span>
             </div>
           </div>

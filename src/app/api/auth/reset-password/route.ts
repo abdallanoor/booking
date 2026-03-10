@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
       return errorResponse("Reset token has expired", 400);
     }
 
-    // Only allow password reset for local provider users
-    if (user.provider !== "local") {
+    // Check if user has a non-local provider and no password
+    if (user.provider !== "local" && !user.password) {
       return errorResponse(
         "Password reset is not available for this account",
         400

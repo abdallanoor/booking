@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Loader2,
   IdCard,
   CheckCircle2,
   Upload,
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { submitIdentityVerificationAction } from "@/actions";
 import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface IdentityVerificationProps {
   identityVerified?: boolean;
@@ -35,8 +36,8 @@ type VerificationState = {
 export function IdentityVerification({
   identityVerified,
   nationalId,
-  onVerified,
 }: IdentityVerificationProps) {
+  const t = useTranslations("identity_verification");
   const [verification, setVerification] = useState<VerificationState>({
     status: identityVerified ? "approved" : "none",
     idNumber: nationalId,
@@ -97,12 +98,12 @@ export function IdentityVerification({
     if (!file) return;
 
     if (file.size > 1 * 1024 * 1024) {
-      toast.error("File size must be less than 1MB");
+      toast.error(t("file_size_error"));
       return;
     }
 
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file");
+      toast.error(t("file_type_error"));
       return;
     }
 
@@ -119,7 +120,7 @@ export function IdentityVerification({
 
   const handleSubmit = async () => {
     if (!idNumber.trim() || !selectedFile) {
-      toast.error("Please fill in all fields and upload an image");
+      toast.error(t("fill_fields"));
       return;
     }
 
@@ -133,7 +134,7 @@ export function IdentityVerification({
       const result = await submitIdentityVerificationAction(formData);
 
       if (result.success) {
-        toast.success("Verification request submitted!");
+        toast.success(t("submit_success"));
         setVerification({
           status: "pending",
           type: docType,
@@ -142,11 +143,11 @@ export function IdentityVerification({
         clearFile();
         setIdNumber("");
       } else {
-        toast.error(result.message || "Failed to submit");
+        toast.error(result.message || t("submit_failed"));
       }
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "An unexpected error occurred";
+        error instanceof Error ? error.message : t("unexpected_error");
       toast.error(message);
     } finally {
       setLoading(false);
@@ -155,49 +156,44 @@ export function IdentityVerification({
 
   if (fetching) {
     return (
-      <div className="p-6 md:p-10 border-t border-border animate-pulse">
+      <div className="p-6 md:p-10 border-t border-border mt-8">
         <div className="mb-8 space-y-2">
-          <div className="h-6 w-48 bg-muted rounded-md" />
-          <div className="h-4 w-64 bg-muted/60 rounded-md" />
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-4 w-64" />
         </div>
         <div className="space-y-2">
-          <div className="h-4 w-40 bg-muted/60 rounded-md" />
-          <div className="h-10 w-full bg-muted rounded-lg" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-10 w-full rounded-4xl" />
         </div>
       </div>
     );
   }
 
-  // ── Verified ──
   if (verification.status === "approved") {
     return (
-      <div className="p-6 md:p-10 border-t border-border">
-        <div className="mb-8">
-          <h3 className="text-xl font-bold text-foreground">
-            Identity Verification
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            Your identity has been verified.
-          </p>
+      <div className="p-6 md:p-10 border-t border-border mt-8">
+        <div className="mb-8 text-start">
+          <h3 className="text-xl font-bold text-foreground">{t("title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("verified_desc")}</p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 text-start">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">
-              National ID / Passport Number
+              {t("doc_national_id_label")}
             </Label>
             <div className="flex items-center gap-1 text-xs font-bold text-green-600 px-1.5 py-0.5 tracking-tight">
               <CheckCircle2 className="h-3 w-3" />
-              Verified
+              {t("verified")}
             </div>
           </div>
           <div className="relative group">
-            <IdCard className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground" />
+            <IdCard className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground" />
             <Input
               value={nationalId || verification.idNumber || ""}
               readOnly
               disabled
-              className="pl-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed"
+              className="ps-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed"
             />
           </div>
         </div>
@@ -205,38 +201,35 @@ export function IdentityVerification({
     );
   }
 
-  // ── Pending ──
   if (verification.status === "pending") {
     return (
-      <div className="p-6 md:p-10 border-t border-border">
-        <div className="mb-8">
-          <h3 className="text-xl font-bold text-foreground">
-            Identity Verification
-          </h3>
+      <div className="p-6 md:p-10 border-t border-border mt-8">
+        <div className="mb-8 text-start">
+          <h3 className="text-xl font-bold text-foreground">{t("title")}</h3>
           <p className="text-sm text-muted-foreground">
-            Your document is under review.
+            {t("under_review_desc")}
           </p>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 text-start">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">
               {verification.type === "national_id"
-                ? "National ID Number"
-                : "Passport Number"}
+                ? t("national_id_label")
+                : t("passport_label")}
             </Label>
             <div className="flex items-center gap-1 text-xs font-bold text-amber-600 px-1.5 py-0.5 tracking-tight">
               <Clock className="h-3 w-3" />
-              Pending
+              {t("pending")}
             </div>
           </div>
           <div className="relative group">
-            <IdCard className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground" />
+            <IdCard className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground" />
             <Input
               value={verification.idNumber || ""}
               readOnly
               disabled
-              className="pl-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed"
+              className="ps-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed"
             />
           </div>
         </div>
@@ -244,18 +237,15 @@ export function IdentityVerification({
     );
   }
 
-  // ── Form (new / rejected) ──
   return (
-    <div className="p-6 md:p-10 border-t border-border">
+    <div className="p-6 md:p-10 border-t border-border mt-8">
       <div className="flex items-center justify-between mb-8">
-        <div>
-          <h3 className="text-xl font-bold text-foreground">
-            Identity Verification
-          </h3>
+        <div className="text-start">
+          <h3 className="text-xl font-bold text-foreground">{t("title")}</h3>
           <p className="text-sm text-muted-foreground">
             {verification.status === "rejected"
-              ? "Update your ID or passport information."
-              : "Submit your ID or passport for verification."}
+              ? t("rejected_desc")
+              : t("submit_desc")}
           </p>
         </div>
         {!isEditing && (
@@ -267,12 +257,12 @@ export function IdentityVerification({
             {verification.status === "rejected" ? (
               <>
                 <Pencil />
-                <span className="max-sm:hidden">Update Details</span>
+                <span className="max-sm:hidden">{t("update_details")}</span>
               </>
             ) : (
               <>
                 <Plus />
-                <span className="max-sm:hidden">Add Details</span>
+                <span className="max-sm:hidden">{t("add_details")}</span>
               </>
             )}
           </Button>
@@ -284,7 +274,7 @@ export function IdentityVerification({
             onClick={() => setIsEditing(false)}
             disabled={loading}
           >
-            Cancel
+            {t("cancel")}
           </Button>
         )}
       </div>
@@ -294,11 +284,13 @@ export function IdentityVerification({
           <div className="p-2 bg-destructive/10 rounded-full shrink-0">
             <XCircle className="h-4 w-4 text-destructive" />
           </div>
-          <div>
-            <p className="font-semibold text-destructive">Request Rejected</p>
+          <div className="text-start">
+            <p className="font-semibold text-destructive">
+              {t("request_rejected")}
+            </p>
             {verification.rejectionReason && (
               <p className="text-muted-foreground text-xs mt-0.5">
-                Reason: {verification.rejectionReason}
+                {t("reason")} {verification.rejectionReason}
               </p>
             )}
           </div>
@@ -312,11 +304,9 @@ export function IdentityVerification({
               <div className="p-4 bg-muted rounded-full">
                 <IdCard className="h-8 w-8 opacity-80" />
               </div>
-              <p className="font-medium text-foreground">
-                No identity details provided
-              </p>
+              <p className="font-medium text-foreground">{t("no_details")}</p>
               <p className="text-xs max-w-xs mx-auto text-muted-foreground">
-                A valid ID or passport is required to verify your identity.
+                {t("no_details_desc")}
               </p>
             </div>
           </div>
@@ -327,54 +317,54 @@ export function IdentityVerification({
           className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300"
         >
           {/* Document Type */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Document Type</Label>
+          <div className="space-y-2 text-start">
+            <Label className="text-sm font-medium">{t("doc_type")}</Label>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => setDocType("national_id")}
                 className={cn(
-                  "rounded-lg border p-3 text-sm font-medium transition-colors text-center",
+                  "rounded-4xl border p-3 text-sm font-medium transition-colors text-center",
                   docType === "national_id"
                     ? "border-foreground bg-foreground text-background"
                     : "border-border text-muted-foreground hover:border-foreground/30",
                 )}
               >
-                National ID
+                {t("national_id")}
               </button>
               <button
                 type="button"
                 onClick={() => setDocType("passport")}
                 className={cn(
-                  "rounded-lg border p-3 text-sm font-medium transition-colors text-center",
+                  "rounded-4xl border p-3 text-sm font-medium transition-colors text-center",
                   docType === "passport"
                     ? "border-foreground bg-foreground text-background"
                     : "border-border text-muted-foreground hover:border-foreground/30",
                 )}
               >
-                Passport
+                {t("passport")}
               </button>
             </div>
           </div>
 
           {/* ID Number */}
-          <div className="space-y-2">
+          <div className="space-y-2 text-start">
             <Label htmlFor="idNumber" className="text-sm font-medium">
               {docType === "national_id"
-                ? "National ID Number"
-                : "Passport Number"}
+                ? t("national_id_label")
+                : t("passport_label")}
             </Label>
             <div className="relative group">
-              <IdCard className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <IdCard className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 id="idNumber"
                 value={idNumber}
                 onChange={(e) => setIdNumber(e.target.value)}
-                className="pl-9"
+                className="ps-9"
                 placeholder={
                   docType === "national_id"
-                    ? "e.g. 29901011234567"
-                    : "e.g. A12345678"
+                    ? t("id_placeholder")
+                    : t("passport_placeholder")
                 }
                 disabled={loading}
               />
@@ -382,11 +372,11 @@ export function IdentityVerification({
           </div>
 
           {/* Image Upload */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Document Image</Label>
+          <div className="space-y-2 text-start">
+            <Label className="text-sm font-medium">{t("doc_image")}</Label>
 
             {preview ? (
-              <div className="relative rounded-lg border overflow-hidden max-w-[250px]">
+              <div className="relative rounded-4xl border overflow-hidden max-w-[250px]">
                 <img
                   src={preview}
                   alt="Document preview"
@@ -397,9 +387,9 @@ export function IdentityVerification({
                   variant="secondary"
                   size="sm"
                   onClick={clearFile}
-                  className="absolute top-2 right-2"
+                  className="absolute top-2 end-2"
                 >
-                  Remove
+                  {t("remove")}
                 </Button>
               </div>
             ) : (
@@ -407,13 +397,11 @@ export function IdentityVerification({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
-                className="w-full rounded-lg border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors p-8 flex flex-col items-center gap-2 text-muted-foreground"
+                className="w-full rounded-4xl border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors p-8 flex flex-col items-center gap-2 text-muted-foreground"
               >
                 <Upload className="h-5 w-5" />
-                <span className="text-sm font-medium">
-                  Upload document image
-                </span>
-                <span className="text-xs">PNG, JPG up to 1MB</span>
+                <span className="text-sm font-medium">{t("upload_image")}</span>
+                <span className="text-xs">{t("image_limits")}</span>
               </button>
             )}
 
@@ -434,7 +422,7 @@ export function IdentityVerification({
               disabled={loading || !idNumber.trim() || !selectedFile}
               className="flex-1 sm:flex-none"
             >
-              {loading ? "Submitting..." : "Submit for Verification"}
+              {loading ? t("submitting") : t("submit")}
             </Button>
           </div>
         </form>

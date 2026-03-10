@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface PhoneVerificationProps {
   currentPhone?: string;
@@ -32,6 +33,7 @@ export function PhoneVerification({
   currentPhone,
   onVerified,
 }: PhoneVerificationProps) {
+  const t = useTranslations("phone_verification");
   const [step, setStep] = useState<Step>(currentPhone ? "display" : "input");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -52,19 +54,19 @@ export function PhoneVerification({
   const handleSendOtp = async () => {
     const cleaned = phone.replace(/\s/g, "");
     if (!cleaned) {
-      toast.error("Please enter a phone number");
+      toast.error(t("enter_phone"));
       return;
     }
 
     setLoading(true);
     try {
       await apiClient.post("/user/phone/send-otp", { phone: cleaned });
-      toast.success("Verification code sent!");
+      toast.success(t("otp_sent"));
       setStep("otp");
       setCountdown(60);
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to send code",
+        error instanceof Error ? error.message : t("otp_send_failed"),
       );
     } finally {
       setLoading(false);
@@ -81,14 +83,12 @@ export function PhoneVerification({
         phone: cleaned,
         code: otp,
       });
-      toast.success("Phone number verified!");
+      toast.success(t("phone_verified"));
       onVerified(cleaned);
       setStep("display");
       setOtp("");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Invalid verification code",
-      );
+      toast.error(error instanceof Error ? error.message : t("otp_invalid"));
       setOtp("");
     } finally {
       setLoading(false);
@@ -101,12 +101,12 @@ export function PhoneVerification({
     try {
       const cleaned = phone.replace(/\s/g, "");
       await apiClient.post("/user/phone/send-otp", { phone: cleaned });
-      toast.success("New verification code sent!");
+      toast.success(t("otp_resent"));
       setCountdown(60);
       setOtp("");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to resend code",
+        error instanceof Error ? error.message : t("otp_resend_failed"),
       );
     } finally {
       setLoading(false);
@@ -123,21 +123,22 @@ export function PhoneVerification({
   // -- Verified phone display --
   if (step === "display" && currentPhone) {
     return (
-      <div className="space-y-2">
+      <div className="space-y-2 text-start">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Phone Number</Label>
+          <Label className="text-sm font-medium">{t("phone_number")}</Label>
           <div className="flex items-center gap-1 text-xs font-bold text-green-600 tracking-tight">
             <CheckCircle2 className="h-3 w-3" />
-            Verified
+            {t("verified")}
           </div>
         </div>
         <div className="relative group">
-          <Phone className="absolute left-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground" />
+          <Phone className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground" />
           <Input
             value={currentPhone}
             readOnly
             disabled
-            className="pl-9 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed"
+            dir="ltr"
+            className="pl-9 rtl:pr-9 rtl:pl-3 bg-secondary/5 border-dashed border-muted-foreground/20 cursor-not-allowed text-left rtl:text-right text-foreground/70"
           />
         </div>
       </div>
@@ -147,15 +148,16 @@ export function PhoneVerification({
   // -- Phone input step --
   if (step === "input") {
     return (
-      <div className="space-y-2">
-        <Label className="text-sm font-medium">Phone Number</Label>
+      <div className="space-y-2 text-start">
+        <Label className="text-sm font-medium">{t("phone_number")}</Label>
         <div className="relative group">
           <Phone className="absolute start-3 top-2/4 -translate-y-2/4 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
           <Input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="ps-9 pe-20"
+            className="pl-9 pr-20 rtl:pl-20 rtl:pr-9 text-left rtl:text-right"
             placeholder="+201234567890"
+            dir="ltr"
             disabled={loading}
           />
           <Button
@@ -165,11 +167,13 @@ export function PhoneVerification({
             size="sm"
             className="absolute end-2 top-2/4 -translate-y-2/4 h-7 px-3 text-xs font-semibold"
           >
-            {loading ? "Verify..." : "Verify"}
+            {loading ? t("verifying") : t("verify")}
           </Button>
         </div>
-        <p className="text-[0.75rem] text-muted-foreground">
-          Enter your number in international format (e.g. +201234567890)
+        <p className="text-[0.75rem] text-muted-foreground text-start">
+          {t.rich("phone_format_desc", {
+            dir: (chunks) => <span dir="ltr">{chunks}</span>,
+          })}
         </p>
       </div>
     );
@@ -178,8 +182,8 @@ export function PhoneVerification({
   // -- OTP verification step --
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">Verification Code</Label>
+      <div className="flex items-center justify-between text-start">
+        <Label className="text-sm font-medium">{t("verification_code")}</Label>
         <div className="flex items-center gap-1">
           <Button
             type="button"
@@ -192,8 +196,8 @@ export function PhoneVerification({
             disabled={loading}
             className="h-7 px-2 text-xs gap-1"
           >
-            <ArrowLeft className="h-3 w-3" />
-            Back
+            <ArrowLeft className="h-3 w-3 rtl:rotate-180" />
+            {t("back")}
           </Button>
           <Button
             type="button"
@@ -208,17 +212,19 @@ export function PhoneVerification({
             ) : (
               <RefreshCw className="h-3 w-3" />
             )}
-            {countdown > 0 ? `${countdown}s` : "Resend"}
+            {countdown > 0 ? `${countdown}s` : t("resend")}
           </Button>
         </div>
       </div>
 
-      <p className="text-[0.8rem] text-muted-foreground">
-        Enter the 6-digit code sent to{" "}
-        <span className="font-medium text-foreground">{phone}</span>
+      <p className="text-[0.8rem] text-muted-foreground text-start">
+        {t("code_sent_to")}
+        <span className="font-medium text-foreground text-end" dir="ltr">
+          {phone}
+        </span>
       </p>
 
-      <div className="flex justify-center">
+      <div className="flex justify-center" dir="ltr">
         <InputOTP
           maxLength={6}
           value={otp}
@@ -244,7 +250,7 @@ export function PhoneVerification({
         disabled={loading || otp.length !== 6}
         className={cn("w-full", loading && "opacity-70")}
       >
-        {loading ? "Verifying..." : "Verify Phone Number"}
+        {loading ? t("verifying_full") : t("verify_phone")}
       </Button>
     </div>
   );

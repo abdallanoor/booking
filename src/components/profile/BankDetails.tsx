@@ -5,7 +5,6 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import {
-  Loader2,
   Landmark,
   Plus,
   Pencil,
@@ -45,6 +44,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { BankDetails as IBankDetails } from "@/types";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 // Comprehensive Egyptian Banks List (Paymob & Standard)
 const PAYMOB_BANKS = [
@@ -99,6 +99,7 @@ interface BankDetailsProps {
 }
 
 export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
+  const t = useTranslations("bank_details");
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [openCombobox, setOpenCombobox] = useState(false);
@@ -132,16 +133,18 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || "Failed to save bank details");
+        throw new Error(data.message || t("save_failed"));
       }
 
-      toast.success("Bank details saved successfully");
+      toast.success(t("save_success"));
       await refreshUser();
       setIsEditing(false);
       reset(values);
     } catch (error) {
       console.error(error);
-      toast.error(error instanceof Error ? error.message : "An error occurred");
+      toast.error(
+        error instanceof Error ? error.message : t("unexpected_error"),
+      );
     }
   };
 
@@ -151,9 +154,9 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
         method: "DELETE",
       });
 
-      if (!res.ok) throw new Error("Failed to delete bank details");
+      if (!res.ok) throw new Error(t("delete_failed"));
 
-      toast.success("Bank details removed successfully");
+      toast.success(t("delete_success"));
       await refreshUser();
       setIsEditing(false);
       reset({
@@ -164,7 +167,7 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
       });
     } catch (error) {
       console.error(error);
-      toast.error("Failed to remove bank details");
+      toast.error(t("delete_failed"));
     } finally {
       setIsDeleting(false);
     }
@@ -172,15 +175,14 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
 
   if (!bankDetails?.fullName && !isEditing) {
     return (
-      <div className="p-6 md:p-10 border-t border-border">
-        <div className="flex items-center justify-between mb-8">
-          <div>
+      <div className="p-6 md:p-10 border-t border-border mt-8">
+        <div className="flex items-start justify-between mb-8">
+          <div className="text-start">
             <h3 className="text-lg font-semibold text-foreground">
-              Bank Details
+              {t("title")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Add your bank account to receive payouts. Currently supporting
-              Egyptian banks only.
+              {t("no_details_desc")}
             </p>
           </div>
           <Button
@@ -189,7 +191,7 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
             className="max-sm:size-9"
           >
             <Plus />
-            <span className="max-sm:hidden">Add Details</span>
+            <span className="max-sm:hidden">{t("add_details")}</span>
           </Button>
         </div>
 
@@ -198,7 +200,7 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
             <div className="p-4 bg-muted rounded-full">
               <Landmark className="h-8 w-8 opacity-80" />
             </div>
-            <p className="font-medium text-foreground">No bank details added</p>
+            <p className="font-medium text-foreground">{t("no_details")}</p>
           </div>
         </div>
       </div>
@@ -206,14 +208,14 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
   }
 
   return (
-    <div className="p-6 md:p-10 border-t border-border">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+    <div className="p-6 md:p-10 border-t border-border mt-8">
+      <div className="flex items-start justify-between mb-8">
+        <div className="text-start">
           <h3 className="text-lg font-semibold text-foreground">
-            Bank Details
+            {t("title")}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Manage your payout bank account information (Egypt only).
+            {t("has_details_desc")}
           </p>
         </div>
         {!isEditing && (
@@ -244,7 +246,7 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
             }}
             disabled={isSubmitting}
           >
-            Cancel
+            {t("cancel")}
           </Button>
         )}
       </div>
@@ -255,8 +257,8 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
           className="space-y-6 animate-in fade-in slide-in-from-top-4 duration-300"
         >
           <div className="grid gap-6">
-            <div className="space-y-2 flex flex-col">
-              <Label htmlFor="bankCode">Bank Name</Label>
+            <div className="space-y-2 flex flex-col text-start">
+              <Label htmlFor="bankCode">{t("bank_name")}</Label>
               <Controller
                 control={control}
                 name="bankCode"
@@ -279,16 +281,16 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
                             ? PAYMOB_BANKS.find(
                                 (bank) => bank.code === field.value,
                               )?.name
-                            : "Select your bank..."}
+                            : t("select_bank")}
                         </span>
                         <ChevronsUpDown className="h-4 w-4 opacity-50 justify-self-end" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-(--radix-popover-trigger-width) p-0 overflow-hidden">
+                    <PopoverContent className="w-(--radix-popover-trigger-width) p-0 overflow-hidden text-start">
                       <Command>
-                        <CommandInput placeholder="Search bank..." />
+                        <CommandInput placeholder={t("search_bank")} />
                         <CommandList>
-                          <CommandEmpty>No bank found.</CommandEmpty>
+                          <CommandEmpty>{t("no_bank_found")}</CommandEmpty>
                           <CommandGroup>
                             {PAYMOB_BANKS.map((bank) => (
                               <CommandItem
@@ -325,8 +327,8 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name (as on account)</Label>
+            <div className="space-y-2 text-start">
+              <Label htmlFor="fullName">{t("full_name")}</Label>
               <Controller
                 control={control}
                 name="fullName"
@@ -334,7 +336,7 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
                   <Input
                     {...field}
                     id="fullName"
-                    placeholder="e.g. Ahmed Mohamed"
+                    placeholder={t("name_placeholder")}
                     className={cn(errors.fullName && "border-destructive")}
                   />
                 )}
@@ -346,8 +348,8 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="accountNumber">Account Number</Label>
+            <div className="space-y-2 text-start">
+              <Label htmlFor="accountNumber">{t("account_number")}</Label>
               <Controller
                 control={control}
                 name="accountNumber"
@@ -356,8 +358,11 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
                     {...field}
                     value={field.value || ""}
                     id="accountNumber"
-                    placeholder="e.g. 100020003000"
-                    className={cn(errors.accountNumber && "border-destructive")}
+                    placeholder={t("acc_placeholder")}
+                    className={cn(
+                      "text-start",
+                      errors.accountNumber && "border-destructive",
+                    )}
                   />
                 )}
               />
@@ -368,8 +373,8 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="iban">IBAN (EG...)</Label>
+            <div className="space-y-2 text-start">
+              <Label htmlFor="iban">{t("iban")}</Label>
               <Controller
                 control={control}
                 name="iban"
@@ -378,8 +383,11 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
                     {...field}
                     value={field.value || ""}
                     id="iban"
-                    placeholder="EG1234..."
-                    className={cn(errors.iban && "border-destructive")}
+                    placeholder={t("iban_placeholder")}
+                    className={cn(
+                      "text-start uppercase",
+                      errors.iban && "border-destructive",
+                    )}
                   />
                 )}
               />
@@ -390,44 +398,47 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
               )}
             </div>
 
-            <div className="text-xs text-muted-foreground">
-              You can provide either your <strong>Account Number</strong>,{" "}
-              <strong>IBAN</strong>, or both.
+            <div className="text-xs text-muted-foreground text-start">
+              {t("info_text")}
             </div>
 
             <div className="flex justify-end gap-3 pt-4">
               <Button type="submit" disabled={isSubmitting || !isDirty}>
-                {isSubmitting ? "Saving..." : "Save Details"}
+                {isSubmitting ? t("saving") : t("save")}
               </Button>
             </div>
           </div>
         </form>
       ) : (
         <div className="border rounded-2xl p-6 bg-card space-y-4">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-2 gap-4 text-sm text-start">
             <div>
-              <p className="text-muted-foreground mb-1">Bank Name</p>
+              <p className="text-muted-foreground mb-1">{t("bank_name")}</p>
               <p className="font-medium">
                 {PAYMOB_BANKS.find((b) => b.code === bankDetails?.bankCode)
                   ?.name || bankDetails?.bankCode}
               </p>
             </div>
             <div>
-              <p className="text-muted-foreground mb-1">Account Holder</p>
+              <p className="text-muted-foreground mb-1">
+                {t("account_holder")}
+              </p>
               <p className="font-medium">{bankDetails?.fullName}</p>
             </div>
             {bankDetails?.accountNumber && (
               <div className="col-span-2">
-                <p className="text-muted-foreground mb-1">Account Number</p>
-                <p className="font-mono bg-muted/50 p-2 rounded text-xs select-all">
+                <p className="text-muted-foreground mb-1">
+                  {t("account_number")}
+                </p>
+                <p className="font-mono bg-muted/50 p-2 rounded text-sm text-start select-all">
                   {bankDetails.accountNumber}
                 </p>
               </div>
             )}
             {bankDetails?.iban && (
               <div className="col-span-2">
-                <p className="text-muted-foreground mb-1">IBAN</p>
-                <p className="font-mono bg-muted/50 p-2 rounded text-xs break-all select-all">
+                <p className="text-muted-foreground mb-1">{t("iban")}</p>
+                <p className="font-mono bg-muted/50 p-2 rounded text-sm text-start break-all select-all uppercase">
                   {bankDetails.iban}
                 </p>
               </div>
@@ -438,16 +449,15 @@ export function BankDetails({ bankDetails, refreshUser }: BankDetailsProps) {
 
       <AlertDialog open={isDeleting} onOpenChange={setIsDeleting}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Bank Details?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. You will need to add your bank
-              details again to receive payouts.
-            </AlertDialogDescription>
+          <AlertDialogHeader className="text-start">
+            <AlertDialogTitle>{t("remove_title")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("remove_desc")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Remove</AlertDialogAction>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              {t("remove")}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

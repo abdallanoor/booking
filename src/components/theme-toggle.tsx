@@ -3,9 +3,11 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("theme");
 
   const isDark = theme === "dark";
 
@@ -14,12 +16,12 @@ export function ThemeToggle() {
       {isDark ? (
         <>
           <Sun />
-          Light
+          {t("light")}
         </>
       ) : (
         <>
           <Moon />
-          Dark
+          {t("dark")}
         </>
       )}
     </DropdownMenuItem>

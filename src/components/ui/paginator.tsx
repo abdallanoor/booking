@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Pagination,
   PaginationContent,
@@ -25,6 +26,8 @@ export function Paginator({
   baseUrl,
   showPreviousNext = true,
 }: PaginatorProps) {
+  const t = useTranslations("common");
+
   if (totalPages <= 1) return null;
 
   const generatePageLink = (page: number) => {
@@ -126,7 +129,9 @@ export function Paginator({
               className={
                 currentPage <= 1 ? "pointer-events-none opacity-50" : undefined
               }
-            />
+            >
+              {t("previous")}
+            </PaginationPrevious>
           </PaginationItem>
         )}
 
@@ -146,7 +151,9 @@ export function Paginator({
                   ? "pointer-events-none opacity-50"
                   : undefined
               }
-            />
+            >
+              {t("next")}
+            </PaginationNext>
           </PaginationItem>
         )}
       </PaginationContent>

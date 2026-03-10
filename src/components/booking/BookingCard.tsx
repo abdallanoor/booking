@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { format } from "date-fns";
 import { Calendar, MapPin, ChevronRight, MoreVertical } from "lucide-react";
 

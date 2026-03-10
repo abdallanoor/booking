@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { format } from "date-fns";
 import { Search as SearchIcon, Minus, Plus } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { ar } from "date-fns/locale";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,6 +21,9 @@ import { DateRange } from "react-day-picker";
 export function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("search_bar");
+  const locale = useLocale();
+  const dateLocale = locale === "ar" ? ar : undefined;
 
   const [location, setLocation] = useState(searchParams.get("location") || "");
 
@@ -35,7 +40,7 @@ export function SearchBar() {
   });
 
   const [guests, setGuests] = useState(
-    parseInt(searchParams.get("guests") || "1")
+    parseInt(searchParams.get("guests") || "1"),
   );
 
   const handleDateSelect = (selectedRange: DateRange | undefined) => {
@@ -65,17 +70,21 @@ export function SearchBar() {
     router.push(`/search?${params.toString()}`);
   };
 
+  const formatDateLabel = (d: Date) => {
+    return format(d, "MMM dd", { locale: dateLocale });
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="flex flex-col md:flex-row h-auto md:h-16 bg-card rounded-2xl md:rounded-full border shadow-lg hover:shadow-xl duration-300 divide-y md:divide-y-0 overflow-hidden md:overflow-visible">
         {/* Location Input */}
         <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto group flex flex-col justify-center md:h-full peer/loc">
           <label className="block text-xs font-bold text-foreground mb-0.5 group-hover:text-foreground/80">
-            Where
+            {t("where")}
           </label>
           <input
             type="text"
-            placeholder="Search destinations"
+            placeholder={t("search_destinations")}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -86,28 +95,27 @@ export function SearchBar() {
         {/* Dates (Unified) */}
         <Popover>
           <PopoverTrigger asChild>
-            <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto text-left group/dates flex flex-col justify-center md:h-full peer/dates peer-hover/loc:[&>.search-separator]:hidden">
-              <div className="search-separator hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/dates:hidden" />
+            <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto text-start group/dates flex flex-col justify-center md:h-full peer/dates peer-hover/loc:[&>.search-separator]:hidden">
+              <div className="search-separator hidden md:block absolute start-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/dates:hidden" />
               <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/dates:text-foreground/80">
-                Dates
+                {t("dates")}
               </label>
               <div
                 className={cn(
                   "text-sm truncate font-medium",
-                  !date?.from && "text-muted-foreground/50"
+                  !date?.from && "text-muted-foreground/50",
                 )}
               >
                 {date?.from ? (
                   date.to ? (
                     <>
-                      {format(date.from, "MMM dd")} -{" "}
-                      {format(date.to, "MMM dd")}
+                      {formatDateLabel(date.from)} - {formatDateLabel(date.to)}
                     </>
                   ) : (
-                    format(date.from, "MMM dd")
+                    formatDateLabel(date.from)
                   )
                 ) : (
-                  "Add dates"
+                  t("add_dates")
                 )}
               </div>
             </div>
@@ -117,6 +125,7 @@ export function SearchBar() {
               mode="range"
               defaultMonth={date?.from}
               selected={date}
+              locale={dateLocale}
               onSelect={handleDateSelect}
               startMonth={new Date()}
               fromDate={new Date()}
@@ -125,38 +134,38 @@ export function SearchBar() {
                 today.setHours(0, 0, 0, 0);
                 return date < today;
               }}
+              className="[--cell-size:--spacing(11)] md:[--cell-size:--spacing(10)]"
             />
             <div className="p-3 border-t flex justify-end">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setDate(undefined)}
-                className="text-xs font-semibold underline hover:bg-transparent p-0 h-auto"
               >
-                Clear dates
+                {t("clear_dates")}
               </Button>
             </div>
           </PopoverContent>
         </Popover>
 
         {/* Guests & Search Button */}
-        <div className="relative flex-[1.2] pr-2 py-2 md:py-0 hover:bg-muted md:rounded-full cursor-pointer flex items-center justify-between w-full md:w-auto group/guests md:h-full peer-hover/dates:[&>.search-separator]:hidden">
-          <div className="search-separator hidden md:block absolute left-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/guests:hidden" />
+        <div className="relative flex-[1.2] pe-2 py-2 md:py-0 hover:bg-muted md:rounded-full cursor-pointer flex items-center justify-between w-full md:w-auto group/guests md:h-full peer-hover/dates:[&>.search-separator]:hidden">
+          <div className="search-separator hidden md:block absolute start-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/guests:hidden" />
           <Popover>
             <PopoverTrigger asChild>
-              <div className="flex-1 text-left pl-6 h-full flex flex-col justify-center">
+              <div className="flex-1 text-start px-6 h-full flex flex-col justify-center">
                 <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/guests:text-foreground/80">
-                  Who
+                  {t("who")}
                 </label>
                 <div
                   className={cn(
                     "text-sm truncate font-medium",
-                    guests === 0 && "text-muted-foreground/50"
+                    guests === 0 && "text-muted-foreground/50",
                   )}
                 >
                   {guests > 0
-                    ? `${guests} guest${guests > 1 ? "s" : ""}`
-                    : "Add guests"}
+                    ? t("guests_count", { count: guests })
+                    : t("add_guests")}
                 </div>
               </div>
             </PopoverTrigger>
@@ -167,9 +176,11 @@ export function SearchBar() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-semibold text-foreground">Adults</div>
+                  <div className="font-semibold text-foreground">
+                    {t("adults")}
+                  </div>
                   <div className="text-sm text-muted-foreground">
-                    Ages 13 or above
+                    {t("adults_desc")}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -200,7 +211,7 @@ export function SearchBar() {
 
           <Button
             size="icon"
-            className="rounded-full h-12 w-12 shrink-0 ml-2 shadow-md hover:scale-105-transform"
+            className="rounded-full h-12 w-12 shrink-0 ms-2 shadow-md hover:scale-105-transform"
             onClick={handleSearch}
           >
             <SearchIcon className="h-5 w-5" />

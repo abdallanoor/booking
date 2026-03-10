@@ -7,6 +7,7 @@ import { Calendar, CheckCircle2, XCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookingCard } from "./BookingCard";
 import type { Booking } from "@/services/bookings.service";
+import { useTranslations } from "next-intl";
 
 interface BookingsListProps {
   bookings: Booking[];
@@ -15,6 +16,7 @@ interface BookingsListProps {
 type TabType = "upcoming" | "past" | "cancelled";
 
 export function BookingsList({ bookings }: BookingsListProps) {
+  const t = useTranslations("bookings");
   const [activeTab, setActiveTab] = useState<TabType>("upcoming");
 
   const filteredBookings = bookings.filter((booking) => {
@@ -50,9 +52,9 @@ export function BookingsList({ bookings }: BookingsListProps) {
           className="w-full"
         >
           <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-muted/50 p-1">
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="past">Past</TabsTrigger>
-            <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
+            <TabsTrigger value="upcoming">{t("upcoming")}</TabsTrigger>
+            <TabsTrigger value="past">{t("past")}</TabsTrigger>
+            <TabsTrigger value="cancelled">{t("cancelled")}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -80,10 +82,10 @@ export function BookingsList({ bookings }: BookingsListProps) {
             )}
           </div>
           <h3 className="text-xl font-medium text-foreground">
-            No bookings found
+            {t("no_bookings")}
           </h3>
           <p className="text-muted-foreground mt-1 max-w-sm">
-            You don&apos;t have any {activeTab} bookings yet.
+            {t("no_bookings_desc", { tab: t(activeTab) })}
           </p>
         </div>
       )}

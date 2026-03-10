@@ -8,11 +8,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Booking } from "@/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { Link } from "@/navigation";
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
 
@@ -21,35 +21,33 @@ interface RecentBookingsProps {
 }
 
 export function RecentBookings({ bookings }: RecentBookingsProps) {
+  const t = useTranslations("hosting");
+
   if (!bookings?.length) {
     return (
-      <Card>
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            No bookings found yet.
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12 border-2 border-dashed rounded-xl">
+        <p className="text-muted-foreground text-lg">{t("no_bookings")}</p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent>
+    <div className="rounded-2xl border bg-card overflow-hidden">
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Guest</TableHead>
-              <TableHead>Listing</TableHead>
-              <TableHead>Dates</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead>Status</TableHead>
+            <TableRow className="bg-muted!">
+              <TableHead className="px-6">{t("col_guest")}</TableHead>
+              <TableHead>{t("col_listing")}</TableHead>
+              <TableHead>{t("col_dates")}</TableHead>
+              <TableHead>{t("col_total_price")}</TableHead>
+              <TableHead className="text-end px-6">{t("col_status")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {bookings.map((booking) => (
               <TableRow key={booking._id}>
-                <TableCell className="font-medium">
+                <TableCell className="font-medium px-6">
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
@@ -61,9 +59,9 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">
-                      <span>{booking.guest?.name || "Unknown Guest"}</span>
+                      <span>{booking.guest?.name || t("unknown_guest")}</span>
                       <span className="text-xs text-muted-foreground">
-                        {booking.guest?.email || "No email"}
+                        {booking.guest?.email || t("no_email")}
                       </span>
                     </div>
                   </div>
@@ -73,38 +71,39 @@ export function RecentBookings({ bookings }: RecentBookingsProps) {
                     href={`/listings/${booking.listing?._id}`}
                     className="hover:underline"
                   >
-                    {booking.listing?.title || "Unknown Listing"}
+                    {booking.listing?.title || t("unknown_listing")}
                   </Link>
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col text-sm">
-                    <span>
+                    <span className="whitespace-nowrap">
                       {format(new Date(booking.checkIn), "MMM d, yyyy")}
                     </span>
-                    <span className="text-muted-foreground text-xs">
-                      to {format(new Date(booking.checkOut), "MMM d, yyyy")}
+                    <span className="text-muted-foreground text-xs whitespace-nowrap">
+                      {t("date_to")}{" "}
+                      {format(new Date(booking.checkOut), "MMM d, yyyy")}
                     </span>
                   </div>
                 </TableCell>
                 <TableCell>{formatCurrency(booking.totalPrice)}</TableCell>
-                <TableCell>
+                <TableCell className="text-end px-6">
                   <Badge
                     variant={
                       booking.status === "confirmed"
-                        ? "default" // or success if available? using default (primary) often green or black
+                        ? "default"
                         : booking.status === "cancelled"
                           ? "destructive"
                           : "secondary"
                     }
                   >
-                    {booking.status}
+                    {t(`status_${booking.status}`) || booking.status}
                   </Badge>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

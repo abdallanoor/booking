@@ -3,15 +3,18 @@
 import { useState, useEffect, Suspense } from "react";
 import { ConversationList } from "./ConversationList";
 import { ChatWindow } from "./ChatWindow";
-import { useSearchParams, useRouter, usePathname } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/navigation";
 import { MessageSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 function ChatLayoutContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const chatId = searchParams.get("chatId");
+  const t = useTranslations("chat");
 
   const [conversations, setConversations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +74,7 @@ function ChatLayoutContent() {
   return (
     <div className="flex h-full w-full overflow-hidden bg-background">
       <div
-        className={`${selectedConversationId ? "hidden md:flex" : "flex"} w-full md:w-80 flex-col border-r`}
+        className={`${selectedConversationId ? "hidden md:flex" : "flex"} w-full md:w-80 flex-col border-r rtl:border-l rtl:border-r-0`}
       >
         <ConversationList
           conversations={conversations}
@@ -96,9 +99,9 @@ function ChatLayoutContent() {
               <MessageSquare className="h-6 w-6 opacity-50" />
             </div>
             <h3 className="text-xl font-semibold text-foreground mb-2">
-              Your Messages
+              {t("your_messages")}
             </h3>
-            <p>Select a conversation to start messaging</p>
+            <p>{t("select_conversation")}</p>
           </div>
         )}
       </div>
@@ -107,13 +110,15 @@ function ChatLayoutContent() {
 }
 
 export function ChatLayout() {
+  const t = useTranslations("chat");
+
   return (
     <Suspense
       fallback={
         <div className="flex h-full w-full overflow-hidden bg-background">
-          <div className="w-full md:w-80 flex-col border-r flex">
+          <div className="w-full md:w-80 flex-col border-r rtl:border-l rtl:border-r-0 flex">
             <div className="flex flex-col gap-2 p-4 w-full h-full">
-              <h2 className="text-xl font-semibold mb-2">Messages</h2>
+              <h2 className="text-xl font-semibold mb-2">{t("title")}</h2>
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-3">
                   <Skeleton className="h-12 w-12 rounded-full shrink-0" />

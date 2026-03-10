@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, MessagesSquare } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function ConversationList({
   conversations,
@@ -19,11 +20,12 @@ export function ConversationList({
   onSelect: (id: string) => void;
 }) {
   const { user } = useAuth();
+  const t = useTranslations("chat");
 
   if (loading) {
     return (
       <div className="flex flex-col gap-2 p-4 overflow-y-auto w-full h-full">
-        <h2 className="text-xl font-semibold mb-2">Messages</h2>
+        <h2 className="text-xl font-semibold mb-2">{t("title")}</h2>
         {[...Array(5)].map((_, i) => (
           <div key={i} className="flex items-center gap-3 p-3">
             <Skeleton className="h-12 w-12 rounded-full shrink-0" />
@@ -40,14 +42,14 @@ export function ConversationList({
   if (conversations.length === 0) {
     return (
       <div className="flex flex-col gap-2 p-4 overflow-y-auto w-full h-full">
-        <h2 className="text-xl font-semibold mb-2">Messages</h2>
+        <h2 className="text-xl font-semibold mb-2">{t("title")}</h2>
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <MessagesSquare className="h-12 w-12 text-foreground mb-4 stroke-[1.5]" />
           <h3 className="text-md font-semibold text-foreground mb-2 tracking-tight">
-            You don't have any messages
+            {t("no_messages")}
           </h3>
           <p className="text-sm text-muted-foreground">
-            When you receive a new message, it will appear here.
+            {t("no_messages_desc")}
           </p>
         </div>
       </div>
@@ -67,7 +69,7 @@ export function ConversationList({
 
   return (
     <div className="flex flex-col gap-2 p-4 overflow-y-auto w-full h-full">
-      <h2 className="text-xl font-semibold mb-2">Messages</h2>
+      <h2 className="text-xl font-semibold mb-2">{t("title")}</h2>
       {sortedConversations.map((conv) => {
         const otherParticipant = conv.participants.find(
           (p: any) => p._id !== user?.id,
@@ -104,7 +106,7 @@ export function ConversationList({
                   {otherParticipant?.name}
                 </span>
                 {conv.lastMessageAt && (
-                  <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                  <span className="text-xs text-muted-foreground whitespace-nowrap ms-2">
                     {formatDistanceToNow(new Date(conv.lastMessageAt), {
                       addSuffix: true,
                     })}

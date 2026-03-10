@@ -17,6 +17,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+import { useTranslations, useLocale } from "next-intl";
 
 interface SavedCardsProps {
   user: User;
@@ -66,6 +69,10 @@ function CardIcon({ brand }: { brand?: string }) {
 }
 
 export function SavedCards({ user, refreshUser }: SavedCardsProps) {
+  const t = useTranslations("saved_cards");
+  const locale = useLocale();
+  const dateLocale = locale === "ar" ? ar : undefined;
+
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cardToDelete, setCardToDelete] = useState<string | null>(null);
 
@@ -79,13 +86,13 @@ export function SavedCards({ user, refreshUser }: SavedCardsProps) {
         body: JSON.stringify({ token }),
       });
 
-      if (!res.ok) throw new Error("Failed to delete card");
+      if (!res.ok) throw new Error(t("delete_failed"));
 
-      toast.success("Card removed successfully");
+      toast.success(t("remove_success"));
       await refreshUser();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to remove card");
+      toast.error(t("remove_failed"));
     } finally {
       setDeletingId(null);
       setCardToDelete(null);
@@ -96,15 +103,13 @@ export function SavedCards({ user, refreshUser }: SavedCardsProps) {
 
   return (
     <>
-      <div className="p-6 md:p-10 border-t border-border">
+      <div className="p-6 md:p-10 border-t border-border mt-8">
         <div className="flex items-center justify-between mb-8">
-          <div>
+          <div className="text-start">
             <h3 className="text-lg font-semibold text-foreground">
-              Saved Cards
+              {t("title")}
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Manage your saved payment methods for faster checkout.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
         </div>
 
@@ -116,12 +121,9 @@ export function SavedCards({ user, refreshUser }: SavedCardsProps) {
                   <CreditCard className="h-8 w-8 opacity-80" />
                 </div>
                 <div className="max-w-md">
-                  <p className="font-medium text-foreground">
-                    No saved cards found
-                  </p>
+                  <p className="font-medium text-foreground">{t("no_cards")}</p>
                   <p className="text-sm mt-2 text-muted-foreground">
-                    To save a card, please make a payment and check the "Save
-                    card for future use" option during checkout.
+                    {t("no_cards_desc")}
                   </p>
                 </div>
               </div>
@@ -135,14 +137,20 @@ export function SavedCards({ user, refreshUser }: SavedCardsProps) {
                 >
                   <div className="flex items-center gap-4">
                     <CardIcon brand={card.brand} />
-                    <div>
+                    <div className="text-start">
                       <div className="font-medium flex items-center gap-2 text-foreground">
-                        <span className="tracking-widest">•••• •••• ••••</span>
-                        <span>{card.last4}</span>
+                        <span className="tracking-widest" dir="ltr">
+                          •••• •••• ••••
+                        </span>
+                        <span dir="ltr">{card.last4}</span>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        Added on{" "}
-                        {new Date(card.createdAt || "").toLocaleDateString()}
+                      <div className="text-xs text-muted-foreground mt-1 text-start">
+                        {t("added_on")}{" "}
+                        {card.createdAt
+                          ? format(new Date(card.createdAt), "dd MMM yyyy", {
+                              locale: dateLocale,
+                            })
+                          : ""}
                       </div>
                     </div>
                   </div>
@@ -174,17 +182,18 @@ export function SavedCards({ user, refreshUser }: SavedCardsProps) {
         open={!!cardToDelete}
         onOpenChange={(open) => !open && setCardToDelete(null)}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="text-start">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete this card?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently remove this
-              payment method from your account.
+            <AlertDialogTitle className="text-start">
+              {t("delete_title")}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-start">
+              {t("delete_desc")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={!!deletingId}>
-              Cancel
+              {t("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
@@ -194,7 +203,7 @@ export function SavedCards({ user, refreshUser }: SavedCardsProps) {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={!!deletingId}
             >
-              {deletingId ? <Loader2 className="animate-spin" /> : "Delete"}
+              {deletingId ? <Loader2 className="animate-spin" /> : t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

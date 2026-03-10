@@ -44,27 +44,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Loader2,
   XIcon,
   UploadCloud,
   Image as ImageIcon,
-  Check,
   MapPin,
   Bed,
   DoorOpen,
   Bath,
   Users,
-  Shield,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Listing } from "@/types";
@@ -73,6 +64,7 @@ import { LocationPicker, LocationData } from "@/components/maps/LocationPicker";
 import { listingSchema, type ListingInput } from "@/lib/validations/listing";
 import { cn } from "@/lib/utils";
 import { Counter } from "@/components/ui/counter";
+import { useTranslations } from "next-intl";
 
 // =============================================================================
 // CONSTANTS
@@ -115,14 +107,14 @@ const COMMON_POLICIES = [
 
 /** Wizard steps configuration */
 const WIZARD_STEPS = [
-  { id: 1, title: "Basics", shortTitle: "Basics" },
-  { id: 2, title: "Location", shortTitle: "Location" },
-  { id: 3, title: "Details", shortTitle: "Details" },
-  { id: 4, title: "Pricing", shortTitle: "Pricing" },
-  { id: 5, title: "Amenities", shortTitle: "Amenities" },
-  { id: 6, title: "Policies", shortTitle: "Policies" },
-  { id: 7, title: "Photos", shortTitle: "Photos" },
-  { id: 8, title: "Preview", shortTitle: "Preview" },
+  { id: 1, titleKey: "step_basics" },
+  { id: 2, titleKey: "step_location" },
+  { id: 3, titleKey: "step_details" },
+  { id: 4, titleKey: "step_pricing" },
+  { id: 5, titleKey: "step_amenities" },
+  { id: 6, titleKey: "step_policies" },
+  { id: 7, titleKey: "step_photos" },
+  { id: 8, titleKey: "step_preview" },
 ] as const;
 
 /** Maps form fields to their corresponding wizard step for error navigation */
@@ -161,6 +153,7 @@ type FrontendListingInput = z.infer<typeof frontendListingSchema>;
 
 /** Step 1: Basic listing information - title, description, type */
 function StepBasics() {
+  const t = useTranslations("listing_form");
   const {
     register,
     control,
@@ -170,18 +163,18 @@ function StepBasics() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Tell us about your place</h2>
-        <p className="text-muted-foreground">Start with the basics.</p>
+        <h2 className="text-2xl font-semibold">{t("basics_title")}</h2>
+        <p className="text-muted-foreground">{t("basics_desc")}</p>
       </div>
 
       <div className="space-y-6">
         {/* Title Field */}
         <div className="space-y-2">
-          <Label htmlFor="title">Listing Title</Label>
+          <Label htmlFor="title">{t("field_title")}</Label>
           <Input
             id="title"
             {...register("title")}
-            placeholder="Cozy apartment in downtown"
+            placeholder={t("field_title_placeholder")}
             className="h-12"
             aria-invalid={!!errors.title}
           />
@@ -192,12 +185,12 @@ function StepBasics() {
 
         {/* Description Field */}
         <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t("field_description")}</Label>
           <Textarea
             id="description"
             {...register("description")}
             rows={4}
-            placeholder="Describe what makes your place special..."
+            placeholder={t("field_description_placeholder")}
             aria-invalid={!!errors.description}
           />
           {errors.description && (
@@ -206,52 +199,6 @@ function StepBasics() {
             </p>
           )}
         </div>
-
-        {/* Property & Privacy Type - Hidden, using defaults */}
-        {/* 
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="listingType">Property Type</Label>
-            <Input
-              id="listingType"
-              placeholder="e.g., Apartment"
-              {...register("listingType")}
-              className="h-12"
-              aria-invalid={!!errors.listingType}
-            />
-            {errors.listingType && (
-              <p className="text-sm text-destructive">
-                {errors.listingType.message}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="privacyType">Privacy Type</Label>
-            <Controller
-              control={control}
-              name="privacyType"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="h-12">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="entire_place">Entire Place</SelectItem>
-                    <SelectItem value="private_room">Private Room</SelectItem>
-                    <SelectItem value="shared_room">Shared Room</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.privacyType && (
-              <p className="text-sm text-destructive">
-                {errors.privacyType.message}
-              </p>
-            )}
-          </div>
-        </div>
-        */}
       </div>
     </div>
   );
@@ -259,6 +206,7 @@ function StepBasics() {
 
 /** Step 2: Location selection with Google Maps */
 function StepLocation() {
+  const t = useTranslations("listing_form");
   const {
     control,
     formState: { errors },
@@ -267,10 +215,8 @@ function StepLocation() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Where's your place located?</h2>
-        <p className="text-muted-foreground">
-          Search for your address or pin it on the map.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("location_title")}</h2>
+        <p className="text-muted-foreground">{t("location_desc")}</p>
       </div>
 
       <GoogleMapsProvider>
@@ -287,7 +233,7 @@ function StepLocation() {
       </GoogleMapsProvider>
       {errors.location && (
         <p className="text-sm text-destructive">
-          {errors.location.message || "Please select a valid location"}
+          {errors.location.message || t("location_error")}
         </p>
       )}
     </div>
@@ -296,6 +242,7 @@ function StepLocation() {
 
 /** Step 3: Listing details - capacity, rooms, price */
 function StepDetails() {
+  const t = useTranslations("listing_form");
   const {
     register,
     control,
@@ -305,18 +252,15 @@ function StepDetails() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Share some details</h2>
-        <p className="text-muted-foreground">
-          Help guests know what to expect.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("details_title")}</h2>
+        <p className="text-muted-foreground">{t("details_desc")}</p>
       </div>
 
       <div>
-        {/* Max Guests Counter */}
         <div className="pb-6">
           <div className="flex items-center justify-between">
             <Label htmlFor="maxGuests" className="text-base font-normal">
-              Max Guests
+              {t("max_guests")}
             </Label>
             <Controller
               control={control}
@@ -338,12 +282,10 @@ function StepDetails() {
             </p>
           )}
         </div>
-
-        {/* Bedrooms Counter */}
         <div className="border-t py-6">
           <div className="flex items-center justify-between">
             <Label htmlFor="bedrooms" className="text-base font-normal">
-              Bedrooms
+              {t("bedrooms")}
             </Label>
             <Controller
               control={control}
@@ -364,12 +306,10 @@ function StepDetails() {
             </p>
           )}
         </div>
-
-        {/* Beds Counter */}
         <div className="border-t py-6">
           <div className="flex items-center justify-between">
             <Label htmlFor="beds" className="text-base font-normal">
-              Beds
+              {t("beds")}
             </Label>
             <Controller
               control={control}
@@ -390,12 +330,10 @@ function StepDetails() {
             </p>
           )}
         </div>
-
-        {/* Bathrooms Counter */}
         <div className="border-t py-6">
           <div className="flex items-center justify-between">
             <Label htmlFor="bathrooms" className="text-base font-normal">
-              Bathrooms
+              {t("bathrooms")}
             </Label>
             <Controller
               control={control}
@@ -424,6 +362,7 @@ function StepDetails() {
 
 /** Step 4: Pricing strategy */
 function StepPricing() {
+  const t = useTranslations("listing_form");
   const {
     register,
     control,
@@ -439,7 +378,6 @@ function StepPricing() {
     pricePerNight && weeklyDiscount > 0
       ? Math.round(pricePerNight * (1 - weeklyDiscount / 100))
       : null;
-
   const monthlyPrice =
     pricePerNight && monthlyDiscount > 0
       ? Math.round(pricePerNight * (1 - monthlyDiscount / 100))
@@ -454,26 +392,17 @@ function StepPricing() {
     onChange: (value: number) => void,
   ) => {
     const inputValue = e.target.value;
-
-    // If input is empty, default to 0
     if (inputValue === "") {
       onChange(0);
       return;
     }
-
-    // Parse integer, clamping leading zeros automatically via parseInt
     let value = parseInt(inputValue, 10);
-
-    // Handle invalid number
     if (isNaN(value)) {
       onChange(0);
       return;
     }
-
-    // Clamp value between 0 and 99
     if (value > 99) value = 99;
     if (value < 0) value = 0;
-
     onChange(value);
   };
 
@@ -482,42 +411,30 @@ function StepPricing() {
     onChange: (value: number) => void,
   ) => {
     const inputValue = e.target.value;
-
-    // If input is empty, default to 0
     if (inputValue === "") {
       onChange(0);
       return;
     }
-
-    // Parse integer, clamping leading zeros automatically via parseInt
     let value = parseInt(inputValue, 10);
-
-    // Handle invalid number
     if (isNaN(value)) {
       onChange(0);
       return;
     }
-
-    // Ensure range [0, 100000]
     if (value < 0) value = 0;
     if (value > 100000) value = 100000;
-
     onChange(value);
   };
 
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Pricing</h2>
-        <p className="text-muted-foreground">
-          Set your price and offer discounts to attract more guests.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("pricing_title")}</h2>
+        <p className="text-muted-foreground">{t("pricing_desc")}</p>
       </div>
 
       <div className="space-y-6">
-        {/* Base Price */}
         <div className="space-y-2">
-          <Label htmlFor="pricePerNight">Base Price per Night (EGP)</Label>
+          <Label htmlFor="pricePerNight">{t("base_price")}</Label>
           <Input
             id="pricePerNight"
             type="number"
@@ -534,14 +451,11 @@ function StepPricing() {
           )}
         </div>
 
-        {/* Weekend Price */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="weekendPrice">
-              Weekend Price (Friday & Saturday)
-            </Label>
+            <Label htmlFor="weekendPrice">{t("weekend_price")}</Label>
             <span className="text-xs text-muted-foreground">
-              Optional. Set 0 to use base price.
+              {t("weekend_price_hint")}
             </span>
           </div>
           <Controller
@@ -566,13 +480,12 @@ function StepPricing() {
         </div>
 
         <div className="border-t pt-6 space-y-4">
-          <h3 className="font-medium text-lg">Discounts</h3>
+          <h3 className="font-medium text-lg">{t("discounts")}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Weekly Discount */}
             <div className="space-y-2">
-              <Label htmlFor="weeklyDiscount">Weekly Discount (%)</Label>
+              <Label htmlFor="weeklyDiscount">{t("weekly_discount")}</Label>
               <p className="text-xs text-muted-foreground">
-                For stays of 7 nights or more
+                {t("weekly_discount_hint")}
               </p>
               <div className="relative">
                 <Controller
@@ -593,13 +506,13 @@ function StepPricing() {
                     />
                   )}
                 />
-                <span className="absolute right-3 top-3.5 text-muted-foreground">
+                <span className="absolute end-3 top-3.5 text-muted-foreground">
                   %
                 </span>
               </div>
               {weeklyPrice !== null && (
                 <p className="text-sm text-muted-foreground">
-                  Price after discount:{" "}
+                  {t("price_after_discount")}{" "}
                   <span className="font-medium text-foreground">
                     {weeklyPrice} EGP
                   </span>
@@ -612,11 +525,10 @@ function StepPricing() {
               )}
             </div>
 
-            {/* Monthly Discount */}
             <div className="space-y-2">
-              <Label htmlFor="monthlyDiscount">Monthly Discount (%)</Label>
+              <Label htmlFor="monthlyDiscount">{t("monthly_discount")}</Label>
               <p className="text-xs text-muted-foreground">
-                For stays of 28 nights or more
+                {t("monthly_discount_hint")}
               </p>
               <div className="relative">
                 <Controller
@@ -637,13 +549,13 @@ function StepPricing() {
                     />
                   )}
                 />
-                <span className="absolute right-3 top-3.5 text-muted-foreground">
+                <span className="absolute end-3 top-3.5 text-muted-foreground">
                   %
                 </span>
               </div>
               {monthlyPrice !== null && (
                 <p className="text-sm text-muted-foreground">
-                  Price after discount:{" "}
+                  {t("price_after_discount")}{" "}
                   <span className="font-medium text-foreground">
                     {monthlyPrice} EGP
                   </span>
@@ -678,10 +590,9 @@ function StepAmenities({
   onRemoveAmenity,
   onToggleAmenity,
 }: StepAmenitiesProps) {
+  const t = useTranslations("listing_form");
   const { watch } = useFormContext<FrontendListingInput>();
   const amenities = watch("amenities");
-
-  /** Filters out common amenities to show only custom ones */
   const customAmenities = amenities.filter(
     (a) => !COMMON_AMENITIES.includes(a as (typeof COMMON_AMENITIES)[number]),
   );
@@ -689,14 +600,11 @@ function StepAmenities({
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Amenities</h2>
-        <p className="text-muted-foreground">What amenities do you offer?</p>
+        <h2 className="text-2xl font-semibold">{t("amenities_title")}</h2>
+        <p className="text-muted-foreground">{t("amenities_desc")}</p>
       </div>
-
       <div className="space-y-4">
-        <Label>Amenities</Label>
-
-        {/* Common Amenities Grid */}
+        <Label>{t("amenities_label")}</Label>
         <div className="flex flex-wrap gap-2">
           {COMMON_AMENITIES.map((amenity) => (
             <Badge
@@ -709,11 +617,9 @@ function StepAmenities({
             </Badge>
           ))}
         </div>
-
-        {/* Custom Amenity Input */}
         <div className="flex gap-2 max-w-md">
           <Input
-            placeholder="Add custom amenity..."
+            placeholder={t("add_amenity_placeholder")}
             value={currentAmenity}
             onChange={(e) => setCurrentAmenity(e.target.value)}
             onKeyDown={(e) => {
@@ -724,11 +630,9 @@ function StepAmenities({
             }}
           />
           <Button type="button" onClick={onAddAmenity} variant="secondary">
-            Add
+            {t("add")}
           </Button>
         </div>
-
-        {/* Custom Amenities Display */}
         {customAmenities.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {customAmenities.map((amenity, index) => (
@@ -766,10 +670,9 @@ function StepPolicies({
   onRemovePolicy,
   onTogglePolicy,
 }: StepPoliciesProps) {
+  const t = useTranslations("listing_form");
   const { watch } = useFormContext<FrontendListingInput>();
   const policies = watch("policies");
-
-  /** Filters out common policies to show only custom ones */
   const customPolicies = policies.filter(
     (p) => !COMMON_POLICIES.includes(p as (typeof COMMON_POLICIES)[number]),
   );
@@ -777,14 +680,11 @@ function StepPolicies({
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Policies</h2>
-        <p className="text-muted-foreground">What are your house rules?</p>
+        <h2 className="text-2xl font-semibold">{t("policies_title")}</h2>
+        <p className="text-muted-foreground">{t("policies_desc")}</p>
       </div>
-
       <div className="space-y-4">
-        <Label>House Rules</Label>
-
-        {/* Common Policies Grid */}
+        <Label>{t("house_rules")}</Label>
         <div className="flex flex-wrap gap-2">
           {COMMON_POLICIES.map((policy) => (
             <Badge
@@ -797,11 +697,9 @@ function StepPolicies({
             </Badge>
           ))}
         </div>
-
-        {/* Custom Policy Input */}
         <div className="flex gap-2 max-w-md">
           <Input
-            placeholder="Add custom rule..."
+            placeholder={t("add_policy_placeholder")}
             value={currentPolicy}
             onChange={(e) => setCurrentPolicy(e.target.value)}
             onKeyDown={(e) => {
@@ -812,11 +710,9 @@ function StepPolicies({
             }}
           />
           <Button type="button" onClick={onAddPolicy} variant="secondary">
-            Add
+            {t("add")}
           </Button>
         </div>
-
-        {/* Custom Policies Display */}
         {customPolicies.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {customPolicies.map((policy, index) => (
@@ -858,43 +754,29 @@ function StepPhotos({
   getInputProps,
   isDragActive,
 }: StepPhotosProps) {
+  const t = useTranslations("listing_form");
   const {
     watch,
     formState: { errors },
   } = useFormContext<FrontendListingInput>();
   const existingImages = watch("images") ?? [];
-
   const totalImages = existingImages.length + newFiles.length;
 
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Add some photos</h2>
-        <p className="text-muted-foreground">
-          The first photo will be your cover image.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("photos_title")}</h2>
+        <p className="text-muted-foreground">{t("photos_desc")}</p>
       </div>
 
-      {/* Dropzone */}
       <div
         {...getRootProps()}
-        className={`
-          relative overflow-hidden rounded-xl border-2 border-dashed p-8 text-center cursor-pointer
-          transition-all duration-300 ease-out
-          ${
-            isDragActive
-              ? "border-primary bg-primary/5 scale-[1.01]"
-              : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"
-          }
-        `}
+        className={`relative overflow-hidden rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition-all duration-300 ease-out ${isDragActive ? "border-primary bg-primary/5 scale-[1.01]" : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"}`}
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center gap-3">
           <div
-            className={`
-            p-4 rounded-full transition-all duration-300
-            ${isDragActive ? "bg-primary/10" : "bg-muted"}
-          `}
+            className={`p-4 rounded-full transition-all duration-300 ${isDragActive ? "bg-primary/10" : "bg-muted"}`}
           >
             <UploadCloud
               className={`h-7 w-7 transition-colors duration-300 ${isDragActive ? "text-primary" : "text-muted-foreground"}`}
@@ -902,29 +784,23 @@ function StepPhotos({
           </div>
           <div>
             <p className="text-base font-medium">
-              {isDragActive ? "Drop your photos here" : "Add photos"}
+              {isDragActive ? t("drop_active") : t("drop_idle")}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              or click to browse • JPG, PNG, WEBP up to 1MB
+              {t("drop_hint")}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Images Preview Grid */}
       {totalImages > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {/* Existing Images */}
           {existingImages.map((url, index) => {
             const isFirstImage = index === 0;
             return (
               <div
                 key={`existing-${index}`}
-                className={`
-                  relative aspect-square rounded-xl overflow-hidden bg-muted
-                  ring-1 ring-border/50 transition-all duration-200
-                  ${isFirstImage ? "ring-2 ring-primary/50" : ""}
-                `}
+                className={`relative aspect-square rounded-xl overflow-hidden bg-muted ring-1 ring-border/50 transition-all duration-200 ${isFirstImage ? "ring-2 ring-primary/50" : ""}`}
               >
                 <NextImage
                   src={url}
@@ -938,31 +814,24 @@ function StepPhotos({
                     e.stopPropagation();
                     onRemoveExistingImage(index);
                   }}
-                  className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/60 hover:bg-black/80 
-                    flex items-center justify-center transition-colors cursor-pointer z-20"
+                  className="absolute top-2 end-2 h-6 w-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors cursor-pointer z-20"
                 >
                   <XIcon className="h-3.5 w-3.5 text-white" />
                 </button>
                 {isFirstImage && (
-                  <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-[11px] font-medium px-2 py-0.5 rounded-md z-10">
-                    Cover
+                  <div className="absolute bottom-2 start-2 bg-primary text-primary-foreground text-[11px] font-medium px-2 py-0.5 rounded-md z-10">
+                    {t("cover")}
                   </div>
                 )}
               </div>
             );
           })}
-
-          {/* New Files */}
           {newFiles.map((file, index) => {
             const isFirstImage = existingImages.length === 0 && index === 0;
             return (
               <div
                 key={`new-${index}`}
-                className={`
-                  relative aspect-square rounded-xl overflow-hidden bg-muted
-                  ring-1 ring-border/50 transition-all duration-200
-                  ${isFirstImage ? "ring-2 ring-primary/50" : ""}
-                `}
+                className={`relative aspect-square rounded-xl overflow-hidden bg-muted ring-1 ring-border/50 transition-all duration-200 ${isFirstImage ? "ring-2 ring-primary/50" : ""}`}
               >
                 <NextImage
                   src={previewUrls[index]}
@@ -976,20 +845,17 @@ function StepPhotos({
                     e.stopPropagation();
                     onRemoveNewFile(index);
                   }}
-                  className="absolute top-2 right-2 h-6 w-6 rounded-full bg-black/60 hover:bg-black/80 
-                    flex items-center justify-center transition-colors z-20 cursor-pointer"
+                  className="absolute top-2 end-2 h-6 w-6 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors z-20 cursor-pointer"
                 >
                   <XIcon className="h-3.5 w-3.5 text-white" />
                 </button>
-                {/* Status Dot - New */}
                 <div
-                  className="absolute top-2 left-2 w-2.5 h-2.5 bg-green-500 rounded-full ring-1 ring-white z-10 shadow-sm"
+                  className="absolute top-2 start-2 w-2.5 h-2.5 bg-green-500 rounded-full ring-1 ring-white z-10 shadow-sm"
                   title="New Image"
                 />
-
                 {isFirstImage && (
-                  <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-[11px] font-medium px-2 py-0.5 rounded-md z-10">
-                    Cover
+                  <div className="absolute bottom-2 start-2 bg-primary text-primary-foreground text-[11px] font-medium px-2 py-0.5 rounded-md z-10">
+                    {t("cover")}
                   </div>
                 )}
               </div>
@@ -998,24 +864,20 @@ function StepPhotos({
         </div>
       )}
 
-      {/* Image count */}
       {totalImages > 0 && (
         <p className="text-xs text-muted-foreground">
-          {totalImages} photo{totalImages !== 1 ? "s" : ""} added
+          {totalImages !== 1
+            ? t("photos_count_plural", { count: totalImages })
+            : t("photos_count", { count: totalImages })}
         </p>
       )}
-
       {errors.images && (
         <p className="text-sm text-destructive">{errors.images.message}</p>
       )}
-
-      {/* Empty state */}
       {totalImages === 0 && (
         <div className="flex flex-col items-center gap-2 text-center py-6 bg-muted/30 rounded-xl border border-dashed border-muted-foreground/20">
           <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground">
-            No photos yet. Add at least one photo to continue.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("no_photos")}</p>
         </div>
       )}
     </div>
@@ -1028,11 +890,10 @@ interface StepPreviewProps {
 }
 
 function StepPreview({ previewUrls }: StepPreviewProps) {
+  const t = useTranslations("listing_form");
   const { watch } = useFormContext<FrontendListingInput>();
   const formValues = watch();
   const existingImages = formValues.images ?? [];
-
-  /** Gets the cover image URL (first existing or first new upload) */
   const coverImageUrl =
     existingImages.length > 0
       ? existingImages[0]
@@ -1040,25 +901,14 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
         ? previewUrls[0]
         : "";
 
-  /** Formats privacy type for display */
-  const privacyTypeLabel =
-    formValues.privacyType === "entire_place"
-      ? "Entire Place"
-      : formValues.privacyType === "private_room"
-        ? "Private Room"
-        : "Shared Room";
-
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Review your listing</h2>
-        <p className="text-muted-foreground">
-          Here's what we'll show to guests. Make sure everything looks good.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("preview_title")}</h2>
+        <p className="text-muted-foreground">{t("preview_desc")}</p>
       </div>
 
       <Card className="overflow-hidden p-0 shadow-none gap-0">
-        {/* Cover Image */}
         <div className="relative aspect-video w-full bg-muted">
           {coverImageUrl ? (
             <>
@@ -1075,39 +925,38 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
               <ImageIcon className="h-12 w-12 opacity-20" />
             </div>
           )}
-          <div className="absolute bottom-4 right-4 text-white font-bold text-xl drop-shadow-md z-10">
+          <div className="absolute bottom-4 end-4 text-white font-bold text-xl drop-shadow-md z-10">
             {formValues.pricePerNight
               ? `${formValues.pricePerNight} EGP`
-              : "Price not set"}
-            <span className="text-sm font-normal opacity-90 mx-1">/ night</span>
+              : t("price_not_set")}
+            <span className="text-sm font-normal opacity-90 mx-1">
+              {t("per_night")}
+            </span>
           </div>
         </div>
 
         <CardContent className="p-6 space-y-8">
-          {/* Title & Description */}
           <div className="space-y-4">
             <div className="flex justify-between items-start gap-4">
               <div>
                 <h3 className="text-2xl font-bold leading-tight">
-                  {formValues.title || "Untitled Listing"}
+                  {formValues.title || t("untitled")}
                 </h3>
                 <div className="flex items-center text-muted-foreground mt-2 text-sm">
-                  <MapPin className="h-4 w-4 mr-1.5 shrink-0" />
+                  <MapPin className="h-4 w-4 me-1.5 shrink-0" />
                   <span className="line-clamp-1">
-                    {formValues.location?.formattedAddress ||
-                      "No address selected"}
+                    {formValues.location?.formattedAddress || t("no_address")}
                   </span>
                 </div>
               </div>
             </div>
             <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-              {formValues.description || "No description provided."}
+              {formValues.description || t("no_description")}
             </p>
           </div>
 
           <div className="h-px bg-border" />
 
-          {/* Quick Stats Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-muted/40 border border-border/50">
               <Users className="h-6 w-6 text-primary mb-2" />
@@ -1115,7 +964,7 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
                 {formValues.maxGuests || 0}
               </span>
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                Guests
+                {t("guests")}
               </span>
             </div>
             <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-muted/40 border border-border/50">
@@ -1124,7 +973,7 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
                 {formValues.bedrooms || 0}
               </span>
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                Bedrooms
+                {t("bedrooms")}
               </span>
             </div>
             <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-muted/40 border border-border/50">
@@ -1133,7 +982,7 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
                 {formValues.beds || 0}
               </span>
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                Beds
+                {t("beds")}
               </span>
             </div>
             <div className="flex flex-col items-center justify-center p-4 rounded-xl bg-muted/40 border border-border/50">
@@ -1142,18 +991,17 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
                 {formValues.bathrooms || 0}
               </span>
               <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                Baths
+                {t("baths")}
               </span>
             </div>
           </div>
 
-          {/* Amenities */}
           {formValues.amenities && formValues.amenities.length > 0 && (
             <>
               <div className="h-px bg-border" />
               <div className="space-y-4">
                 <h4 className="font-semibold text-lg flex items-center gap-2">
-                  What this place offers
+                  {t("what_place_offers")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {formValues.amenities.map((amenity) => (
@@ -1170,13 +1018,12 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
             </>
           )}
 
-          {/* Policies */}
           {formValues.policies && formValues.policies.length > 0 && (
             <>
               <div className="h-px bg-border" />
               <div className="space-y-4">
                 <h4 className="font-semibold text-lg flex items-center gap-2">
-                  House Rules
+                  {t("house_rules")}
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {formValues.policies.map((policy) => (
@@ -1204,6 +1051,7 @@ function StepPreview({ previewUrls }: StepPreviewProps) {
 
 export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
   const router = useRouter();
+  const t = useTranslations("listing_form");
   const [isPending, startTransition] = useTransition();
   const [uploadStatus, setUploadStatus] = useState<UploadStatus>("idle");
 
@@ -1547,10 +1395,10 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
       try {
         if (mode === "edit" && listing?._id) {
           await updateListing(listing._id, finalData);
-          toast.success("Listing updated successfully");
+          toast.success(t("listing_updated"));
         } else {
           await createListing(finalData);
-          toast.success("Listing created successfully");
+          toast.success(t("listing_created"));
         }
 
         // Clear temporary files on success
@@ -1686,12 +1534,12 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
                   onClick={currentStep === 1 ? () => router.back() : goBack}
                   disabled={isPending || uploadStatus !== "idle"}
                 >
-                  {currentStep === 1 ? "Cancel" : "Back"}
+                  {currentStep === 1 ? t("cancel") : t("back")}
                 </Button>
 
                 {currentStep !== WIZARD_STEPS.length ? (
                   <Button type="button" onClick={goNext} size="lg">
-                    Next
+                    {t("next")}
                   </Button>
                 ) : (
                   <>
@@ -1704,17 +1552,17 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
                       {uploadStatus === "uploading" ? (
                         <>
                           <Loader2 className="animate-spin" />
-                          Uploading {newFiles.length} Images...
+                          {t("uploading", { count: newFiles.length })}
                         </>
                       ) : uploadStatus === "saving" ? (
                         <>
                           <Loader2 className="animate-spin" />
-                          Saving Listing...
+                          {t("saving")}
                         </>
                       ) : mode === "edit" ? (
-                        "Update Listing"
+                        t("update_listing")
                       ) : (
-                        "Create Listing"
+                        t("create_listing")
                       )}
                     </Button>
 
@@ -1726,24 +1574,26 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
                         <AlertDialogHeader>
                           <AlertDialogTitle>
                             {mode === "edit"
-                              ? "Update Listing?"
-                              : "Create Listing?"}
+                              ? t("confirm_update_title")
+                              : t("confirm_create_title")}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
                             {mode === "edit"
-                              ? "Are you sure you want to update this listing? The changes will be visible to guests immediately."
-                              : "Are you sure you want to create this listing? Once published, it will be visible to guests."}
+                              ? t("confirm_update_desc")
+                              : t("confirm_create_desc")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => {
                               setShowConfirmDialog(false);
                               handleSubmit(onSubmit, handleFormErrors)();
                             }}
                           >
-                            {mode === "edit" ? "Yes, Update" : "Yes, Create"}
+                            {mode === "edit"
+                              ? t("yes_update")
+                              : t("yes_create")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -1760,19 +1610,18 @@ export function ListingForm({ listing, mode = "create" }: ListingFormProps) {
             >
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("delete_image_title")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to remove this image? This action
-                    cannot be undone.
+                    {t("delete_image_desc")}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={confirmDeleteImage}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete
+                    {t("delete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

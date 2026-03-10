@@ -25,11 +25,12 @@ import {
   isBefore,
   differenceInCalendarDays,
   startOfDay,
+  startOfWeek,
+  addDays,
 } from "date-fns";
 import {
   ChevronLeft,
   ChevronRight,
-  Lock,
   X,
   RotateCcw,
   MessageSquare,
@@ -42,6 +43,8 @@ import {
   updateCalendarDates,
 } from "@/services/calendar-dates.service";
 import { cn } from "@/lib/utils";
+import { useTranslations, useLocale } from "next-intl";
+import { ar } from "date-fns/locale";
 
 // --- Types ---
 
@@ -63,8 +66,6 @@ interface DateData {
 
 // --- Constants ---
 
-const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
 // --- Helper Functions ---
 
 const getDateKey = (date: Date) => format(date, "yyyy-MM-dd");
@@ -77,6 +78,9 @@ function useListingCalendar(
   weekendPrice?: number,
   bookedDates: ListingCalendarProps["bookedDates"] = [],
 ) {
+  const localeCtx = useLocale();
+  const dateLocale = localeCtx === "ar" ? ar : undefined;
+
   const [currentMonth, setCurrentMonth] = useState(() =>
     startOfMonth(new Date()),
   );
@@ -190,10 +194,10 @@ function useListingCalendar(
       let end = group.dates[0];
 
       const formatRange = (s: Date, e: Date) => {
-        if (isSameDay(s, e)) return format(s, "MMM d");
+        if (isSameDay(s, e)) return format(s, "MMM d", { locale: dateLocale });
         if (s.getMonth() !== e.getMonth())
-          return `${format(s, "MMM d")} – ${format(e, "MMM d")}`;
-        return `${format(s, "MMM d")} – ${format(e, "d")}`;
+          return `${format(s, "MMM d", { locale: dateLocale })} – ${format(e, "MMM d", { locale: dateLocale })}`;
+        return `${format(s, "MMM d", { locale: dateLocale })} – ${format(e, "d", { locale: dateLocale })}`;
       };
 
       for (let i = 1; i < group.dates.length; i++) {
@@ -396,7 +400,6 @@ function useListingCalendar(
   const handleBlockParams = useCallback(
     (blocked: boolean) => {
       if (blocked) {
-        // Logic handled inside updateDates for note preservation
         updateDates(
           { isBlocked: true },
           `${selectedDates.size} date(s) blocked`,
@@ -518,6 +521,7 @@ function useListingCalendar(
     getDateData,
     isNoteInputVisible,
     setIsNoteInputVisible,
+    dateLocale,
   };
 }
 
@@ -555,6 +559,7 @@ const CalendarDay = memo(
     onToggle,
     isPast,
     isToday,
+    dateLocale,
   }: {
     date: Date;
     isSelected: boolean;
@@ -562,6 +567,7 @@ const CalendarDay = memo(
     onToggle: (d: Date) => void;
     isPast: boolean;
     isToday: boolean;
+    dateLocale?: any;
   }) => {
     const { price, isBlocked, isBooked, hasCustomPrice, hasNote } =
       getDateData(date);
@@ -632,7 +638,7 @@ const CalendarDay = memo(
               (isBlocked || isBooked) && "line-through decoration-current",
             )}
           >
-            {format(date, "d")}
+            {format(date, "d", { locale: dateLocale })}
           </span>
 
           {/* Note Indicator (Top Right) */}
@@ -686,7 +692,8 @@ const CalendarDay = memo(
       prev.isSelected === next.isSelected &&
       prev.date.getTime() === next.date.getTime() &&
       prev.getDateData === next.getDateData &&
-      prev.onToggle === next.onToggle
+      prev.onToggle === next.onToggle &&
+      prev.dateLocale === next.dateLocale
     );
   },
 );
@@ -698,11 +705,13 @@ const MonthView = memo(
     selectedDates,
     getDateData,
     onToggle,
+    dateLocale,
   }: {
     monthDate: Date;
     selectedDates: Set<string>;
     getDateData: (d: Date) => DateData;
     onToggle: (d: Date) => void;
+    dateLocale?: any;
   }) => {
     const monthStart = startOfMonth(monthDate);
     const monthEnd = endOfMonth(monthDate);
@@ -710,17 +719,24 @@ const MonthView = memo(
     const startOffset = getDay(monthStart);
     const today = startOfDay(new Date());
 
+    const weekdays = useMemo(() => {
+      const start = startOfWeek(new Date(), { weekStartsOn: 0 }); // Sunday
+      return Array.from({ length: 7 }).map((_, i) =>
+        format(addDays(start, i), "EEE", { locale: dateLocale }),
+      );
+    }, [dateLocale]);
+
     return (
       <div className="min-w-0 flex-1">
-        <h3 className="text-lg font-semibold text-center mb-4">
-          {format(monthDate, "MMMM yyyy")}
+        <h3 className="text-lg font-semibold text-center mb-4 capitalize">
+          {format(monthDate, "MMMM yyyy", { locale: dateLocale })}
         </h3>
 
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {WEEKDAYS.map((day) => (
+          {weekdays.map((day) => (
             <div
               key={day}
-              className="text-center text-xs font-medium text-muted-foreground py-2"
+              className="text-center text-xs font-medium text-muted-foreground py-2 capitalize"
             >
               {day}
             </div>
@@ -742,6 +758,7 @@ const MonthView = memo(
                 onToggle={onToggle}
                 isPast={isBefore(day, today)}
                 isToday={isSameDay(day, today)}
+                dateLocale={dateLocale}
               />
             );
           })}
@@ -775,6 +792,7 @@ const MonthSkeleton = () => (
 // --- Component ---
 
 export function ListingCalendar(props: ListingCalendarProps) {
+  const t = useTranslations("listing_calendar");
   const {
     currentMonth,
     isLoading,
@@ -799,6 +817,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
     getDateData,
     isNoteInputVisible,
     setIsNoteInputVisible,
+    dateLocale,
   } = useListingCalendar(
     props.listingId,
     props.basePrice,
@@ -808,13 +827,10 @@ export function ListingCalendar(props: ListingCalendarProps) {
 
   return (
     <div className="space-y-6 mb-44 md:mb-30">
-      {/* Header controls used to be here, but moved logic to hook */}
+      {/* Header controls */}
       <div className="pb-4">
         <div className="flex items-start justify-between">
-          <p className="text-sm text-muted-foreground">
-            Click on dates to select them, then use the action panel to block or
-            set prices.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("instructions")}</p>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -827,7 +843,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
                 ) || isLoading
               }
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
             </Button>
             <Button
               variant="outline"
@@ -835,7 +851,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
               onClick={handleNextMonth}
               disabled={isLoading}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 rtl:rotate-180" />
             </Button>
           </div>
         </div>
@@ -854,12 +870,14 @@ export function ListingCalendar(props: ListingCalendarProps) {
               selectedDates={selectedDates}
               getDateData={getDateData}
               onToggle={toggleDateSelection}
+              dateLocale={dateLocale}
             />
             <MonthView
               monthDate={addMonths(currentMonth, 1)}
               selectedDates={selectedDates}
               getDateData={getDateData}
               onToggle={toggleDateSelection}
+              dateLocale={dateLocale}
             />
           </>
         )}
@@ -867,17 +885,16 @@ export function ListingCalendar(props: ListingCalendarProps) {
 
       <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 pt-6 pb-2 border-t border-border/50">
         <LegendItem
-          label="Today"
+          label={t("legend_today")}
           className="bg-background border-border aspect-square"
           icon={
             <div className="w-5 h-5 rounded-full bg-primary/10 ring-1 ring-primary/20 text-[10px] flex items-center justify-center font-bold text-primary">
-              {format(new Date(), "d")}
+              {format(new Date(), "d", { locale: dateLocale })}
             </div>
           }
         />
-
         <LegendItem
-          label="Blocked"
+          label={t("legend_blocked")}
           className="bg-secondary/50 border-secondary pattern-diagonal-lines aspect-square relative"
           icon={
             <span className="text-xs line-through decoration-current text-muted-foreground/50 font-normal">
@@ -886,14 +903,14 @@ export function ListingCalendar(props: ListingCalendarProps) {
           }
         />
         <LegendItem
-          label="Booked"
+          label={t("legend_booked")}
           className="bg-destructive/5 border-none text-destructive/60 cursor-not-allowed decoration-destructive/30 aspect-square"
         />
         <LegendItem
-          label="Has note"
+          label={t("legend_has_note")}
           className="bg-background border-border aspect-square relative"
           icon={
-            <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
+            <div className="absolute top-1.5 end-1.5 w-1.5 h-1.5 rounded-full bg-primary" />
           }
         />
       </div>
@@ -912,12 +929,12 @@ export function ListingCalendar(props: ListingCalendarProps) {
           <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 w-full relative">
             {/* Selection Counter & Close (Mobile) */}
             <div className="flex items-center justify-between w-full sm:w-auto gap-4">
-              <div className="flex items-center gap-2.5 bg-muted/40 rounded-full pl-1.5 pr-3 py-1.5 border border-border/50">
+              <div className="flex items-center gap-2.5 bg-muted/40 rounded-full ps-1.5 pe-3 py-1.5 border border-border/50">
                 <span className="bg-primary text-primary-foreground text-[10px] font-bold h-5 min-w-5 px-1.5 flex items-center justify-center rounded-full shadow-sm">
                   {selectedDates.size}
                 </span>
                 <span className="text-xs font-semibold text-foreground/80 tracking-tight uppercase">
-                  Selected
+                  {t("selected")}
                 </span>
               </div>
               <Button
@@ -933,9 +950,9 @@ export function ListingCalendar(props: ListingCalendarProps) {
             <div className="hidden sm:block h-8 w-px bg-border/50" />
 
             {/* Actions Toolbar */}
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 w-full sm:flex-1 pr-0">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 w-full sm:flex-1 pe-0">
               {/* Status Switch */}
-              <div className="flex items-center gap-2 bg-muted/30 hover:bg-muted/50 transition-colors rounded-full pl-3 pr-1.5 py-1 border border-border/50 shrink-0">
+              <div className="flex items-center gap-2 bg-muted/30 hover:bg-muted/50 transition-colors rounded-full ps-3 pe-1.5 py-1 border border-border/50 shrink-0">
                 <Label
                   htmlFor="block-switch"
                   className={cn(
@@ -948,10 +965,10 @@ export function ListingCalendar(props: ListingCalendarProps) {
                   )}
                 >
                   {selectionStats.mixedBlockedStatus === "mixed"
-                    ? "Mixed"
+                    ? t("status_mixed")
                     : selectionStats.mixedBlockedStatus === "blocked"
-                      ? "Blocked"
-                      : "Available"}
+                      ? t("status_blocked")
+                      : t("status_available")}
                 </Label>
 
                 <Switch
@@ -975,16 +992,16 @@ export function ListingCalendar(props: ListingCalendarProps) {
                 selectionStats.mixedBlockedStatus === "mixed") && (
                 <>
                   {isNoteInputVisible || noteInput ? (
-                    <div className="flex items-center bg-background rounded-full border border-border/50 pl-3 pr-1 py-1 shadow-sm shrink-0 animate-in fade-in zoom-in-95 duration-200">
+                    <div className="flex items-center bg-background rounded-full border border-border/50 ps-3 pe-1 py-1 shrink-0 animate-in fade-in zoom-in-95 duration-200">
                       <Input
                         type="text"
-                        placeholder="Note..."
+                        placeholder={t("note_placeholder")}
                         value={noteInput}
                         onChange={(e) => setNoteInput(e.target.value)}
                         onKeyDown={(e) =>
                           e.key === "Enter" && !isPending && handleSetNote()
                         }
-                        className="pl-1 h-6 w-24 sm:w-32 border-0 bg-transparent focus-visible:ring-0 shadow-none text-xs py-0"
+                        className="ps-1 h-6 w-24 sm:w-32 border-0 bg-transparent focus-visible:ring-0 shadow-none text-xs py-0"
                         autoFocus
                       />
                       <Button
@@ -993,10 +1010,10 @@ export function ListingCalendar(props: ListingCalendarProps) {
                         onClick={handleSetNote}
                         disabled={isPending}
                         className="h-6 w-6 p-0 rounded-full hover:bg-primary/10 hover:text-primary"
-                        title="Save note"
+                        title={t("save_note")}
                       >
                         <div className="h-2.5 w-2.5 bg-current rounded-full" />
-                        <span className="sr-only">Save</span>
+                        <span className="sr-only">{t("save_note")}</span>
                       </Button>
                     </div>
                   ) : (
@@ -1005,20 +1022,20 @@ export function ListingCalendar(props: ListingCalendarProps) {
                       variant="ghost"
                       onClick={() => setIsNoteInputVisible(true)}
                       className="h-8 w-8 p-0 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/50 border border-transparent hover:border-border/50"
-                      title="Add note"
+                      title={t("add_note")}
                     >
                       <MessageSquare className="h-4 w-4" />
-                      <span className="sr-only">Add Note</span>
+                      <span className="sr-only">{t("add_note")}</span>
                     </Button>
                   )}
                 </>
               )}
 
               {/* Price Input */}
-              <div className="flex items-center bg-background rounded-full border border-border/50 pl-3 pr-1 py-1 shadow-sm shrink-0 hover:border-border transition-colors">
+              <div className="flex items-center bg-background rounded-full border border-border/50 ps-3 pe-1 py-1 shadow-sm shrink-0 hover:border-border transition-colors">
                 <Input
                   type="number"
-                  placeholder="Price"
+                  placeholder={t("price_placeholder")}
                   value={customPriceInput}
                   onChange={(e) => setCustomPriceInput(e.target.value)}
                   onKeyDown={(e) =>
@@ -1027,19 +1044,18 @@ export function ListingCalendar(props: ListingCalendarProps) {
                     !isPending &&
                     handleSetPrice()
                   }
-                  className="pl-1 h-6 w-16 border-0 bg-transparent focus-visible:ring-0 shadow-none text-xs py-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="ps-1 h-6 w-16 border-0 bg-transparent focus-visible:ring-0 shadow-none text-xs py-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   min={10}
                   max={100000}
                   step="0.01"
                 />
-
                 <Button
                   size="sm"
                   onClick={handleSetPrice}
                   disabled={isPending || !customPriceInput}
-                  className="h-6 px-2.5 text-[10px] ml-1 rounded-full font-semibold"
+                  className="h-6 px-2.5 text-[10px] ms-1 rounded-full font-semibold"
                 >
-                  Set
+                  {t("set")}
                 </Button>
               </div>
 
@@ -1050,7 +1066,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
                   onClick={handleClearPrice}
                   disabled={isPending}
                   className="h-8 w-8 px-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full shrink-0 transition-colors"
-                  title="Reset custom price"
+                  title={t("reset_price")}
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
@@ -1060,7 +1076,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full hidden sm:flex hover:bg-muted ml-auto shrink-0 text-muted-foreground"
+              className="h-9 w-9 rounded-full hidden sm:flex hover:bg-muted ms-auto shrink-0 text-muted-foreground"
               onClick={clearSelection}
             >
               <X className="h-4 w-4" />
@@ -1090,7 +1106,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
                             e.stopPropagation();
                             handleEditNoteGroup(group.note, group.dates);
                           }}
-                          title="Edit note"
+                          title={t("edit_note")}
                         >
                           <Edit2 className="h-3 w-3" />
                         </Button>
@@ -1102,7 +1118,7 @@ export function ListingCalendar(props: ListingCalendarProps) {
                             e.stopPropagation();
                             handleRemoveNoteGroup(group.dates);
                           }}
-                          title="Delete note"
+                          title={t("delete_note")}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>

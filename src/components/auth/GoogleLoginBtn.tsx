@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface GoogleLoginBtnProps {
   disabled?: boolean;
@@ -14,6 +15,7 @@ export function GoogleLoginBtn({
   callbackUrl = "/",
 }: GoogleLoginBtnProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("auth");
 
   const handleGoogleLogin = () => {
     setIsLoading(true);
@@ -35,7 +37,7 @@ export function GoogleLoginBtn({
       disabled={isDisabled}
     >
       <Image src="/google.svg" alt="Google" width={20} height={20} />
-      Continue with Google
+      {t("continue_with_google")}
     </Button>
   );
 }

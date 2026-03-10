@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link } from "@/navigation";
+import { usePathname } from "@/navigation";
 import { useSection } from "@/contexts/SectionContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,8 @@ import { useRouter } from "nextjs-toploader/app";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/contexts/AuthContext";
 import { Section, HeaderUser } from "@/types";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useLocale, useTranslations } from "next-intl";
 
 const emptySubscribe = () => () => {};
 
@@ -46,6 +48,7 @@ export function Header({ links }: HeaderProps) {
   const section = useSection();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations("nav");
 
   // Modern hydration mismatch handling
   const isClient = useSyncExternalStore(
@@ -63,9 +66,9 @@ export function Header({ links }: HeaderProps) {
           router.push("/");
         })(),
         {
-          loading: "Logging out...",
-          success: "Logged out successfully",
-          error: "Failed to logout",
+          loading: t("logging_out"),
+          success: t("logged_out_success"),
+          error: t("failed_logout"),
         },
       );
     });
@@ -98,9 +101,10 @@ export function Header({ links }: HeaderProps) {
 }
 
 function Logo() {
+  const t = useTranslations("nav");
   return (
-    <Link href="/" className="text-2xl font-bold text-primary">
-      Booking
+    <Link href="/" prefetch={false} className="text-2xl font-bold text-primary">
+      {t("booking")}
     </Link>
   );
 }
@@ -147,6 +151,7 @@ function SectionNavigation({
         <Link
           key={route.href}
           href={route.href}
+          prefetch={false}
           className={cn(
             "text-sm font-medium transition-colors hover:text-primary hover:bg-accent py-1.5 px-3 rounded-full leading-normal dark:hover:bg-accent/50",
             activeLink?.href === route.href
@@ -162,12 +167,13 @@ function SectionNavigation({
 }
 
 function AuthNavigation({ user }: { user: HeaderUser | null }) {
+  const t = useTranslations("nav");
   if (user) return null;
 
   return (
-    <Link href="/auth/login">
+    <Link href="/auth/login" prefetch={false}>
       <Button size="sm" variant="ghost">
-        Login
+        {t("login")}
       </Button>
     </Link>
   );
@@ -180,6 +186,7 @@ function NavActions({
   user: HeaderUser | null;
   section: Section;
 }) {
+  const t = useTranslations("nav");
   if (!user) return null;
 
   return (
@@ -189,9 +196,9 @@ function NavActions({
         <>
           {section === "guest" ? (
             <>
-              <Link href="/admin">
+              <Link href="/admin" prefetch={false}>
                 <Button variant="ghost" size="sm">
-                  Switch to admin
+                  {t("switch_to_admin")}
                 </Button>
               </Link>
             </>
@@ -201,18 +208,20 @@ function NavActions({
 
       {/* Host specific header actions */}
       {user.role === "Host" && (
-        <Link href={section === "guest" ? "/hosting" : "/"}>
+        <Link href={section === "guest" ? "/hosting" : "/"} prefetch={false}>
           <Button variant="ghost" size="sm">
-            {section === "guest" ? "Switch to hosting" : "Switch to travelling"}
+            {section === "guest"
+              ? t("switch_to_hosting")
+              : t("switch_to_travelling")}
           </Button>
         </Link>
       )}
 
       {/* Guest specific header actions */}
       {user.role === "Guest" && (
-        <Link href="/become-host">
+        <Link href="/become-host" prefetch={false}>
           <Button variant="ghost" size="sm">
-            Become a Host
+            {t("become_host")}
           </Button>
         </Link>
       )}
@@ -224,7 +233,7 @@ function UserProfileLink({ user }: { user: HeaderUser | null }) {
   if (!user) return null;
 
   return (
-    <Link href="/profile">
+    <Link href="/profile" prefetch={false}>
       <Avatar className="size-9 hover:opacity-80 transition-opacity">
         {user.avatar && <AvatarImage src={user.avatar} />}
         <AvatarFallback className="bg-muted">
@@ -246,14 +255,16 @@ function UserMenu({
   isPending: boolean;
   onLogout: () => void;
 }) {
+  const locale = useLocale();
+
   return (
-    <DropdownMenu>
+    <DropdownMenu dir={locale === "ar" ? "rtl" : "ltr"}>
       <DropdownMenuTrigger asChild>
         <Button variant="secondary" size="icon">
           <Menu />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 mt-2.5">
+      <DropdownMenuContent align="end" className="w-52 mt-2.5">
         {user ? (
           <AuthenticatedMenu
             user={user}
@@ -280,28 +291,36 @@ function AuthenticatedMenu({
   isPending: boolean;
   onLogout: () => void;
 }) {
+  const t = useTranslations("nav");
   return (
     <>
-      <div className="px-2 py-1.5 focus:bg-accent focus:text-accent-foreground outline-none">
+      <div
+        dir="ltr"
+        className="px-2 py-1.5 focus:bg-accent focus:text-accent-foreground outline-none"
+      >
         <p className="font-semibold truncate">{user.name}</p>
         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
       </div>
       <DropdownMenuSeparator />
 
-      <MenuItem href="/profile" icon={User} label="Profile" />
+      <MenuItem href="/profile" icon={User} label={t("profile")} />
       <MenuItem
         href={section === "hosting" ? "/hosting/messages" : "/messages"}
         icon={MessageSquare}
-        label="Messages"
+        label={t("messages")}
       />
-      <MenuItem href="/bookings" icon={Calendar} label="My Bookings" />
-      <MenuItem href="/wishlist" icon={Heart} label="Wishlist" />
+      <MenuItem href="/bookings" icon={Calendar} label={t("my_bookings")} />
+      <MenuItem href="/wishlist" icon={Heart} label={t("wishlist")} />
 
       <DropdownMenuSeparator />
 
       {/* Role and Section based context switches */}
       {user.role === "Guest" && (
-        <MenuItem href="/become-host" icon={Building2} label="Become a Host" />
+        <MenuItem
+          href="/become-host"
+          icon={Building2}
+          label={t("become_host")}
+        />
       )}
 
       {user.role === "Host" && (
@@ -309,7 +328,9 @@ function AuthenticatedMenu({
           href={section === "hosting" ? "/" : "/hosting"}
           icon={section === "hosting" ? Map : Building2}
           label={
-            section === "hosting" ? "Switch to travelling" : "Switch to hosting"
+            section === "hosting"
+              ? t("switch_to_travelling")
+              : t("switch_to_hosting")
           }
         />
       )}
@@ -318,51 +339,62 @@ function AuthenticatedMenu({
         <>
           {section === "guest" && (
             <>
-              <MenuItem href="/admin" icon={Shield} label="Switch to admin" />
+              <MenuItem
+                href="/admin"
+                icon={Shield}
+                label={t("switch_to_admin")}
+              />
               <MenuItem
                 href="/hosting"
                 icon={Building2}
-                label="Switch to hosting"
+                label={t("switch_to_hosting")}
               />
             </>
           )}
           {section === "admin" && (
             <>
-              <MenuItem href="/" icon={Map} label="Switch to travelling" />
+              <MenuItem href="/" icon={Map} label={t("switch_to_travelling")} />
               <MenuItem
                 href="/hosting"
                 icon={Building2}
-                label="Switch to hosting"
+                label={t("switch_to_hosting")}
               />
             </>
           )}
           {section === "hosting" && (
             <>
-              <MenuItem href="/" icon={Map} label="Switch to travelling" />
-              <MenuItem href="/admin" icon={Shield} label="Switch to admin" />
+              <MenuItem href="/" icon={Map} label={t("switch_to_travelling")} />
+              <MenuItem
+                href="/admin"
+                icon={Shield}
+                label={t("switch_to_admin")}
+              />
             </>
           )}
         </>
       )}
 
       <DropdownMenuSeparator />
+      <LanguageSwitcher />
       <ThemeToggle />
       <DropdownMenuSeparator />
 
       <DropdownMenuItem onClick={onLogout} disabled={isPending}>
         <LogOut />
-        Logout
+        {t("logout")}
       </DropdownMenuItem>
     </>
   );
 }
 
 function GuestMenu() {
+  const t = useTranslations("nav");
   return (
     <>
-      <MenuItem href="/auth/login" icon={LogIn} label="Login" />
-      <MenuItem href="/auth/register" icon={UserPlus} label="Sign up" />
+      <MenuItem href="/auth/login" icon={LogIn} label={t("login")} />
+      <MenuItem href="/auth/register" icon={UserPlus} label={t("sign_up")} />
       <DropdownMenuSeparator />
+      <LanguageSwitcher />
       <ThemeToggle />
     </>
   );
@@ -379,7 +411,7 @@ function MenuItem({
 }) {
   return (
     <DropdownMenuItem asChild>
-      <Link href={href}>
+      <Link href={href} prefetch={false}>
         <Icon />
         {label}
       </Link>

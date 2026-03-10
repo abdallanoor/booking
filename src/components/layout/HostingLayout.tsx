@@ -10,40 +10,43 @@ import {
   ListTodo,
   MessageSquare,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/navigation";
 
-const hostingLinks = [
-  {
-    href: "/hosting",
-    label: "Overview",
-    icon: LayoutDashboard,
-  },
-  {
-    href: "/hosting/today",
-    label: "Today",
-    icon: ListTodo,
-  },
-  {
-    href: "/hosting/listings",
-    label: "Listings",
-    icon: Building2,
-  },
-  {
-    href: "/hosting/bookings",
-    label: "Bookings",
-    icon: Calendar,
-  },
-  {
-    href: "/hosting/messages",
-    label: "Messages",
-    icon: MessageSquare,
-  },
-];
+import { useTranslations } from "next-intl";
 
 export function HostingLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const isWizardPage =
     pathname?.includes("/listings/new") || pathname?.endsWith("/edit");
+
+  const hostingLinks = [
+    {
+      href: "/hosting",
+      label: t("overview"),
+      icon: LayoutDashboard,
+    },
+    {
+      href: "/hosting/today",
+      label: t("today"),
+      icon: ListTodo,
+    },
+    {
+      href: "/hosting/listings",
+      label: t("listings"),
+      icon: Building2,
+    },
+    {
+      href: "/hosting/bookings",
+      label: t("bookings"),
+      icon: Calendar,
+    },
+    {
+      href: "/hosting/messages",
+      label: t("messages"),
+      icon: MessageSquare,
+    },
+  ];
 
   if (isWizardPage) {
     return (

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { changePasswordAction } from "@/actions";
 import { toast } from "sonner";
 import { Loader2, Save as SaveIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface PasswordSettingsProps {
   hasPassword?: boolean;
@@ -17,6 +18,7 @@ export function PasswordSettings({
   hasPassword,
   refreshUser,
 }: PasswordSettingsProps) {
+  const t = useTranslations("password_settings");
   const [loading, setLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -43,13 +45,13 @@ export function PasswordSettings({
     const confirmPassword = formData.get("confirmPassword") as string;
 
     if (newPassword !== confirmPassword) {
-      toast.error("New passwords do not match");
+      toast.error(t("pass_mismatch"));
       setLoading(false);
       return;
     }
 
     if (newPassword.length < 6) {
-      toast.error("Password must be at least 6 characters");
+      toast.error(t("pass_length"));
       setLoading(false);
       return;
     }
@@ -58,19 +60,19 @@ export function PasswordSettings({
       const result = await changePasswordAction(currentPassword, newPassword);
 
       if (result.success) {
-        toast.success("Password updated successfully");
+        toast.success(t("success"));
         formRef.current?.reset();
         setIsDirty(false);
         if (refreshUser) {
           await refreshUser();
         }
       } else {
-        toast.error(result.message || "Failed to update password");
+        toast.error(result.message || t("failed"));
       }
     } catch (error) {
       console.error(error);
       const message =
-        error instanceof Error ? error.message : "An unexpected error occurred";
+        error instanceof Error ? error.message : t("unexpected_error");
       toast.error(message);
     } finally {
       setLoading(false);
@@ -78,16 +80,14 @@ export function PasswordSettings({
   };
 
   return (
-    <div className="p-6 md:p-10 border-t border-border">
-      <div className="flex items-center justify-between mb-8">
-        <div>
+    <div className="p-6 md:p-10 border-t border-border mt-8">
+      <div className="flex items-start justify-between mb-8">
+        <div className="text-start">
           <h3 className="text-lg font-semibold text-foreground">
-            {hasPassword ? "Change Password" : "Set Password"}
+            {hasPassword ? t("change_title") : t("set_title")}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {hasPassword
-              ? "Ensure your account is secure by using a strong password."
-              : "Secure your account with a password."}
+            {hasPassword ? t("change_desc") : t("set_desc")}
           </p>
         </div>
         <Button
@@ -99,7 +99,7 @@ export function PasswordSettings({
         >
           {loading ? <Loader2 className="animate-spin" /> : <SaveIcon />}
           <span className="hidden sm:inline">
-            {hasPassword ? "Update Password" : "Set Password"}
+            {hasPassword ? t("update_btn") : t("set_btn")}
           </span>
         </Button>
       </div>
@@ -113,39 +113,42 @@ export function PasswordSettings({
       >
         <div className="grid gap-6 max-w-md">
           {hasPassword && (
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
+            <div className="space-y-2 text-start">
+              <Label htmlFor="currentPassword">{t("current_pass")}</Label>
               <Input
                 id="currentPassword"
                 name="currentPassword"
                 type="password"
                 placeholder="••••••••"
                 autoComplete="current-password"
+                className="text-start"
                 required
               />
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
+          <div className="space-y-2 text-start">
+            <Label htmlFor="newPassword">{t("new_pass")}</Label>
             <Input
               id="newPassword"
               name="newPassword"
               type="password"
               placeholder="••••••••"
               autoComplete="new-password"
+              className="text-start"
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+          <div className="space-y-2 text-start">
+            <Label htmlFor="confirmPassword">{t("confirm_pass")}</Label>
             <Input
               id="confirmPassword"
               name="confirmPassword"
               type="password"
               placeholder="••••••••"
               autoComplete="new-password"
+              className="text-start"
               required
             />
           </div>
