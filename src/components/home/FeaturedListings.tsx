@@ -1,10 +1,13 @@
 import { cookies } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ListingsGrid } from "@/components/listing/ListingsGrid";
 import { getListings } from "@/services/listings.service";
 import { getWishlist } from "@/services/wishlist.service";
 
 export default async function FeaturedListings() {
-  const listings = await getListings();
+  const locale = await getLocale();
+  const t = await getTranslations("home");
+  const listings = await getListings(undefined, locale);
 
   let wishlistIds = new Set<string>();
   const cookieStore = await cookies();
@@ -24,8 +27,8 @@ export default async function FeaturedListings() {
     }
   }
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Featured Listings</h2>
+    <div className="text-start">
+      <h2 className="text-2xl font-semibold mb-4">{t("featured_listings")}</h2>
       <ListingsGrid listings={listings} wishlistIds={wishlistIds} />
     </div>
   );

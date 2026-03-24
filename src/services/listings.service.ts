@@ -8,6 +8,7 @@ export type { Listing, ListingFilters };
 // Get all listings
 export async function getListings(
   filters?: ListingFilters,
+  locale?: string,
 ): Promise<Listing[]> {
   const params = new URLSearchParams();
   if (filters?.city) params.append("city", filters.city);
@@ -18,17 +19,27 @@ export async function getListings(
   if (filters?.hostId) params.append("hostId", filters.hostId);
 
   const query = params.toString();
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{ data: { listings: Listing[] } }>(
     `/listings${query ? `?${query}` : ""}`,
+    { headers },
   );
 
   return response.data.listings;
 }
 
 // Get single listing
-export async function getListing(id: string): Promise<Listing> {
+export async function getListing(id: string, locale?: string, original?: boolean): Promise<Listing> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
+  const url = original ? `/listings/${id}?original=true` : `/listings/${id}`;
+
   const response = await apiGet<{ data: { listing: Listing } }>(
-    `/listings/${id}`,
+    url,
+    { headers },
   );
 
   return response.data.listing;
@@ -50,7 +61,8 @@ export async function getListingBookedDates(
 export async function getAdminListings(
   page: number = 1,
   limit: number = 10,
-  status?: string
+  status?: string,
+  locale?: string
 ): Promise<{ listings: Listing[]; pagination: any; counts: { pending: number; approved: number; rejected: number } }> {
   const params = new URLSearchParams();
   params.append("dashboard", "true");
@@ -59,12 +71,15 @@ export async function getAdminListings(
   params.append("limit", limit.toString());
   if (status) params.append("status", status);
 
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{
     data: { 
       listings: Listing[]; 
       pagination: any;
     };
-  }>(`/listings?${params.toString()}`);
+  }>(`/listings?${params.toString()}`, { headers });
   
   // To get counts, we should ideally fetch from another endpoint or modify backend, 
   // but since we need them, we can fetch all listing counts separately or 
@@ -79,9 +94,13 @@ export async function getAdminListings(
 }
 
 // Get all listings for admin (legacy without pagination, if used somewhere else)
-export async function getAllListings(): Promise<Listing[]> {
+export async function getAllListings(locale?: string): Promise<Listing[]> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{ data: { listings: Listing[] } }>(
     "/listings?dashboard=true&view=admin",
+    { headers }
   );
   return response.data.listings;
 }
@@ -89,11 +108,15 @@ export async function getAllListings(): Promise<Listing[]> {
 // Get listings for current host
 export async function getHostListings(
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  locale?: string
 ): Promise<{ listings: Listing[]; pagination: any }> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{
     data: { listings: Listing[]; pagination: any };
-  }>(`/listings?dashboard=true&page=${page}&limit=${limit}`);
+  }>(`/listings?dashboard=true&page=${page}&limit=${limit}`, { headers });
   return {
     listings: response.data.listings,
     pagination: response.data.pagination,

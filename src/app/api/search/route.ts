@@ -3,6 +3,8 @@ import dbConnect from "@/lib/mongodb";
 import Listing from "@/models/Listing";
 import Booking from "@/models/Booking";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { applyListingLocale } from "@/lib/listing-translation";
+import { SUPPORTED_LOCALES } from "@/lib/translate";
 
 interface SearchFilter {
   $or?: Array<{ [key: string]: RegExp }>;
@@ -79,7 +81,20 @@ export async function GET(req: NextRequest) {
 
     const listings = await Listing.find(filter).populate("host", "name avatar");
 
-    return successResponse({ listings, count: listings.length });
+    // Only apply translation if language header is explicitly sent
+    const acceptLang = req.headers.get("accept-language");
+    let finalListings;
+    if (acceptLang) {
+      const locale = acceptLang.split(",")[0].split("-")[0].trim();
+      const effectiveLocale = (SUPPORTED_LOCALES as readonly string[]).includes(locale) ? locale : "en";
+      finalListings = listings.map((l) =>
+        applyListingLocale(l.toObject(), effectiveLocale)
+      );
+    } else {
+      finalListings = listings;
+    }
+
+    return successResponse({ listings: finalListings, count: finalListings.length });
   } catch (error) {
     console.error("Search error:", error);
     const message = error instanceof Error ? error.message : "Search failed";

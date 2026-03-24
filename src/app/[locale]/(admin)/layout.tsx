@@ -14,19 +14,19 @@ export default async function AdminRouteLayout({
   const token = cookieStore.get("auth_token")?.value;
 
   if (!token) {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   const payload = verifyToken(token);
   if (!payload) {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   await dbConnect();
   const user = await User.findById(payload.userId).lean();
 
   if (!user) {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   // Restrict access to Admin only

@@ -6,10 +6,12 @@ import { successResponse, errorResponse } from "@/lib/api-response";
 import { requireAuth } from "@/lib/auth/auth-middleware";
 import Listing from "@/models/Listing";
 import Message from "@/models/Message";
+import { applyListingLocale } from "@/lib/listing-translation";
 
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth(req);
+    const acceptLang = req.headers.get("accept-language");
     await dbConnect();
 
     // Ensure Listing model is loaded so populate works
@@ -34,8 +36,14 @@ export async function GET(req: NextRequest) {
           sender: { $ne: user._id },
           isRead: false,
         });
+        const obj = conv.toObject();
+        if (acceptLang && obj.booking && (obj.booking as any).listing) {
+          const locale = acceptLang.split(",")[0].split("-")[0].trim();
+          (obj.booking as any).listing = applyListingLocale((obj.booking as any).listing, locale);
+        }
+
         return {
-          ...conv.toObject(),
+          ...obj,
           unreadCount,
         };
       })
@@ -53,6 +61,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const user = await requireAuth(req);
+    const acceptLang = req.headers.get("accept-language");
     await dbConnect();
 
     const body = await req.json();
@@ -97,7 +106,13 @@ export async function POST(req: NextRequest) {
       populate: { path: "listing", select: "title images" }
     });
 
-    return successResponse({ conversation }, "Conversation retrieved", 200);
+    const obj = conversation.toObject();
+    if (acceptLang && obj.booking && (obj.booking as any).listing) {
+      const locale = acceptLang.split(",")[0].split("-")[0].trim();
+      (obj.booking as any).listing = applyListingLocale((obj.booking as any).listing, locale);
+    }
+
+    return successResponse({ conversation: obj }, "Conversation retrieved", 200);
   } catch (error) {
     console.error("Create conversation error:", error);
     const message = error instanceof Error ? error.message : "Failed to create conversation";

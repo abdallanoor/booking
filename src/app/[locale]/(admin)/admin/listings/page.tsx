@@ -79,6 +79,7 @@ export default function AdminListingsPage() {
           pageNum,
           5,
           status === "all" ? undefined : status,
+          locale,
         );
         setListings(data.listings);
         setPagination(data.pagination);
@@ -89,7 +90,7 @@ export default function AdminListingsPage() {
         setLoading(false);
       }
     },
-    [t],
+    [t, locale],
   );
 
   useEffect(() => {

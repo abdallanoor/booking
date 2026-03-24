@@ -68,7 +68,7 @@ export default async function RootLayout({
               >
                 <DirectionProvider dir={direction}>
                   {children}
-                  <Toaster />
+                  <Toaster dir={direction} />
                 </DirectionProvider>
               </GoogleOAuthProvider>
             </ThemeProvider>

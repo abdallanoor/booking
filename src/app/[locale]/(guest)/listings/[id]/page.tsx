@@ -21,6 +21,7 @@ import { MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ShareButton } from "@/components/listing/ShareButton";
 import { SaveButton } from "@/components/listing/SaveButton";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Review } from "@/types";
 import QuestionList from "@/components/Question/QuestionList";
 
@@ -30,6 +31,9 @@ export default async function ListingDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations("listing_details");
+  const locale = await getLocale();
+  const dir = locale === "ar" ? "rtl" : "ltr";
 
   let listing: Listing;
   let bookedDates: {
@@ -42,7 +46,7 @@ export default async function ListingDetailPage({
   let reviews: Review[] | undefined = [];
 
   try {
-    listing = await getListing(id);
+    listing = await getListing(id, locale);
     bookedDates = await getListingBookedDates(id);
 
     // Fetch custom prices for the next year
@@ -81,7 +85,7 @@ export default async function ListingDetailPage({
 
     // Check wishlist using the same approach as home page
     try {
-      const wishlist = await getWishlist();
+      const wishlist = await getWishlist(locale);
       const validWishlist = wishlist.filter((item) => item.listing !== null);
       isInWishlist = validWishlist.some(
         (item) => item.listing._id === listing._id,
@@ -98,11 +102,11 @@ export default async function ListingDetailPage({
   }
 
   return (
-    <main className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <main className="container max-w-6xl! py-6">
       {/* Header Section */}
       <div className="mb-6">
-        <div className="flex justify-between items-start">
-          <h1 className="text-2xl font-semibold text-foreground">
+        <div className="flex justify-between items-start gap-4">
+          <h1 className="text-2xl font-semibold text-foreground text-start">
             {listing.title}
           </h1>
           <div className="flex gap-2">
@@ -116,51 +120,71 @@ export default async function ListingDetailPage({
       </div>
 
       {/* Images Carousel Section */}
-      <div className="mb-8 rounded-xl overflow-hidden relative group">
-        <Carousel className="w-full">
-          <CarouselContent>
-            {listing.images.map((image, index) => (
-              <CarouselItem
-                key={index}
-                className="sm:basis-1/2 lg:basis-1/2 cursor-pointer z-40"
-              >
-                <div className="relative aspect-4/3 sm:aspect-video w-full">
-                  <Image
-                    src={image}
-                    alt={`${listing.title} - Image ${index + 1}`}
-                    fill
-                    className="object-cover hover:opacity-95 transition-opacity"
-                  />
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="left-4 bg-background!" />
-          <CarouselNext className="right-4 bg-background!" />
-        </Carousel>
+      <div className="mb-8 rounded-3xl overflow-hidden relative group">
+        {listing.images.length === 1 ? (
+          <div className="relative aspect-4/3 sm:aspect-video max-h-96 w-full">
+            <Image
+              src={listing.images[0]}
+              alt={`${listing.title} - Image 1`}
+              fill
+              className="object-cover"
+            />
+          </div>
+        ) : (
+          <Carousel
+            dir={dir}
+            opts={{
+              direction: dir,
+            }}
+            className="w-full"
+          >
+            <CarouselContent>
+              {listing.images.map((image, index) => (
+                <CarouselItem
+                  key={index}
+                  className="sm:basis-1/2 lg:basis-1/2 cursor-pointer z-40"
+                >
+                  <div className="relative aspect-4/3 sm:aspect-video w-full">
+                    <Image
+                      src={image}
+                      alt={`${listing.title} - Image ${index + 1}`}
+                      fill
+                      className="object-cover hover:opacity-95 transition-opacity"
+                    />
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="start-2 bg-background!" />
+            <CarouselNext className="end-2 bg-background!" />
+          </Carousel>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 relative">
+      <div className="grid grid-cols-1 lg:grid-cols-8 gap-12 relative">
         {/* Left Column: Details */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-5 space-y-8 text-start">
           {/* Title & Stats */}
           <div className="border-b pb-6">
-            <h2 className="text-xl font-semibold mb-1">
+            <h2 className="text-xl font-semibold mb-1" dir="auto">
               {listing.privacyType === "entire_place"
-                ? "Entire home"
+                ? t("entire_home")
                 : listing.privacyType === "private_room"
-                  ? "Private room"
-                  : "Shared room"}{" "}
-              in {listing.location.city}, {listing.location.country}
+                  ? t("private_room")
+                  : t("shared_room")}{" "}
+              {t("in_location", {
+                city: listing.location.city,
+                country: listing.location.country,
+              })}
             </h2>
             <div className="flex gap-1 text-sm text-muted-foreground">
-              <span>{listing.maxGuests} guests</span>
+              <span>{t("guests", { count: listing.maxGuests })}</span>
               <span>·</span>
-              <span>{listing.bedrooms} bedrooms</span>
+              <span>{t("bedrooms", { count: listing.bedrooms })}</span>
               <span>·</span>
-              <span>{listing.beds} beds</span>
+              <span>{t("beds", { count: listing.beds })}</span>
               <span>·</span>
-              <span>{listing.bathrooms} baths</span>
+              <span>{t("baths", { count: listing.bathrooms })}</span>
             </div>
           </div>
 
@@ -174,18 +198,19 @@ export default async function ListingDetailPage({
             </Avatar>
             <div className="flex flex-col">
               <span className="font-semibold text-base">
-                Hosted by {listing.host.name}
+                {t("hosted_by", { name: listing.host.name })}
               </span>
               {listing.host.createdAt && (
                 <span className="text-muted-foreground text-sm">
-                  Joined{" "}
-                  {new Date(listing.host.createdAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      month: "long",
-                      year: "numeric",
-                    },
-                  )}
+                  {t("joined", {
+                    date: new Date(listing.host.createdAt).toLocaleDateString(
+                      locale === "ar" ? "ar-EG" : "en-US",
+                      {
+                        month: "long",
+                        year: "numeric",
+                      },
+                    ),
+                  })}
                 </span>
               )}
             </div>
@@ -197,10 +222,10 @@ export default async function ListingDetailPage({
               <div className="mt-1">
                 <MapPin className="w-6 h-6" />
               </div>
-              <div>
-                <h3 className="font-semibold">Great location</h3>
+              <div className="text-start">
+                <h3 className="font-semibold">{t("great_location")}</h3>
                 <p className="text-muted-foreground text-sm">
-                  Guests love the location of this listing.
+                  {t("great_location_desc")}
                 </p>
               </div>
             </div>
@@ -216,9 +241,9 @@ export default async function ListingDetailPage({
 
           {/* Amenities */}
           {listing.amenities && listing.amenities.length > 0 && (
-            <div className="border-b pb-6">
+            <div className="border-b pb-6 text-start">
               <h2 className="text-xl font-semibold mb-4">
-                What this place offers
+                {t("what_this_place_offers")}
               </h2>
               <div className="grid grid-cols-2 gap-y-3">
                 {listing.amenities.map((amenity) => (
@@ -232,8 +257,8 @@ export default async function ListingDetailPage({
 
           {/* Policies */}
           {listing.policies && listing.policies.length > 0 && (
-            <div className="border-b pb-6">
-              <h2 className="text-xl font-semibold mb-4">House Rules</h2>
+            <div className="border-b pb-6 text-start">
+              <h2 className="text-xl font-semibold mb-4">{t("house_rules")}</h2>
               <div className="grid grid-cols-2 gap-y-3">
                 {listing.policies.map((policy, index) => (
                   <div key={index} className="text-muted-foreground">
@@ -256,7 +281,7 @@ export default async function ListingDetailPage({
         </div>
 
         {/* Right Column: Sticky Booking Card */}
-        <div className="relative">
+        <div className="relative lg:col-span-3">
           <div className="sticky top-8">
             <BookingForm
               listing={listing}

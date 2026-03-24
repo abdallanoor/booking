@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/dialog";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { authService } from "@/services/auth.service";
+import { useTranslations, useLocale } from "next-intl";
+import { ar } from "date-fns/locale";
 
 interface BookingFormProps {
   listing: Listing;
@@ -48,6 +50,8 @@ export function BookingForm({
   const [isPending, startTransition] = useTransition();
   const [mounted, setMounted] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const t = useTranslations("booking_components");
+  const locale = useLocale();
 
   const [date, setDate] = useState<DateRange | undefined>();
   const [guests, setGuests] = useState(1);
@@ -111,9 +115,7 @@ export function BookingForm({
     // If both from and to are selected, validate the range
     if (selectedRange.from && selectedRange.to) {
       if (rangeOverlapsBooking(selectedRange.from, selectedRange.to)) {
-        toast.error(
-          "Selected date range includes already booked dates. Please choose different dates.",
-        );
+        toast.error(t("date_overlap_error"));
         setDate(undefined);
         return;
       }
@@ -153,14 +155,14 @@ export function BookingForm({
         });
 
         if (!paymentResponse.success || !paymentResponse.data.checkoutUrl) {
-          throw new Error("Failed to initiate payment");
+          throw new Error(t("payment_init_error"));
         }
 
         // Step 3: Redirect to Paymob checkout
         window.location.href = paymentResponse.data.checkoutUrl;
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Failed to create booking";
+          error instanceof Error ? error.message : t("booking_create_error");
         toast.error(message);
       }
     });
@@ -168,7 +170,7 @@ export function BookingForm({
 
   const handleBooking = () => {
     if (!user) {
-      toast.error("Please login to book");
+      toast.error(t("login_to_book"));
       const callbackUrl = encodeURIComponent(window.location.pathname);
       router.push(`/auth/login?callbackUrl=${callbackUrl}`);
       return;
@@ -218,10 +220,10 @@ export function BookingForm({
 
     if (nights >= 28 && listing.discounts?.monthly) {
       discountPercent = listing.discounts.monthly;
-      discountName = "Monthly discount";
+      discountName = t("monthly_discount");
     } else if (nights >= 7 && listing.discounts?.weekly) {
       discountPercent = listing.discounts.weekly;
-      discountName = "Weekly discount";
+      discountName = t("weekly_discount");
     }
 
     const discountAmount = Math.round(baseTotal * (discountPercent / 100));
@@ -250,30 +252,34 @@ export function BookingForm({
             )}
             <Popover>
               <PopoverTrigger asChild>
-                <button className="text-xl font-bold underline decoration-1 underline-offset-4 outline-none cursor-pointer">
+                <button className="text-xl font-bold underline decoration-1 underline-offset-4 outline-none">
                   {formatCurrency(priceBreakdown.total)}
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-96" align="end">
-                <div className="font-semibold text-lg pb-3 mb-3">
-                  Price details
+              <PopoverContent className="w-90 text-start" align="end">
+                <div className="font-semibold text-lg pb-3 mb-3 border-b">
+                  {t("price_details")}
                 </div>
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      {priceBreakdown.nights} nights x{" "}
-                      {formatCurrency(
-                        Math.round(
-                          priceBreakdown.baseTotal / priceBreakdown.nights,
+                      {t("nights_x_price", {
+                        nights: priceBreakdown.nights,
+                        price: formatCurrency(
+                          Math.round(
+                            priceBreakdown.baseTotal / priceBreakdown.nights,
+                          ),
                         ),
-                      )}
+                      })}
                     </span>
                     <span>{formatCurrency(priceBreakdown.baseTotal)}</span>
                   </div>
 
                   {priceBreakdown.discountAmount > 0 && (
                     <div className="flex justify-between text-green-600">
-                      <span>{priceBreakdown.discountName || "Discount"}</span>
+                      <span>
+                        {priceBreakdown.discountName || t("discount")}
+                      </span>
                       <span>
                         -{formatCurrency(priceBreakdown.discountAmount)}
                       </span>
@@ -283,20 +289,20 @@ export function BookingForm({
                   <div className="border-t pt-4 flex justify-between font-bold text-lg">
                     <span>
                       {priceBreakdown.discountAmount > 0
-                        ? "Price after discount"
-                        : "Total"}
+                        ? t("price_after_discount")
+                        : t("total")}
                     </span>
                     <span>{formatCurrency(priceBreakdown.total)}</span>
                   </div>
                 </div>
               </PopoverContent>
             </Popover>
-            <span className="text-base text-muted-foreground">
-              for {priceBreakdown.nights} nights
+            <span className="text-base text-muted-foreground mt-1 block">
+              {t("for_nights", { nights: priceBreakdown.nights })}
             </span>
           </div>
         ) : (
-          <div className="text-2xl font-bold">Add dates for prices</div>
+          <div className="text-2xl font-bold">{t("add_dates_for_prices")}</div>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
@@ -304,26 +310,32 @@ export function BookingForm({
           {!mounted ? (
             // Static fallback for server-side rendering
             <>
-              <div className="grid grid-cols-2 border-b">
-                <div className="p-3 border-r relative text-left">
+              <div className="grid grid-cols-2 border-b text-start">
+                <div className="p-3 border-e relative text-start">
                   <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5">
-                    Check-in
+                    {t("check_in")}
                   </label>
-                  <div className="text-sm text-muted-foreground">Add date</div>
+                  <div className="text-sm text-muted-foreground">
+                    {t("add_date")}
+                  </div>
                 </div>
-                <div className="p-3 relative text-left">
+                <div className="p-3 relative text-start">
                   <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5">
-                    Check-out
+                    {t("check_out")}
                   </label>
-                  <div className="text-sm text-muted-foreground">Add date</div>
+                  <div className="text-sm text-muted-foreground">
+                    {t("add_date")}
+                  </div>
                 </div>
               </div>
-              <div className="p-3 relative flex justify-between items-center text-left">
+              <div className="p-3 relative flex justify-between items-center text-start">
                 <div>
-                  <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5">
-                    Guests
+                  <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5 mt-1">
+                    {t("guests_label")}
                   </label>
-                  <div className="text-sm">1 guest</div>
+                  <div className="text-sm">
+                    {t("guests_count", { count: 1 })}
+                  </div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </div>
@@ -333,10 +345,10 @@ export function BookingForm({
             <>
               <Popover>
                 <PopoverTrigger asChild>
-                  <div className="grid grid-cols-2 border-b cursor-pointer">
-                    <div className="p-3 border-r hover:bg-muted/50 transition-colors relative text-left">
+                  <div className="grid grid-cols-2 border-b cursor-pointer text-start">
+                    <div className="p-3 border-e hover:bg-muted/50 transition-colors relative text-start">
                       <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5">
-                        Check-in
+                        {t("check_in")}
                       </label>
                       <div
                         className={cn(
@@ -345,13 +357,20 @@ export function BookingForm({
                         )}
                       >
                         {date?.from
-                          ? format(date.from, "MM/dd/yyyy")
-                          : "Add date"}
+                          ? new Date(date.from).toLocaleDateString(
+                              locale === "ar" ? "ar-EG" : "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                              },
+                            )
+                          : t("add_date")}
                       </div>
                     </div>
-                    <div className="p-3 hover:bg-muted/50 transition-colors relative text-left">
+                    <div className="p-3 hover:bg-muted/50 transition-colors relative text-start">
                       <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5">
-                        Check-out
+                        {t("check_out")}
                       </label>
                       <div
                         className={cn(
@@ -359,21 +378,28 @@ export function BookingForm({
                           !date?.to && "text-muted-foreground",
                         )}
                       >
-                        {date?.to ? format(date.to, "MM/dd/yyyy") : "Add date"}
+                        {date?.to
+                          ? new Date(date.to).toLocaleDateString(
+                              locale === "ar" ? "ar-EG" : "en-US",
+                              {
+                                year: "numeric",
+                                month: "2-digit",
+                                day: "2-digit",
+                              },
+                            )
+                          : t("add_date")}
                       </div>
                     </div>
                   </div>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0 rounded-2xl"
-                  align="center"
-                >
+                <PopoverContent className="w-auto p-0" align="center">
                   <Calendar
                     mode="range"
                     defaultMonth={date?.from}
                     selected={date}
+                    locale={locale === "ar" ? ar : undefined}
                     onSelect={handleDateSelect}
-                    // className="[--cell-size:--spacing(11)] md:[--cell-size:--spacing(10)]"
+                    className="[--cell-size:--spacing(11)] md:[--cell-size:--spacing(10)]"
                     startMonth={new Date()}
                     fromDate={new Date()}
                     modifiers={{
@@ -397,9 +423,8 @@ export function BookingForm({
                       variant="ghost"
                       size="sm"
                       onClick={() => setDate(undefined)}
-                      className="text-xs font-semibold underline hover:bg-transparent p-0 h-auto"
                     >
-                      Clear dates
+                      {t("clear_dates")}
                     </Button>
                   </div>
                 </PopoverContent>
@@ -407,13 +432,13 @@ export function BookingForm({
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <div className="p-3 hover:bg-muted/50 transition-colors cursor-pointer relative flex justify-between items-center text-left">
+                  <div className="p-3 hover:bg-muted/50 transition-colors cursor-pointer relative flex justify-between items-center text-start">
                     <div>
                       <label className="text-[10px] font-bold uppercase text-muted-foreground block mb-0.5">
-                        Guests
+                        {t("guests_label")}
                       </label>
                       <div className="text-sm">
-                        {guests} guest{guests !== 1 && "s"}
+                        {t("guests_count", { count: guests })}
                       </div>
                     </div>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -422,9 +447,9 @@ export function BookingForm({
                 <PopoverContent className="w-80 p-4" align="end">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-semibold">Adults</div>
+                      <div className="font-semibold">{t("adults")}</div>
                       <div className="text-sm text-muted-foreground">
-                        age 13+
+                        {t("age_13_plus")}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -452,7 +477,7 @@ export function BookingForm({
                     </div>
                   </div>
                   <div className="mt-2 text-xs text-muted-foreground text-center">
-                    Max guests: {listing.maxGuests}
+                    {t("max_guests", { max: listing.maxGuests })}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -473,20 +498,21 @@ export function BookingForm({
           size="lg"
         >
           {listing.status === "pending" || listing.status === "rejected"
-            ? "Listing turned off"
+            ? t("listing_turned_off")
             : isPending
-              ? "Booking..."
-              : "Reserve"}
+              ? t("booking_loading")
+              : t("reserve")}
         </Button>
       </CardContent>
 
       <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent variant="drawer" className="sm:max-w-xl">
+        <DialogContent variant="drawer" className="sm:max-w-xl text-start">
           <DialogHeader>
-            <DialogTitle>Complete Your Profile</DialogTitle>
-            <DialogDescription>
-              Please complete the following details to proceed with your
-              booking.
+            <DialogTitle className="text-start">
+              {t("complete_profile_title")}
+            </DialogTitle>
+            <DialogDescription className="text-start">
+              {t("complete_profile_desc")}
             </DialogDescription>
           </DialogHeader>
           {user && (
@@ -500,15 +526,13 @@ export function BookingForm({
                   const freshUser = await authService.me();
                   if (checkProfileComplete(freshUser)) {
                     setShowProfileDialog(false);
-                    toast.success(
-                      "Profile complete! Proceeding to reservation...",
-                    );
+                    toast.success(t("profile_complete_success"));
                     executeBooking();
                   } else {
-                    toast.error("Please complete all required fields.");
+                    toast.error(t("complete_required_fields"));
                   }
                 } catch {
-                  toast.error("Failed to verify profile status");
+                  toast.error(t("verify_profile_error"));
                 }
               }}
             />

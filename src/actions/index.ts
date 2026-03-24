@@ -45,8 +45,14 @@ export async function removeFromWishlistAction(listingId: string) {
 // HOSTING ACTIONS
 // ============================================================================
 
-export async function getAllBookingsAction() {
-  return await apiGet<{ data: { bookings: Booking[] } }>("/bookings?view=host");
+export async function getAllBookingsAction(locale?: string) {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
+  return await apiGet<{ data: { bookings: Booking[] } }>(
+    "/bookings?view=host",
+    { headers }
+  );
 }
 
 // ============================================================================

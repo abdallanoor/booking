@@ -10,10 +10,12 @@ import {
   requireProfileCompletion,
 } from "@/lib/auth/auth-middleware";
 import { checkAvailability } from "@/lib/availability";
+import { applyListingLocale } from "@/lib/listing-translation";
 
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth(req);
+    const acceptLang = req.headers.get("accept-language");
     await dbConnect();
 
     const searchParams = req.nextUrl.searchParams;
@@ -64,8 +66,22 @@ export async function GET(req: NextRequest) {
       .skip(skip)
       .limit(limit);
 
+    let finalBookings;
+    if (acceptLang) {
+      const locale = acceptLang.split(",")[0].split("-")[0].trim();
+      finalBookings = bookings.map((booking) => {
+        const obj = booking.toObject();
+        if (obj.listing) {
+          obj.listing = applyListingLocale(obj.listing, locale);
+        }
+        return obj;
+      });
+    } else {
+      finalBookings = bookings;
+    }
+
     return successResponse({
-      bookings,
+      bookings: finalBookings,
       pagination: {
         total,
         pages: Math.ceil(total / limit),
@@ -87,6 +103,7 @@ export async function POST(req: NextRequest) {
   try {
     // Check if user profile is complete for booking
     const user = await requireProfileCompletion(req, "book");
+    const acceptLang = req.headers.get("accept-language");
     await dbConnect();
 
     const body = await req.json();
@@ -196,7 +213,19 @@ export async function POST(req: NextRequest) {
 
     await booking.populate("listing");
 
-    return successResponse({ booking }, "Booking created successfully", 201);
+    let responseBooking;
+    if (acceptLang) {
+      const locale = acceptLang.split(",")[0].split("-")[0].trim();
+      const obj = booking.toObject();
+      if (obj.listing) {
+        obj.listing = applyListingLocale(obj.listing, locale);
+      }
+      responseBooking = obj;
+    } else {
+      responseBooking = booking;
+    }
+
+    return successResponse({ booking: responseBooking }, "Booking created successfully", 201);
   } catch (error) {
     if (
       error &&

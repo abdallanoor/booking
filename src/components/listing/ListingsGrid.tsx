@@ -2,6 +2,7 @@
 
 import { ListingCard } from "./ListingCard";
 import type { Listing } from "@/types";
+import { useTranslations } from "next-intl";
 
 interface ListingsGridProps {
   listings: Listing[];
@@ -12,10 +13,12 @@ export function ListingsGrid({
   listings,
   wishlistIds = new Set(),
 }: ListingsGridProps) {
+  const t = useTranslations("listing_components");
+
   if (listings.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No listings available</p>
+        <p className="text-muted-foreground">{t("no_listings")}</p>
       </div>
     );
   }

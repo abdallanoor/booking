@@ -41,12 +41,13 @@ import {
 import { deleteListing, getHostListings } from "@/services/listings.service";
 import type { Listing } from "@/types";
 import { formatCurrency } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function ListingsPage() {
   const t = useTranslations("hosting");
   const tAdmin = useTranslations("admin");
   const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const [listings, setListings] = useState<Listing[]>([]);
   const [pagination, setPagination] = useState<any>(null);
@@ -61,7 +62,7 @@ export default function ListingsPage() {
     async (pageNum: number) => {
       setLoading(true);
       try {
-        const data = await getHostListings(pageNum, 5);
+        const data = await getHostListings(pageNum, 5, locale);
         setListings(data.listings);
         setPagination(data.pagination);
       } catch (error) {
@@ -71,7 +72,7 @@ export default function ListingsPage() {
         setLoading(false);
       }
     },
-    [t],
+    [t, locale],
   );
 
   useEffect(() => {

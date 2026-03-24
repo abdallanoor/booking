@@ -5,11 +5,9 @@ import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  createReview,
-  checkEligibility,
-} from "@/services/reviews.service";
+import { createReview, checkEligibility } from "@/services/reviews.service";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface ReviewFormProps {
   listingId: string;
@@ -27,6 +25,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
     booking?: { _id: string; checkIn: string; checkOut: string };
   } | null>(null);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const t = useTranslations("reviews");
 
   // Check eligibility on mount
   useEffect(() => {
@@ -44,7 +43,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
     e.preventDefault();
 
     if (!rating) {
-      toast.error("Please select a rating");
+      toast.error(t("select_rating_error"));
       return;
     }
 
@@ -58,16 +57,14 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
         comment: comment.trim() || undefined,
       });
 
-      toast.success("Review submitted successfully!");
+      toast.success(t("submit_success"));
       setReviewSubmitted(true);
       setRating(0);
       setComment("");
       onReviewSubmitted?.();
     } catch (error: unknown) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to submit review. Please try again.";
+        error instanceof Error ? error.message : t("submit_error");
       toast.error(message);
     } finally {
       setIsSubmitting(false);
@@ -84,18 +81,16 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
 
   return (
     <div className="border rounded-2xl p-6 space-y-6">
-      <div>
-        <h3 className="font-semibold text-lg mb-1">Share Your Experience</h3>
-        <p className="text-sm text-muted-foreground">
-          Help other travelers by sharing your experience
-        </p>
+      <div className="text-start">
+        <h3 className="font-semibold text-lg mb-1">{t("share_experience")}</h3>
+        <p className="text-sm text-muted-foreground">{t("help_travelers")}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 text-start">
         {/* Star Rating */}
         <div className="space-y-2">
           <Label>
-            Rating <span className="text-destructive">*</span>
+            {t("rating_label")} <span className="text-destructive">*</span>
           </Label>
           <div className="flex items-center gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -108,16 +103,17 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
                 className="transition-transform hover:scale-110"
               >
                 <Star
-                  className={`h-8 w-8 ${star <= (hoveredRating || rating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "fill-muted text-muted-foreground"
-                    }`}
+                  className={`h-8 w-8 ${
+                    star <= (hoveredRating || rating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "fill-muted text-muted-foreground"
+                  }`}
                 />
               </button>
             ))}
             {rating > 0 && (
-              <span className="ml-2 text-sm text-muted-foreground">
-                {rating} {rating === 1 ? "star" : "stars"}
+              <span className="mx-2 text-sm text-muted-foreground">
+                {t("stars", { count: rating })}
               </span>
             )}
           </div>
@@ -125,17 +121,18 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
 
         {/* Comment */}
         <div className="space-y-2">
-          <Label htmlFor="comment">Your Review (Optional)</Label>
+          <Label htmlFor="comment">{t("review_label")}</Label>
           <Textarea
             id="comment"
-            placeholder="Share details about your experience..."
+            placeholder={t("review_placeholder")}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             rows={5}
             maxLength={2000}
+            className="text-start"
           />
           <p className="text-xs text-muted-foreground">
-            {comment.length}/2000 characters
+            {t("characters_count", { count: comment.length })}
           </p>
         </div>
 
@@ -146,7 +143,7 @@ export function ReviewForm({ listingId, onReviewSubmitted }: ReviewFormProps) {
           disabled={isSubmitting || !rating}
           className="w-full"
         >
-          {isSubmitting ? "Submitting..." : "Submit Review"}
+          {isSubmitting ? t("submitting") : t("submit_review")}
         </Button>
       </form>
     </div>

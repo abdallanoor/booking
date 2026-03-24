@@ -4,7 +4,6 @@ import { useState, useEffect, useTransition } from "react";
 import { Link } from "@/navigation";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Heart } from "lucide-react";
 import { addToWishlistAction, removeFromWishlistAction } from "@/actions";
 import { Button } from "@/components/ui/button";
@@ -12,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { Listing } from "@/types";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface ListingCardProps {
   listing: Listing;
@@ -25,6 +25,7 @@ export function ListingCard({
   const { user } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [inWishlist, setInWishlist] = useState(isInWishlist);
+  const t = useTranslations("listing_components");
 
   useEffect(() => {
     setInWishlist(isInWishlist);
@@ -33,7 +34,7 @@ export function ListingCard({
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     if (!user) {
-      toast.error("Please login to save this listing");
+      toast.error(t("login_to_save"));
       return;
     }
 
@@ -44,14 +45,14 @@ export function ListingCard({
       try {
         if (newState) {
           await addToWishlistAction(listing._id);
-          toast.success("Added to wishlist");
+          toast.success(t("added_wishlist"));
         } else {
           await removeFromWishlistAction(listing._id);
-          toast.success("Removed from wishlist");
+          toast.success(t("removed_wishlist"));
         }
       } catch (error) {
         setInWishlist(!newState);
-        toast.error(error instanceof Error ? error.message : "Failed");
+        toast.error(error instanceof Error ? error.message : t("failed"));
       }
     });
   };
@@ -65,9 +66,6 @@ export function ListingCard({
           fill
           className="object-cover"
         />
-        <Badge className="absolute bottom-2 left-2">
-          {listing.privacyType.replace("_", " ")}
-        </Badge>
       </div>
 
       <CardContent>
@@ -77,23 +75,27 @@ export function ListingCard({
             {listing.location.city}, {listing.location.country}
           </p>
           <div className="flex items-baseline gap-1">
-            <span className="font-bold">
+            <span className="font-bold gap-1 mt-1">
               {formatCurrency(listing.pricePerNight)}
             </span>
-            <span className="text-sm text-muted-foreground">/ night</span>
+            <span className="text-sm text-muted-foreground">
+              {t("per_night")}
+            </span>
           </div>
           <div className="flex gap-2 text-xs text-muted-foreground">
-            <span>{listing.maxGuests} guests</span>
+            <span>{t("guests", { count: listing.maxGuests })}</span>
             <span>•</span>
-            <span>{listing.bedrooms} bedrooms</span>
+            <span>{t("bedrooms", { count: listing.bedrooms })}</span>
             <span>•</span>
-            <span>{listing.beds} beds</span>
+            <span>{t("beds", { count: listing.beds })}</span>
           </div>
         </div>
       </CardContent>
 
       <Link href={`/listings/${listing._id}`} className="absolute inset-0 z-10">
-        <span className="sr-only">View {listing.title}</span>
+        <span className="sr-only">
+          {t("view_listing", { title: listing.title })}
+        </span>
       </Link>
 
       <Button
@@ -104,8 +106,9 @@ export function ListingCard({
         disabled={isPending}
       >
         <Heart
-          className={`h-5 w-5 transition-colors ${inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
-            }`}
+          className={`h-5 w-5 transition-colors ${
+            inWishlist ? "fill-red-500 text-red-500" : "text-foreground"
+          }`}
         />
       </Button>
     </Card>

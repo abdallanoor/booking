@@ -3,16 +3,19 @@
 import { Share } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface ShareButtonProps {
   listingTitle: string;
 }
 
 export function ShareButton({ listingTitle }: ShareButtonProps) {
+  const t = useTranslations("listing_components");
+
   const handleShare = async () => {
     const shareData = {
       title: listingTitle,
-      text: `Check out this listing: ${listingTitle}`,
+      text: t("share_text", { title: listingTitle }),
       url: window.location.href,
     };
 
@@ -23,16 +26,16 @@ export function ShareButton({ listingTitle }: ShareButtonProps) {
       } catch (error) {
         // User cancelled the share
         if (error instanceof Error && error.name !== "AbortError") {
-          toast.error("Failed to share");
+          toast.error(t("share_failed"));
         }
       }
     } else {
       // Fallback: Copy to clipboard
       try {
         await navigator.clipboard.writeText(window.location.href);
-        toast.success("Link copied to clipboard");
+        toast.success(t("link_copied"));
       } catch {
-        toast.error("Failed to copy link");
+        toast.error(t("copy_failed"));
       }
     }
   };
@@ -45,7 +48,7 @@ export function ShareButton({ listingTitle }: ShareButtonProps) {
       onClick={handleShare}
     >
       <Share />
-      <span className="max-sm:hidden">Share</span>
+      <span className="max-sm:hidden">{t("share")}</span>
     </Button>
   );
 }

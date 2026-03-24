@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getBooking } from "@/services/bookings.service";
 import { BookingDetailsView } from "./BookingDetailsView";
 import { getServerUser } from "@/lib/auth/server-auth";
+import { getLocale } from "next-intl/server";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -21,7 +22,8 @@ export default async function BookingDetailsPage({ params }: PageProps) {
   let booking;
 
   try {
-    booking = await getBooking(id);
+    const locale = await getLocale();
+    booking = await getBooking(id, locale);
   } catch (error) {
     if (error instanceof Error && error.message.includes("404")) {
       notFound();

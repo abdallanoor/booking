@@ -17,11 +17,12 @@ import { getHostBookings } from "@/services/bookings.service";
 import type { Booking } from "@/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StartChatButton } from "@/components/chat/StartChatButton";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { formatCurrency } from "@/lib/utils";
 
 export default function BookingsPage() {
   const t = useTranslations("hosting");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -33,18 +34,21 @@ export default function BookingsPage() {
   );
   const limit = 10;
 
-  const fetchBookings = useCallback(async (pageNum: number) => {
-    setLoading(true);
-    try {
-      const data = await getHostBookings(pageNum, limit);
-      setBookings(data.bookings);
-      setPagination(data.pagination);
-    } catch (error) {
-      console.error("Failed to fetch bookings:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchBookings = useCallback(
+    async (pageNum: number) => {
+      setLoading(true);
+      try {
+        const data = await getHostBookings(pageNum, limit, locale);
+        setBookings(data.bookings);
+        setPagination(data.pagination);
+      } catch (error) {
+        console.error("Failed to fetch bookings:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [locale],
+  );
 
   useEffect(() => {
     fetchBookings(currentPage);

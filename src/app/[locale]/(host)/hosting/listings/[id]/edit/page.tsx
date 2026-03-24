@@ -34,7 +34,7 @@ export default function EditListingPage({
 
     const fetchListing = async () => {
       try {
-        const fetchedListing = await getListing(id);
+        const fetchedListing = await getListing(id, undefined, true);
 
         if (!fetchedListing) {
           router.push("/hosting/listings");

@@ -1,13 +1,14 @@
 import { getBookings } from "@/services/bookings.service";
 import { BookingsList } from "@/components/booking/BookingsList";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 // Force dynamic rendering - this page requires user authentication
 export const dynamic = "force-dynamic";
 
 export default async function BookingsPage() {
   const t = await getTranslations("bookings");
-  const bookings = await getBookings();
+  const locale = await getLocale();
+  const bookings = await getBookings(locale);
 
   return (
     <main className="container mx-auto px-4 py-8">

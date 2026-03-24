@@ -55,6 +55,7 @@ export default function AdminBookingsPage() {
           pageNum,
           10,
           status === "all" ? undefined : status,
+          locale,
         );
         setBookings(data.bookings);
         setPagination(data.pagination);
@@ -65,7 +66,7 @@ export default function AdminBookingsPage() {
         setLoading(false);
       }
     },
-    [t],
+    [t, locale],
   );
 
   useEffect(() => {

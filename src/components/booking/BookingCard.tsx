@@ -19,6 +19,7 @@ import {
 import type { Booking } from "@/services/bookings.service";
 import { formatCurrency } from "@/lib/utils";
 import { CancellationModal } from "./CancellationModal";
+import { useTranslations, useLocale } from "next-intl";
 
 interface BookingCardProps {
   booking: Booking;
@@ -27,6 +28,8 @@ interface BookingCardProps {
 export function BookingCard({ booking }: BookingCardProps) {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const { listing, status, checkIn, checkOut, totalPrice, _id } = booking;
+  const t = useTranslations("booking_components");
+  const locale = useLocale();
 
   // Fallback for missing listing (deleted/hidden)
   if (!listing) {
@@ -35,19 +38,25 @@ export function BookingCard({ booking }: BookingCardProps) {
         <div className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 overflow-hidden rounded-lg bg-muted/50 flex items-center justify-center">
           <MapPin className="h-6 w-6 text-muted-foreground opacity-50" />
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 text-start">
           <p className="font-semibold text-sm text-muted-foreground">
-            Listing Unavailable
+            {t("listing_unavailable")}
           </p>
           <p className="text-[10px] text-muted-foreground/60 mb-2">
-            This property is no longer available.
+            {t("property_unavailable")}
           </p>
           <div className="text-[10px] text-muted-foreground/60 space-y-0.5">
-            <p className="flex items-center">
+            <p className="flex items-center" dir="ltr">
               <Calendar className="h-2.5 w-2.5 mr-1" />{" "}
-              {format(new Date(checkIn), "PPP")}
+              {new Date(checkIn).toLocaleDateString(
+                locale === "ar" ? "ar-EG" : "en-US",
+                { year: "numeric", month: "long", day: "numeric" },
+              )}
             </p>
-            <p>ID: {_id.slice(-6).toUpperCase()}</p>
+            <p>
+              {t("id")}
+              {_id.slice(-6).toUpperCase()}
+            </p>
           </div>
         </div>
       </Card>
@@ -58,15 +67,15 @@ export function BookingCard({ booking }: BookingCardProps) {
     status === "confirmed"
       ? "bg-green-500/10 text-green-700 hover:bg-green-500/20"
       : status === "cancelled"
-      ? "bg-red-500/10 text-red-700 hover:bg-red-500/20"
-      : "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20";
+        ? "bg-red-500/10 text-red-700 hover:bg-red-500/20"
+        : "bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20";
 
   return (
     <>
       <Card className="group relative overflow-hidden border-border hover:border-primary/40 transition-all duration-300 shadow-none hover:shadow flex flex-row items-center p-3 gap-4 cursor-pointer">
         {/* Stretched Link for the whole card */}
         <Link href={`/bookings/${_id}`} className="absolute inset-0 z-0">
-          <span className="sr-only">View Details</span>
+          <span className="sr-only">{t("details")}</span>
         </Link>
 
         {/* Compact Image Section */}
@@ -83,10 +92,10 @@ export function BookingCard({ booking }: BookingCardProps) {
         </div>
 
         {/* Info Section */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5 pointer-events-none">
+        <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch py-0.5 pointer-events-none text-start">
           <div className="space-y-1">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors">
+              <h3 className="font-semibold text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors text-start">
                 {listing.title}
               </h3>
               <Badge
@@ -97,10 +106,17 @@ export function BookingCard({ booking }: BookingCardProps) {
             </div>
 
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <div className="flex items-center">
+              <div className="flex items-center" dir="ltr">
                 <Calendar className="h-3 w-3 mr-1 opacity-70" />
-                {format(new Date(checkIn), "MMM d")} -{" "}
-                {format(new Date(checkOut), "MMM d")}
+                {new Date(checkIn).toLocaleDateString(
+                  locale === "ar" ? "ar-EG" : "en-US",
+                  { month: "short", day: "numeric" },
+                )}{" "}
+                -{" "}
+                {new Date(checkOut).toLocaleDateString(
+                  locale === "ar" ? "ar-EG" : "en-US",
+                  { month: "short", day: "numeric" },
+                )}
               </div>
               <div className="flex items-center">
                 <MapPin className="h-3 w-3 mr-1 opacity-70" />
@@ -109,10 +125,10 @@ export function BookingCard({ booking }: BookingCardProps) {
             </div>
           </div>
 
-          <div className="flex items-center justify-between mt-auto pt-2">
+          <div className="flex items-center justify-between mt-auto pt-2 text-start">
             <div className="flex flex-col">
               <span className="text-[10px] text-muted-foreground leading-none mb-0.5">
-                Total Price
+                {t("total_price")}
               </span>
               <span className="font-bold text-primary text-sm sm:text-base">
                 {formatCurrency(totalPrice)}
@@ -127,8 +143,8 @@ export function BookingCard({ booking }: BookingCardProps) {
                 asChild
               >
                 <Link href={`/bookings/${_id}`}>
-                  Details
-                  <ChevronRight />
+                  {t("details")}
+                  <ChevronRight className="rtl:rotate-180" />
                 </Link>
               </Button>
 
@@ -145,13 +161,13 @@ export function BookingCard({ booking }: BookingCardProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
+                      className="text-destructive focus:text-destructive text-start"
                       onClick={(e) => {
                         e.stopPropagation();
                         setShowCancelModal(true);
                       }}
                     >
-                      Cancel Booking
+                      {t("cancel_booking")}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

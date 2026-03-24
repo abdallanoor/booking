@@ -5,6 +5,7 @@ import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import type { Review } from "@/types";
+import { useTranslations, useLocale } from "next-intl";
 
 interface ReviewCardProps {
   review: Review;
@@ -12,7 +13,13 @@ interface ReviewCardProps {
   onShowMore?: () => void;
 }
 
-export function ReviewCard({ review, showFullReview = false, onShowMore }: ReviewCardProps) {
+export function ReviewCard({
+  review,
+  showFullReview = false,
+  onShowMore,
+}: ReviewCardProps) {
+  const t = useTranslations("reviews");
+  const locale = useLocale();
   const { guest, rating, comment, createdAt } = review;
 
   // Count words in the comment
@@ -44,8 +51,14 @@ export function ReviewCard({ review, showFullReview = false, onShowMore }: Revie
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm">{guest.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {format(new Date(createdAt), "MMM yyyy")}
+              <span
+                className="text-xs text-muted-foreground whitespace-nowrap"
+                dir="ltr"
+              >
+                {new Date(createdAt).toLocaleDateString(
+                  locale === "ar" ? "ar-EG" : "en-US",
+                  { month: "short", year: "numeric" },
+                )}
               </span>
             </div>
           </div>
@@ -55,17 +68,18 @@ export function ReviewCard({ review, showFullReview = false, onShowMore }: Revie
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`h-3 w-3 ${star <= rating
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "fill-muted text-muted-foreground"
-                  }`}
+                className={`h-3 w-3 ${
+                  star <= rating
+                    ? "fill-yellow-400 text-yellow-400"
+                    : "fill-muted text-muted-foreground"
+                }`}
               />
             ))}
           </div>
 
           {/* Comment */}
           {comment && (
-            <div className="space-y-1">
+            <div className="space-y-1 text-start">
               <p className="text-sm text-foreground leading-relaxed whitespace-pre-line">
                 {displayComment}
                 {shouldTruncate && "..."}
@@ -77,7 +91,7 @@ export function ReviewCard({ review, showFullReview = false, onShowMore }: Revie
                   onClick={onShowMore}
                   className="h-auto p-0 text-sm font-semibold underline"
                 >
-                  Show More
+                  {t("show_more")}
                 </Button>
               )}
             </div>

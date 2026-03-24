@@ -4,6 +4,8 @@ import Listing from "@/models/Listing";
 import { listingSchema } from "@/lib/validations/listing";
 import { successResponse, errorResponse } from "@/lib/api-response";
 import { getCurrentUser, requireRole } from "@/lib/auth/auth-middleware";
+import { triggerListingTranslation, applyListingLocale } from "@/lib/listing-translation";
+import { SUPPORTED_LOCALES } from "@/lib/translate";
 
 interface ListingFilter {
   "location.city"?: RegExp;
@@ -154,8 +156,21 @@ export async function GET(req: NextRequest) {
       .skip(skip)
       .limit(limit);
 
+    // Only apply translation if language header is explicitly sent
+    const acceptLang = req.headers.get("accept-language");
+    let finalListings;
+    if (acceptLang) {
+      const locale = acceptLang.split(",")[0].split("-")[0].trim();
+      const effectiveLocale = (SUPPORTED_LOCALES as readonly string[]).includes(locale) ? locale : "en";
+      finalListings = listings.map((l) =>
+        applyListingLocale(l.toObject(), effectiveLocale)
+      );
+    } else {
+      finalListings = listings;
+    }
+
     return successResponse({
-      listings,
+      listings: finalListings,
       pagination: {
         total,
         pages: Math.ceil(total / limit),
@@ -186,6 +201,16 @@ export async function POST(req: NextRequest) {
       ...validatedData,
       host: user._id,
     });
+
+    // Fire-and-forget: trigger translation in background
+    triggerListingTranslation(listing._id.toString(), {
+      title: validatedData.title,
+      description: validatedData.description,
+      amenities: validatedData.amenities,
+      policies: validatedData.policies,
+    }).catch((err) =>
+      console.error("[Translation] Background translation failed:", err)
+    );
 
     return successResponse({ listing }, "Listing created successfully", 201);
   } catch (error) {

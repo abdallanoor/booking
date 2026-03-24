@@ -2,11 +2,12 @@ import { getWishlist } from "@/services/wishlist.service";
 import { ListingCard } from "@/components/listing/ListingCard";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 export default async function WishlistPage() {
   const t = await getTranslations("wishlist");
-  const wishlist = await getWishlist();
+  const locale = await getLocale();
+  const wishlist = await getWishlist(locale);
 
   // Filter out items with deleted listings
   const validWishlist = wishlist.filter((item) => item.listing !== null);

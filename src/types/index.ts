@@ -123,6 +123,13 @@ export interface JWTPayload {
 // LISTING TYPES
 // ============================================================================
 
+export interface TranslatedFields {
+  title?: string;
+  description?: string;
+  amenities?: string[];
+  policies?: string[];
+}
+
 /**
  * Base Listing structure
  */
@@ -645,6 +652,8 @@ export interface IListingDocument
   extends Document, Omit<ListingBase, "status"> {
   status: ListingStatus;
   host: Types.ObjectId;
+  translations?: Map<string, TranslatedFields>;
+  sourceLang?: string;
   createdAt: Date;
   updatedAt: Date;
 }

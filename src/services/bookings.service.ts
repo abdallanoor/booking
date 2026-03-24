@@ -5,18 +5,26 @@ import type { Booking } from "@/types";
 export type { Booking };
 
 // Get all bookings with caching
-export async function getBookings(): Promise<Booking[]> {
+export async function getBookings(locale?: string): Promise<Booking[]> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{ data: { bookings: Booking[] } }>(
-    "/bookings?view=guest"
+    "/bookings?view=guest",
+    { headers }
   );
 
   return response.data.bookings;
 }
 
 // Get single booking with caching
-export async function getBooking(id: string): Promise<Booking> {
+export async function getBooking(id: string, locale?: string): Promise<Booking> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{ data: { booking: Booking } }>(
-    `/bookings/${id}`
+    `/bookings/${id}`,
+    { headers }
   );
 
   return response.data.booking;
@@ -24,11 +32,15 @@ export async function getBooking(id: string): Promise<Booking> {
 // Get host bookings with pagination
 export async function getHostBookings(
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  locale?: string
 ): Promise<{ bookings: Booking[]; pagination: any }> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{
     data: { bookings: Booking[]; pagination: any };
-  }>(`/bookings?view=host&page=${page}&limit=${limit}`);
+  }>(`/bookings?view=host&page=${page}&limit=${limit}`, { headers });
 
   return {
     bookings: response.data.bookings,
@@ -39,7 +51,8 @@ export async function getHostBookings(
 export async function getAdminBookings(
   page: number = 1,
   limit: number = 10,
-  status?: string
+  status?: string,
+  locale?: string
 ): Promise<{ bookings: Booking[]; pagination: any }> {
   const params = new URLSearchParams();
   params.append("view", "admin");
@@ -47,9 +60,12 @@ export async function getAdminBookings(
   params.append("limit", limit.toString());
   if (status) params.append("status", status);
 
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<{
     data: { bookings: Booking[]; pagination: any };
-  }>(`/bookings?${params.toString()}`);
+  }>(`/bookings?${params.toString()}`, { headers });
 
   return {
     bookings: response.data.bookings || [],

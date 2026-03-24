@@ -8,18 +8,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Loader2, Send } from "lucide-react";
 
 import { askQuestion } from "@/services/questions.service";
+import { useTranslations } from "next-intl";
 
 interface AskQuestionFormProps {
   listingId: string;
 }
 
-export default function AskQuestionForm({
-  listingId,
-}: AskQuestionFormProps) {
+export default function AskQuestionForm({ listingId }: AskQuestionFormProps) {
   const [question, setQuestion] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const { user } = useAuth();
+  const t = useTranslations("guest_questions");
 
   if (!user) return null;
 
@@ -29,12 +29,12 @@ export default function AskQuestionForm({
     e.preventDefault();
 
     if (!user) {
-      toast.error("You must be logged in to ask a question");
+      toast.error(t("login_required"));
       return;
     }
 
     if (!question.trim()) {
-      toast.error("Please enter a question");
+      toast.error(t("empty_question"));
       return;
     }
 
@@ -43,40 +43,36 @@ export default function AskQuestionForm({
     try {
       await askQuestion(listingId, question);
 
-      toast.success("Question submitted successfully!");
+      toast.success(t("success"));
       setQuestion("");
       setIsSubmitted(true);
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(t("error"));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <form onSubmit={handleSubmit} className="mt-6 space-y-4 text-start">
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold">Ask a Question</h3>
-        <p className="text-sm text-muted-foreground">
-          Have questions about this listing? Ask the host directly.
-        </p>
+        <h3 className="text-lg font-semibold">{t("ask_title")}</h3>
+        <p className="text-sm text-muted-foreground">{t("ask_desc")}</p>
       </div>
 
       <Textarea
-        placeholder="Type your question here..."
+        placeholder={t("placeholder")}
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        className="min-h-[100px] resize-none"
+        className="min-h-[100px] resize-none text-start"
         disabled={isSubmitting}
       />
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={isSubmitting || !question.trim()}
-        >
-          Send Question {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
+        <Button type="submit" disabled={isSubmitting || !question.trim()}>
+          {t("send")}{" "}
+          {isSubmitting ? <Loader2 className="animate-spin" /> : <Send />}
         </Button>
       </div>
     </form>

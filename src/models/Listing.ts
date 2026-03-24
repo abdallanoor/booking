@@ -77,6 +77,22 @@ const listingSchema = new Schema<IListingDocument>(
       type: [String],
       default: [],
     },
+    translations: {
+      type: Map,
+      of: new Schema(
+        {
+          title: { type: String },
+          description: { type: String },
+          amenities: { type: [String] },
+          policies: { type: [String] },
+        },
+        { _id: false }
+      ),
+    },
+    sourceLang: {
+      type: String,
+      default: "en",
+    },
     pricePerNight: {
       type: Number,
       required: [true, "Price per night is required"],

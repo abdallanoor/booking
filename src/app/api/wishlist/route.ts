@@ -3,10 +3,12 @@ import dbConnect from "@/lib/mongodb";
 import Wishlist from "@/models/Wishlist";
 import { requireAuth } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { applyListingLocale } from "@/lib/listing-translation";
 
 export async function GET(req: NextRequest) {
   try {
     const user = await requireAuth(req);
+    const acceptLang = req.headers.get("accept-language");
     await dbConnect();
 
     const wishlistItems = await Wishlist.find({ user: user._id })
@@ -16,7 +18,21 @@ export async function GET(req: NextRequest) {
       })
       .sort({ createdAt: -1 });
 
-    return successResponse({ wishlist: wishlistItems });
+    let finalItems;
+    if (acceptLang) {
+      const locale = acceptLang.split(",")[0].split("-")[0].trim();
+      finalItems = wishlistItems.map((item) => {
+        const obj = item.toObject();
+        if (obj.listing) {
+          obj.listing = applyListingLocale(obj.listing, locale);
+        }
+        return obj;
+      });
+    } else {
+      finalItems = wishlistItems;
+    }
+
+    return successResponse({ wishlist: finalItems });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to get wishlist";

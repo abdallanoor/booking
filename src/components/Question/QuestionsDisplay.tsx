@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface QuestionsDisplayProps {
   questions: Question[];
@@ -28,8 +29,10 @@ interface QuestionsDisplayProps {
 // Component must be declared outside of render
 const QuestionAccordion = ({
   questionsList,
+  t,
 }: {
   questionsList: Question[];
+  t: any;
 }) => (
   <Accordion
     type="single"
@@ -53,10 +56,10 @@ const QuestionAccordion = ({
           </span>
         </AccordionTrigger>
         <AccordionContent
-          className="pb-4 pt-1 text-muted-foreground whitespace-pre-wrap wrap-break-word"
+          className="pb-4 pt-1 text-muted-foreground whitespace-pre-wrap wrap-break-word text-start"
           suppressHydrationWarning
         >
-          {q.answer || <span className="italic">No answer yet.</span>}
+          {q.answer || <span className="italic">{t("no_answer")}</span>}
         </AccordionContent>
       </AccordionItem>
     ))}
@@ -68,6 +71,7 @@ export default function QuestionsDisplay({
   listingId,
   hasAskedQuestion,
 }: QuestionsDisplayProps) {
+  const t = useTranslations("guest_questions");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const MAX_VISIBLE_QUESTIONS = 4;
   const hasMoreQuestions = questions.length > MAX_VISIBLE_QUESTIONS;
@@ -76,15 +80,13 @@ export default function QuestionsDisplay({
     : questions;
 
   return (
-    <div className="pb-6" id="questions">
-      <h2 className="text-2xl font-bold mb-6 text-foreground">
-        Questions &amp; Answers
-      </h2>
+    <div className="pb-6 text-start" id="questions">
+      <h2 className="text-2xl font-bold mb-6 text-foreground">{t("title")}</h2>
 
       {questions.length > 0 ? (
         <div>
           {/* Show first 4 questions */}
-          <QuestionAccordion questionsList={visibleQuestions} />
+          <QuestionAccordion questionsList={visibleQuestions} t={t} />
 
           {/* View More Button if more than 4 questions */}
           {hasMoreQuestions && (
@@ -92,7 +94,7 @@ export default function QuestionsDisplay({
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild suppressHydrationWarning>
                   <Button variant="secondary" className="sm:w-auto">
-                    Show all {questions.length} questions
+                    {t("show_all", { count: questions.length })}
                   </Button>
                 </DialogTrigger>
                 <DialogContent
@@ -100,13 +102,13 @@ export default function QuestionsDisplay({
                   className="md:max-w-lg! max-h-[85vh] flex flex-col"
                   suppressHydrationWarning
                 >
-                  <DialogHeader>
+                  <DialogHeader className="text-start">
                     <DialogTitle>
-                      All Questions ({questions.length})
+                      {t("all_questions", { count: questions.length })}
                     </DialogTitle>
                   </DialogHeader>
-                  <div className="overflow-y-auto pr-2 -mr-2 flex-1">
-                    <QuestionAccordion questionsList={questions} />
+                  <div className="overflow-y-auto pe-2 -me-2 flex-1">
+                    <QuestionAccordion questionsList={questions} t={t} />
                   </div>
                 </DialogContent>
               </Dialog>
@@ -117,11 +119,9 @@ export default function QuestionsDisplay({
         <div className="text-center py-10 bg-muted/30 rounded-xl border border-dashed border-border">
           <MessageCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
           <h3 className="text-lg font-medium text-foreground">
-            No questions yet
+            {t("no_questions")}
           </h3>
-          <p className="text-muted-foreground">
-            Be the first to ask a question about this listing!
-          </p>
+          <p className="text-muted-foreground">{t("be_first")}</p>
         </div>
       )}
 

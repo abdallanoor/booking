@@ -66,7 +66,7 @@ export default function BecomeHostPage() {
       </div>
 
       {/* Right / Image Side */}
-      <div className="flex-1 relative min-h-[50vh] lg:min-h-0 bg-muted max-lg:rounded-t-3xl lg:rounded-s-3xl">
+      <div className="flex-1 relative min-h-[50vh] lg:min-h-0 bg-muted max-lg:rounded-t-3xl lg:rounded-s-3xl overflow-hidden">
         <Image
           src="/home.webp"
           alt={t("image_alt")}

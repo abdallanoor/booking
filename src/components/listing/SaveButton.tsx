@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { addToWishlistAction, removeFromWishlistAction } from "@/actions";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface SaveButtonProps {
   listingId: string;
@@ -20,6 +21,7 @@ export function SaveButton({
   const { user } = useAuth();
   const [isPending, startTransition] = useTransition();
   const [inWishlist, setInWishlist] = useState(initialIsInWishlist);
+  const t = useTranslations("listing_components");
 
   useEffect(() => {
     setInWishlist(initialIsInWishlist);
@@ -27,7 +29,7 @@ export function SaveButton({
 
   const toggleWishlist = () => {
     if (!user) {
-      toast.error("Please login to save this listing");
+      toast.error(t("login_to_save"));
       return;
     }
 
@@ -38,14 +40,14 @@ export function SaveButton({
       try {
         if (newState) {
           await addToWishlistAction(listingId);
-          toast.success("Added to wishlist");
+          toast.success(t("added_wishlist"));
         } else {
           await removeFromWishlistAction(listingId);
-          toast.success("Removed from wishlist");
+          toast.success(t("removed_wishlist"));
         }
       } catch (error) {
         setInWishlist(!newState);
-        toast.error(error instanceof Error ? error.message : "Failed");
+        toast.error(error instanceof Error ? error.message : t("failed"));
       }
     });
   };
@@ -59,10 +61,13 @@ export function SaveButton({
       disabled={isPending}
     >
       <Heart
-        className={`w-4 h-4 transition-colors ${inWishlist ? "fill-red-500 text-red-500" : ""
-          }`}
+        className={`w-4 h-4 transition-colors ${
+          inWishlist ? "fill-red-500 text-red-500" : ""
+        }`}
       />
-      <span className="max-sm:hidden">{inWishlist ? "Saved" : "Save"}</span>
+      <span className="max-sm:hidden">
+        {inWishlist ? t("saved") : t("save")}
+      </span>
     </Button>
   );
 }

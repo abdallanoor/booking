@@ -7,13 +7,15 @@ import { getWishlist } from "@/services/wishlist.service";
 import { Card, CardContent } from "@/components/ui/card";
 import { SearchBarSkeleton } from "@/components/search/SearchBarSkeleton";
 
-
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function SearchPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
+  const locale = await getLocale();
+  const t = await getTranslations("search_page");
   const params = await searchParams;
 
   const filters = {
@@ -23,7 +25,7 @@ export default async function SearchPage({
     guests: params.guests ? parseInt(params.guests) : undefined,
   };
 
-  const listings = await searchListings(filters);
+  const listings = await searchListings(filters, locale);
 
   let wishlistIds = new Set<string>();
   const cookieStore = await cookies();
@@ -31,13 +33,13 @@ export default async function SearchPage({
 
   if (token) {
     try {
-      const wishlist = await getWishlist();
+      const wishlist = await getWishlist(locale);
       const validWishlist = wishlist.filter((item) => item.listing !== null);
       wishlistIds = new Set(validWishlist.map((item) => item.listing._id));
     } catch (error) {
       console.log(
         "Wishlist fetch skipped:",
-        error instanceof Error ? error.message : "Not authenticated"
+        error instanceof Error ? error.message : "Not authenticated",
       );
     }
   }
@@ -53,14 +55,14 @@ export default async function SearchPage({
         {/* Results */}
         <div>
           <h2 className="text-2xl font-semibold mb-4">
-            {listings.length} listings found
+            {t("listings_found", { count: listings.length })}
           </h2>
 
           {listings.length === 0 ? (
             <Card>
               <CardContent className="text-center">
                 <p className="text-muted-foreground">
-                  No listings found. Try adjusting your search filters.
+                  {t("no_results")}
                 </p>
               </CardContent>
             </Card>

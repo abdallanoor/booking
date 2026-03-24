@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, MapPin, Navigation, Edit3 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export interface LocationData {
   streetAddress: string;
@@ -39,6 +40,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
   );
   const [isDetectingLocation, setIsDetectingLocation] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(!!value);
+  const t = useTranslations("location_picker");
 
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
 
@@ -141,7 +143,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
   // Handle current location detection
   const detectCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      alert(t("geolocation_not_supported"));
       return;
     }
 
@@ -192,23 +194,23 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           message: error.message,
         });
 
-        let errorMessage = "Unable to detect your location.";
+        let errorMessage = t("location_detect_error");
 
         // Handle specific error codes
         switch (error.code) {
           case 1: // PERMISSION_DENIED
-            errorMessage =
-              "Location permission denied. Please enable location services in your browser settings.";
+            errorMessage = t("location_permission_denied");
             break;
           case 2: // POSITION_UNAVAILABLE
-            errorMessage =
-              "Location information is unavailable. Please check your device settings.";
+            errorMessage = t("location_unavailable");
             break;
           case 3: // TIMEOUT
-            errorMessage = "The location request timed out. Please try again.";
+            errorMessage = t("location_timeout");
             break;
           default:
-            errorMessage = `Location error: ${error.message}`;
+            errorMessage = t("location_error_general", {
+              message: error.message,
+            });
         }
 
         alert(errorMessage);
@@ -217,7 +219,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
-  }, [parseAddressComponents]);
+  }, [parseAddressComponents, t]);
 
   // Handle manual entry
   const startManualEntry = useCallback(() => {
@@ -252,8 +254,8 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
 
   if (loadError) {
     return (
-      <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
-        Error loading Google Maps. Please check your API key.
+      <div className="p-4 bg-destructive/10 text-destructive rounded-lg text-start">
+        {t("map_load_error")}
       </div>
     );
   }
@@ -262,7 +264,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-6 w-6 animate-spin" />
-        <span className="ml-2">Loading maps...</span>
+        <span className="ml-2">{t("loading_maps")}</span>
       </div>
     );
   }
@@ -290,10 +292,10 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
               }}
             >
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <MapPin className="absolute rtl:right-3 ltr:left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search for address..."
-                  className="pl-10"
+                  placeholder={t("search_address")}
+                  className="px-10 text-start"
                   onClick={() => setInputMode("search")}
                 />
               </div>
@@ -303,7 +305,7 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
           {/* Alternative Options */}
           <div className="flex items-center gap-2">
             <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">OR</span>
+            <span className="text-xs text-muted-foreground">{t("or")}</span>
             <div className="flex-1 h-px bg-border" />
           </div>
 
@@ -316,21 +318,21 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
               className="h-auto py-3"
             >
               {isDetectingLocation ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 rtl:ml-2 ltr:mr-2 animate-spin" />
               ) : (
-                <Navigation />
+                <Navigation className="rtl:ml-2 ltr:mr-2 h-4 w-4" />
               )}
-              <span className="text-sm">Use Current Location</span>
+              <span className="text-sm">{t("use_current_location")}</span>
             </Button>
 
             <Button
               type="button"
               variant="outline"
               onClick={startManualEntry}
-              className="h-auto py-3"
+              className="h-auto py-3 gap-2"
             >
-              <Edit3 />
-              <span className="text-sm">Enter Manually</span>
+              <Edit3 className="h-4 w-4" />
+              <span className="text-sm">{t("enter_manually")}</span>
             </Button>
           </div>
         </div>
@@ -339,99 +341,99 @@ export function LocationPicker({ value, onChange }: LocationPickerProps) {
       {/* Address Confirmation Form */}
       {showConfirmation && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium">Confirm Address Details</h4>
+          <div className="flex items-center justify-between text-start">
+            <h4 className="font-medium">{t("confirm_address_details")}</h4>
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={resetSelection}
             >
-              Change
+              {t("change")}
             </Button>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid gap-4 text-start">
             {/* Country */}
             <div className="space-y-2">
-              <Label htmlFor="location-country">Country / Region *</Label>
+              <Label htmlFor="location-country">{t("country_region")}</Label>
               <Input
                 id="location-country"
                 value={formFields.country}
                 onChange={(e) => handleFieldChange("country", e.target.value)}
-                placeholder="Egypt"
+                placeholder={t("egypt")}
                 required
               />
             </div>
 
             {/* Street Address */}
             <div className="space-y-2">
-              <Label htmlFor="location-street">Street Address *</Label>
+              <Label htmlFor="location-street">{t("street_address")}</Label>
               <Input
                 id="location-street"
                 value={formFields.streetAddress}
                 onChange={(e) =>
                   handleFieldChange("streetAddress", e.target.value)
                 }
-                placeholder="123 Main Street"
+                placeholder={t("street_placeholder")}
                 required
               />
             </div>
 
             {/* Apt / Suite */}
             <div className="space-y-2">
-              <Label htmlFor="location-apt">Apt, Suite, Room, etc.</Label>
+              <Label htmlFor="location-apt">{t("apt_suite")}</Label>
               <Input
                 id="location-apt"
                 value={formFields.apt || ""}
                 onChange={(e) => handleFieldChange("apt", e.target.value)}
-                placeholder="Apt 5B"
+                placeholder={t("apt_placeholder")}
               />
             </div>
 
             {/* City */}
             <div className="space-y-2">
-              <Label htmlFor="location-city">City / Markaz *</Label>
+              <Label htmlFor="location-city">{t("city_markaz")}</Label>
               <Input
                 id="location-city"
                 value={formFields.city}
                 onChange={(e) => handleFieldChange("city", e.target.value)}
-                placeholder="Cairo"
+                placeholder={t("cairo")}
                 required
               />
             </div>
 
             {/* Governorate */}
             <div className="space-y-2">
-              <Label htmlFor="location-governorate">Governorate</Label>
+              <Label htmlFor="location-governorate">{t("governorate")}</Label>
               <Input
                 id="location-governorate"
                 value={formFields.governorate || ""}
                 onChange={(e) =>
                   handleFieldChange("governorate", e.target.value)
                 }
-                placeholder="Cairo Governorate"
+                placeholder={t("governorate_placeholder")}
               />
             </div>
 
             {/* Postal Code */}
             <div className="space-y-2">
-              <Label htmlFor="location-postal">Postal Code</Label>
+              <Label htmlFor="location-postal">{t("postal_code")}</Label>
               <Input
                 id="location-postal"
                 value={formFields.postalCode || ""}
                 onChange={(e) =>
                   handleFieldChange("postalCode", e.target.value)
                 }
-                placeholder="12345"
+                placeholder={t("postal_placeholder")}
               />
             </div>
           </div>
 
           {/* Map Preview */}
           {formFields.coordinates.lat !== 0 && (
-            <div className="space-y-2">
-              <Label>Location Preview</Label>
+            <div className="space-y-2 text-start">
+              <Label>{t("location_preview")}</Label>
               <div className="rounded-lg overflow-hidden border">
                 <GoogleMap
                   mapContainerStyle={mapContainerStyle}

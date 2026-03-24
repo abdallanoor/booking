@@ -18,17 +18,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function TodayPage() {
   const t = useTranslations("hosting");
+  const locale = useLocale();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchBookings() {
       try {
-        const result = await getAllBookingsAction();
+        const result = await getAllBookingsAction(locale);
         setBookings(result.data?.bookings || []);
       } catch (error) {
         console.error("Failed to fetch bookings:", error);
@@ -37,7 +38,7 @@ export default function TodayPage() {
       }
     }
     fetchBookings();
-  }, []);
+  }, [locale]);
 
   const today = new Date();
 

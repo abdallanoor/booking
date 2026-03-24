@@ -5,7 +5,7 @@ import { getServerUser } from "@/lib/auth/server-auth";
 import { ListingCalendar } from "@/components/hosting/ListingCalendar";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 export default async function CalendarPage({
   params,
@@ -14,11 +14,12 @@ export default async function CalendarPage({
 }) {
   const user = await getServerUser();
   if (!user) {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   const { id } = await params;
-  const listing = await getListing(id);
+  const locale = await getLocale();
+  const listing = await getListing(id, locale);
 
   if (!listing) {
     redirect("/hosting/listings");
