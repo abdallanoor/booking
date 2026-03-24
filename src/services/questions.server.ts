@@ -6,13 +6,17 @@ import type { Question } from "@/types";
  * Uses apiGet which handles server-side cookies and full URLs
  */
 export async function getListingQuestions(
-  listingId: string
+  listingId: string,
+  locale?: string
 ): Promise<{ questions: Question[]; hasAskedQuestion: boolean }> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   // Use the public API endpoint for getting visible questions for a listing
   const response = await apiGet<{
     questions: Question[];
     hasAskedQuestion: boolean;
-  }>(`/listings/${listingId}/questions`);
+  }>(`/listings/${listingId}/questions`, { headers });
 
   return response;
 }
@@ -21,10 +25,15 @@ export async function getListingQuestions(
  * Server-only service for host questions
  */
 export async function getHostListingQuestions(
-  listingId: string
+  listingId: string,
+  locale?: string
 ): Promise<Question[]> {
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
   const response = await apiGet<Question[]>(
-    `/host/listings/${listingId}/questions`
+    `/host/listings/${listingId}/questions`,
+    { headers }
   );
   return response;
 }

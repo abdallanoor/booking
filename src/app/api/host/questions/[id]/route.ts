@@ -4,6 +4,7 @@ import Question from "@/models/Question";
 import { getCurrentUser } from "@/lib/auth/auth-middleware";
 import Listing from "@/models/Listing";
 import { sendQuestionReplyEmail } from "@/lib/email/nodemailer";
+import { triggerQuestionTranslation } from "@/lib/question-translation";
 
 // PATCH: Answer question, toggle visibility, update FAQ
 export async function PATCH(
@@ -43,6 +44,14 @@ export async function PATCH(
     if (isVisible !== undefined) question.isVisible = isVisible;
 
     await question.save();
+
+    // Trigger translation update if answer or question changed
+    if (answer !== undefined) {
+      triggerQuestionTranslation(question._id.toString(), {
+        question: question.question,
+        answer: question.answer,
+      }).catch(err => console.error("[Translation] Question update translation failed:", err));
+    }
 
     // Send email if it's a new answer to a guest question
     if (answer && !wasAnswered && !question.isFAQ && question.guestId) {

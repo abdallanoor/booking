@@ -298,9 +298,16 @@ export interface UpdateReviewInput {
 // QUESTION TYPES
 // ============================================================================
 
+export interface QuestionTranslations {
+  question?: string;
+  answer?: string;
+}
+
 export interface QuestionBase {
   question: string;
   answer?: string;
+  translations?: Record<string, QuestionTranslations>;
+  sourceLang?: string;
   isVisible: boolean;
   isFAQ: boolean;
 }
@@ -713,10 +720,11 @@ export interface IWishlistDocument extends Document {
 /**
  * Mongoose Question Document
  */
-export interface IQuestionDocument extends Document, QuestionBase {
+export interface IQuestionDocument extends Document, Omit<QuestionBase, "translations"> {
   listingId: Types.ObjectId;
   guestId?: Types.ObjectId;
   hostId: Types.ObjectId;
+  translations?: Map<string, QuestionTranslations>;
   createdAt: Date;
   updatedAt: Date;
 }

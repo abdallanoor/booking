@@ -54,10 +54,11 @@ import {
 } from "@/services/questions.service";
 import { useRouter, useParams } from "next/navigation";
 import { Link } from "@/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function HostQuestionsPage() {
   const t = useTranslations("questions");
+  const locale = useLocale();
   const params = useParams<{ id: string }>();
   const listingId = params.id;
 
@@ -82,9 +83,12 @@ export default function HostQuestionsPage() {
     try {
       setIsLoading(true);
       const [listingRes, data] = await Promise.all([
-        apiClient.get<{ data: { listing: Listing } }>(`/listings/${listingId}`),
-        getHostListingQuestions(listingId),
+        apiClient.get<{ data: { listing: Listing } }>(`/listings/${listingId}`, {
+          headers: { "accept-language": locale },
+        }),
+        getHostListingQuestions(listingId, locale),
       ]);
+
       setListingTitle(listingRes.data.listing.title);
       setQuestions(data);
     } catch (error) {
@@ -102,7 +106,7 @@ export default function HostQuestionsPage() {
 
   const refreshQuestions = useCallback(async () => {
     try {
-      const data = await getHostListingQuestions(listingId);
+      const data = await getHostListingQuestions(listingId, locale);
       setQuestions(data);
     } catch (error) {
       console.error("Error refreshing questions:", error);

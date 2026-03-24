@@ -1,6 +1,7 @@
 import { getListingQuestions } from "@/services/questions.server";
 import QuestionsDisplay from "./QuestionsDisplay";
 import { Suspense } from "react";
+import { getLocale } from "next-intl/server";
 
 interface QuestionListProps {
   listingId: string;
@@ -8,7 +9,8 @@ interface QuestionListProps {
 }
 
 export default async function QuestionList({ listingId }: QuestionListProps) {
-  const { questions, hasAskedQuestion } = await getListingQuestions(listingId);
+  const locale = await getLocale();
+  const { questions, hasAskedQuestion } = await getListingQuestions(listingId, locale);
 
   return (
     <Suspense fallback={null}>

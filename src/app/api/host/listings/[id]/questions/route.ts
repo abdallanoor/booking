@@ -3,6 +3,8 @@ import dbConnect from "@/lib/mongodb";
 import Question from "@/models/Question";
 import Listing from "@/models/Listing";
 import { getCurrentUser } from "@/lib/auth/auth-middleware";
+import { triggerQuestionTranslation, applyQuestionLocale } from "@/lib/question-translation";
+import { SUPPORTED_LOCALES } from "@/lib/translate";
 
 // GET: Fetch all questions for a listing (Host only)
 export async function GET(
@@ -32,7 +34,19 @@ export async function GET(
       .populate("guestId", "name avatar")
       .sort({ createdAt: -1 });
 
-    return NextResponse.json(questions);
+    // Resolve locale: check header first (explicitly sent by developer), then cookie (site language), then fallback
+    const acceptLang = request.headers.get("accept-language")?.split(",")[0].split("-")[0].trim();
+    const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+    
+    const rawLocale = (acceptLang && (SUPPORTED_LOCALES as readonly string[]).includes(acceptLang)) 
+      ? acceptLang 
+      : (cookieLocale || "en");
+    
+    const effectiveLocale = (SUPPORTED_LOCALES as readonly string[]).includes(rawLocale) ? rawLocale : "en";
+    
+    const localizedQuestions = questions.map(q => applyQuestionLocale(q.toObject ? q.toObject() : q, effectiveLocale));
+
+    return NextResponse.json(localizedQuestions);
   } catch (error) {
     console.error("Error fetching host questions:", error);
     return NextResponse.json(
@@ -83,6 +97,12 @@ export async function POST(
       isVisible: true,
       isFAQ: true,
     });
+
+    // Fire-and-forget translation
+    triggerQuestionTranslation(newFAQ._id.toString(), {
+      question: newFAQ.question,
+      answer: newFAQ.answer,
+    }).catch(err => console.error("[Translation] Host FAQ translation failed:", err));
 
     return NextResponse.json(newFAQ, { status: 201 });
   } catch (error) {

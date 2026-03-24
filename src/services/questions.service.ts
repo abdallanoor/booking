@@ -3,9 +3,15 @@ import { Question } from "@/types";
 
 // Guest APIs
 export async function getListingQuestions(
-  listingId: string
+  listingId: string,
+  locale?: string
 ): Promise<Question[]> {
-  return apiClient.get<Question[]>(`/listings/${listingId}/questions`);
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
+  return apiClient.get<Question[]>(`/listings/${listingId}/questions`, {
+    headers,
+  });
 }
 
 export async function askQuestion(
@@ -19,9 +25,15 @@ export async function askQuestion(
 
 // Host APIs
 export async function getHostListingQuestions(
-  listingId: string
+  listingId: string,
+  locale?: string
 ): Promise<Question[]> {
-  return apiClient.get<Question[]>(`/host/listings/${listingId}/questions`);
+  const headers: Record<string, string> = {};
+  if (locale) headers["accept-language"] = locale;
+
+  return apiClient.get<Question[]>(`/host/listings/${listingId}/questions`, {
+    headers,
+  });
 }
 
 export async function createFAQ(

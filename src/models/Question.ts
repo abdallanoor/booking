@@ -35,6 +35,20 @@ const questionSchema = new Schema<IQuestionDocument>(
       type: Boolean,
       default: false,
     },
+    translations: {
+      type: Map,
+      of: new Schema(
+        {
+          question: { type: String },
+          answer: { type: String },
+        },
+        { _id: false }
+      ),
+    },
+    sourceLang: {
+      type: String,
+      default: "en",
+    },
   },
   {
     timestamps: true,
