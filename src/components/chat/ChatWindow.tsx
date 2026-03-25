@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Send } from "lucide-react";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
@@ -58,8 +58,8 @@ export function ChatWindow({
     }
   }, [messages]);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSend = async (e?: React.FormEvent) => {
+    e?.preventDefault?.();
     if (!newMessage.trim() || sending) return;
 
     const content = newMessage.trim();
@@ -185,22 +185,28 @@ export function ChatWindow({
 
       {/* Input Area */}
       <div className="p-4 border-t bg-background">
-        <form onSubmit={handleSend} className="flex items-center gap-2">
-          <Input
-            type="text"
-            className="flex-1 rounded-full px-4 h-10"
+        <form onSubmit={handleSend} className="flex items-end gap-2">
+          <Textarea
+            className="flex-1 min-h-10 max-h-[120px] rounded-3xl px-4 py-2.5 resize-none scrollbar-thin"
             placeholder={t("type_message")}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             disabled={sending}
+            rows={1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
           />
           <Button
             type="submit"
-            size="icon"
+            size="icon-lg"
             className="rounded-full shrink-0"
             disabled={!newMessage.trim() || sending}
           >
-            <Send className="rtl:-scale-x-100" />
+            <Send />
             <span className="sr-only">{t("send")}</span>
           </Button>
         </form>
