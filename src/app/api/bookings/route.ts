@@ -115,6 +115,10 @@ export async function POST(req: NextRequest) {
       return errorResponse("Listing not found", 404);
     }
 
+    if (listing.host.toString() === user._id.toString()) {
+      return errorResponse("You cannot book your own listing", 403);
+    }
+
     if (listing.status === "pending") {
       return errorResponse(
         "Property turned off: This property is currently not accepting reservations.",
