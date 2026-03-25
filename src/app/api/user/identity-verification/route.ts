@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import IdentityVerification from "@/models/IdentityVerification";
 import { requireAuth } from "@/lib/auth/auth-middleware";
 import { successResponse, errorResponse } from "@/lib/api-response";
+import { deleteImageFromCloudinary } from "@/lib/cloudinary";
 
 // GET: Get user's latest verification request
 export async function GET(req: NextRequest) {
@@ -34,17 +35,21 @@ export async function POST(req: NextRequest) {
       return errorResponse("Your identity is already verified", 400);
     }
 
-    // Check if there's already a pending request
-    const existingPending = await IdentityVerification.findOne({
+    // Check if there's already any request
+    const existingRequest = await IdentityVerification.findOne({
       user: user._id,
-      status: "pending",
     });
 
-    if (existingPending) {
-      return errorResponse(
-        "You already have a pending verification request",
-        400
-      );
+    if (existingRequest) {
+      if (existingRequest.status === "pending") {
+        return errorResponse(
+          "You already have a pending verification request",
+          400
+        );
+      }
+      if (existingRequest.status === "approved") {
+        return errorResponse("Your identity is already verified", 400);
+      }
     }
 
     const body = await req.json();
@@ -61,19 +66,38 @@ export async function POST(req: NextRequest) {
       return errorResponse("Document image is required", 400);
     }
 
-    // Create verification request
-    const verification = await IdentityVerification.create({
-      user: user._id,
-      type,
-      idNumber: idNumber.trim(),
-      imageUrl,
-      status: "pending",
-    });
+    let verification;
+
+    if (existingRequest) {
+      // Delete old image if it has changed
+      if (existingRequest.imageUrl && existingRequest.imageUrl !== imageUrl) {
+        await deleteImageFromCloudinary(existingRequest.imageUrl).catch(
+          (err) => console.error("Failed to delete old identity image:", err)
+        );
+      }
+
+      // Update existing rejected request
+      existingRequest.type = type;
+      existingRequest.idNumber = idNumber.trim();
+      existingRequest.imageUrl = imageUrl;
+      existingRequest.status = "pending";
+      existingRequest.rejectionReason = undefined;
+      verification = await existingRequest.save();
+    } else {
+      // Create verification request
+      verification = await IdentityVerification.create({
+        user: user._id,
+        type,
+        idNumber: idNumber.trim(),
+        imageUrl,
+        status: "pending",
+      });
+    }
 
     return successResponse(
       { verification },
       "Verification request submitted successfully",
-      201
+      existingRequest ? 200 : 201
     );
   } catch (error) {
     console.error("Identity verification submission error:", error);

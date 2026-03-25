@@ -145,7 +145,13 @@ export default function VerificationsPage() {
         action: "approve",
       });
       toast.success(t("approved_success"));
-      setVerifications((prev) => prev.filter((v) => v._id !== id));
+      if (statusFilter === "all") {
+        setVerifications((prev) =>
+          prev.map((v) => (v._id === id ? { ...v, status: "approved" } : v)),
+        );
+      } else {
+        setVerifications((prev) => prev.filter((v) => v._id !== id));
+      }
     } catch {
       toast.error(t("failed_approve"));
     } finally {
@@ -166,7 +172,15 @@ export default function VerificationsPage() {
         rejectionReason,
       });
       toast.success(t("rejected_success"));
-      setVerifications((prev) => prev.filter((v) => v._id !== id));
+      if (statusFilter === "all") {
+        setVerifications((prev) =>
+          prev.map((v) =>
+            v._id === id ? { ...v, status: "rejected", rejectionReason } : v,
+          ),
+        );
+      } else {
+        setVerifications((prev) => prev.filter((v) => v._id !== id));
+      }
       setRejectingId(null);
       setRejectionReason("");
     } catch {

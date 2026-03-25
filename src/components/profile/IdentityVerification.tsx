@@ -31,6 +31,7 @@ type VerificationState = {
   type?: "national_id" | "passport";
   idNumber?: string;
   rejectionReason?: string;
+  imageUrl?: string;
 };
 
 export function IdentityVerification({
@@ -70,6 +71,7 @@ export function IdentityVerification({
               type: string;
               idNumber: string;
               rejectionReason?: string;
+              imageUrl?: string;
             } | null;
           };
         }>("/user/identity-verification");
@@ -81,6 +83,7 @@ export function IdentityVerification({
             type: v.type as "national_id" | "passport",
             idNumber: v.idNumber,
             rejectionReason: v.rejectionReason,
+            imageUrl: v.imageUrl,
           });
         }
       } catch {
@@ -119,7 +122,7 @@ export function IdentityVerification({
   };
 
   const handleSubmit = async () => {
-    if (!idNumber.trim() || !selectedFile) {
+    if (!idNumber.trim() || (!selectedFile && !preview)) {
       toast.error(t("fill_fields"));
       return;
     }
@@ -129,7 +132,11 @@ export function IdentityVerification({
       const formData = new FormData();
       formData.append("type", docType);
       formData.append("idNumber", idNumber.trim());
-      formData.append("image", selectedFile);
+      if (selectedFile) {
+        formData.append("image", selectedFile);
+      } else if (preview && verification.imageUrl && preview === verification.imageUrl) {
+        formData.append("existingImageUrl", verification.imageUrl);
+      }
 
       const result = await submitIdentityVerificationAction(formData);
 
@@ -250,7 +257,15 @@ export function IdentityVerification({
         </div>
         {!isEditing && (
           <Button
-            onClick={() => setIsEditing(true)}
+            onClick={() => {
+              if (verification.status === "rejected") {
+                setDocType(verification.type || "national_id");
+                setIdNumber(verification.idNumber || "");
+                setPreview(verification.imageUrl || null);
+                setSelectedFile(null);
+              }
+              setIsEditing(true);
+            }}
             variant="secondary"
             className="max-sm:size-9"
           >
@@ -376,11 +391,11 @@ export function IdentityVerification({
             <Label className="text-sm font-medium">{t("doc_image")}</Label>
 
             {preview ? (
-              <div className="relative rounded-4xl border overflow-hidden max-w-[250px]">
+              <div className="relative rounded-4xl border overflow-hidden w-full max-w-[250px] h-48 bg-muted/30">
                 <img
                   src={preview}
                   alt="Document preview"
-                  className="w-full max-h-48 object-contain bg-muted/30"
+                  className="w-full h-full object-contain"
                 />
                 <Button
                   type="button"
@@ -397,7 +412,7 @@ export function IdentityVerification({
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={loading}
-                className="w-full rounded-4xl border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors p-8 flex flex-col items-center gap-2 text-muted-foreground"
+                className="w-full max-w-[250px] h-48 rounded-4xl border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors flex flex-col items-center justify-center gap-2 text-muted-foreground"
               >
                 <Upload className="h-5 w-5" />
                 <span className="text-sm font-medium">{t("upload_image")}</span>
@@ -419,7 +434,7 @@ export function IdentityVerification({
             <Button
               type="button"
               onClick={handleSubmit}
-              disabled={loading || !idNumber.trim() || !selectedFile}
+              disabled={loading || !idNumber.trim() || (!selectedFile && !preview)}
               className="flex-1 sm:flex-none"
             >
               {loading ? t("submitting") : t("submit")}

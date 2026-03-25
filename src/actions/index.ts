@@ -139,16 +139,21 @@ export async function changePasswordAction(
 }
 
 export async function submitIdentityVerificationAction(formData: FormData) {
-  const file = formData.get("image") as File;
+  const file = formData.get("image") as File | null;
+  const existingImageUrl = formData.get("existingImageUrl") as string | null;
   const type = formData.get("type") as string;
   const idNumber = formData.get("idNumber") as string;
 
-  if (!file || !type || !idNumber) {
+  if ((!file && !existingImageUrl) || !type || !idNumber) {
     return { success: false, message: "All fields are required" };
   }
 
   try {
-    const [imageUrl] = await uploadImages([file], "booking-app/identity");
+    let imageUrl = existingImageUrl;
+    if (file && file.size > 0) {
+      const [uploadedUrl] = await uploadImages([file], "booking-app/identity");
+      imageUrl = uploadedUrl;
+    }
 
     const result = await apiPost<ApiResponse<{ verification: unknown }>>(
       "/user/identity-verification",
