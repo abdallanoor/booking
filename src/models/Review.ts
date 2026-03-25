@@ -32,6 +32,15 @@ const reviewSchema = new Schema<IReviewDocument>(
       trim: true,
       maxlength: [2000, "Comment cannot exceed 2000 characters"],
     },
+    translations: {
+      type: Map,
+      of: Object,
+      default: {},
+    },
+    sourceLang: {
+      type: String,
+      default: "en",
+    },
   },
   {
     timestamps: true,

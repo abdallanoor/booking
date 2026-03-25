@@ -1,6 +1,5 @@
 "use client";
 
-import { format } from "date-fns";
 import { Star } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";

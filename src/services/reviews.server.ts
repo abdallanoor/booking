@@ -9,9 +9,13 @@ export const reviewsServerService = {
   /**
    * Get reviews for a listing (Server-side)
    */
-  getReviews: async (listingId: string): Promise<Review[]> => {
+  getReviews: async (listingId: string, locale?: string): Promise<Review[]> => {
+    const headers: Record<string, string> = {};
+    if (locale) headers["accept-language"] = locale;
+
     const response = await apiGet<{ data: { reviews: Review[] } }>(
-      `/reviews?listingId=${listingId}`
+      `/reviews?listingId=${listingId}`,
+      { headers }
     );
 
     return response.data.reviews;
@@ -19,6 +23,6 @@ export const reviewsServerService = {
 };
 
 // Also export as standalone function for convenience
-export async function getReviews(listingId: string): Promise<Review[]> {
-  return reviewsServerService.getReviews(listingId);
+export async function getReviews(listingId: string, locale?: string): Promise<Review[]> {
+  return reviewsServerService.getReviews(listingId, locale);
 }

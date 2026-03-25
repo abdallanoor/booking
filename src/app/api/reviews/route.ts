@@ -144,6 +144,12 @@ export async function POST(req: NextRequest) {
     booking.reviewId = review._id;
     await booking.save();
 
+    // Trigger translation in the background if there's a comment
+    if (review.comment) {
+      const { triggerReviewTranslation } = await import("@/lib/review-translation");
+      triggerReviewTranslation(review._id.toString());
+    }
+
     // Populate review for response
     await review.populate("guest", "name avatar");
     await review.populate("listing", "title");
@@ -205,7 +211,24 @@ export async function GET(req: NextRequest) {
       .populate("booking", "checkIn checkOut")
       .sort({ createdAt: -1 }); // Newest first
 
-    return successResponse({ reviews });
+    // Resolve locale and apply to reviews
+    const { applyReviewLocale } = await import("@/lib/review-translation");
+    const { SUPPORTED_LOCALES } = await import("@/lib/translate");
+
+    const acceptLang = req.headers.get("accept-language")?.split(",")[0].split("-")[0].trim();
+    const cookieLocale = req.cookies.get("NEXT_LOCALE")?.value;
+    
+    const rawLocale = (acceptLang && (SUPPORTED_LOCALES as readonly string[]).includes(acceptLang)) 
+      ? acceptLang 
+      : (cookieLocale || "en");
+    
+    const effectiveLocale = (SUPPORTED_LOCALES as readonly string[]).includes(rawLocale) ? rawLocale : "en";
+
+    const localizedReviews = reviews.map(r => 
+      applyReviewLocale(r.toObject ? r.toObject() : r, effectiveLocale)
+    );
+
+    return successResponse({ reviews: localizedReviews });
   } catch (error) {
     console.error("Get reviews error:", error);
     const message =

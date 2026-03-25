@@ -244,6 +244,8 @@ export interface Review extends Omit<
   "listing" | "guest" | "booking"
 > {
   _id: string;
+  translations?: Map<string, any>;
+  sourceLang?: string;
   listing: {
     _id: string;
     title: string;
@@ -691,6 +693,8 @@ export interface IReviewDocument
   booking: Types.ObjectId;
   rating: number;
   comment?: string;
+  translations?: Map<string, any>;
+  sourceLang?: string;
   createdAt: Date;
   updatedAt: Date;
 }

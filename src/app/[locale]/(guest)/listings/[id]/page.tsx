@@ -77,7 +77,7 @@ export default async function ListingDetailPage({
 
     // Fetch reviews for the listing
     try {
-      reviews = await getReviews(id);
+      reviews = await getReviews(id, locale);
     } catch {
       // Reviews fetch failed, continue without reviews
       reviews = [];
