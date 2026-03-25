@@ -89,14 +89,23 @@ export async function POST(req: NextRequest) {
       return errorResponse("Chat is only allowed for confirmed bookings", 403);
     }
 
-    // Check if conversation already exists for this booking
-    let conversation = await Conversation.findOne({ booking: bookingId });
+    const guestId = booking.guest;
+    const hostId = (booking.listing as any).host;
+
+    // Check if a conversation between these two users already exists
+    let conversation = await Conversation.findOne({
+      participants: { $all: [guestId, hostId], $size: 2 },
+    });
 
     if (!conversation) {
       conversation = await Conversation.create({
-        participants: [booking.guest, (booking.listing as any).host],
+        participants: [guestId, hostId],
         booking: bookingId,
       });
+    } else if (conversation.booking.toString() !== bookingId.toString()) {
+      // Update the conversation's booking context to the current booking
+      conversation.booking = bookingId;
+      await conversation.save();
     }
 
     await conversation.populate("participants", "name avatar role");
