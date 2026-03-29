@@ -112,6 +112,18 @@ This comprehensive platform enables users to discover and book properties, manag
 
 ---
 
+## 🆕 Latest Updates
+
+- 🌍 **Internationalization (i18n) & RTL** — Complete migration to route-based localization (`[locale]`) with full Right-to-Left language support including Arabic.
+- 💬 **In-App Messaging** — Comprehensive chat system enabling direct communication between guests and hosts, complete with multi-line inputs and robust empty states.
+- 🌐 **Automated Review Translation** — Background processing to dynamically translate review comments based on the user's active locale.
+- 🆔 **Enhanced Identity Verification** — Added functionality for users to seamlessly re-submit identity verification and update their documents.
+- 🔧 **Admin Overview Overhaul** — Upgraded admin dashboards with server-side pagination, status filtering, and capabilities to provide listing rejection reasons.
+- 🔒 **Prevent Host Self-Booking** — Added strict constraints to prevent users from booking their own properties.
+- ✨ **UI & Layout Optimizations** — Revamped search bar grid layouts, updated Radix UI popovers, and implemented robust URL-driven pagination across listings and bookings.
+
+---
+
 ## 🛠️ Getting Started
 
 ### Prerequisites
