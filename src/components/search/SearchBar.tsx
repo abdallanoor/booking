@@ -76,28 +76,35 @@ export function SearchBar() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="flex flex-col md:flex-row h-auto md:h-16 bg-card rounded-2xl md:rounded-full border shadow-lg hover:shadow-xl duration-300 divide-y md:divide-y-0 overflow-hidden md:overflow-visible">
+      <div className="grid grid-cols-1 md:grid-cols-3 h-auto md:h-16 bg-card rounded-2xl md:rounded-full border shadow-lg hover:shadow-xl duration-300 divide-y md:divide-y-0 overflow-hidden md:overflow-visible">
         {/* Location Input */}
-        <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto group flex flex-col justify-center md:h-full peer/loc">
-          <label className="block text-xs font-bold text-foreground mb-0.5 group-hover:text-foreground/80">
+        <div
+          className="relative px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer group flex flex-col justify-center h-full peer/loc"
+          onClick={() => document.getElementById("location-input")?.focus()}
+        >
+          <label
+            htmlFor="location-input"
+            className="block text-xs font-bold text-foreground mb-0.5 group-hover:text-foreground/80 cursor-pointer"
+          >
             {t("where")}
           </label>
           <input
+            id="location-input"
             type="text"
             placeholder={t("search_destinations")}
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="w-full bg-transparent border-none text-sm text-muted-foreground placeholder:text-muted-foreground/50 focus:outline-none truncate"
+            className="w-full bg-transparent border-none text-sm text-muted-foreground placeholder:text-muted-foreground/50 focus:outline-none truncate cursor-pointer focus:cursor-text"
           />
         </div>
 
         {/* Dates (Unified) */}
         <Popover>
           <PopoverTrigger asChild>
-            <div className="relative flex-1 px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer w-full md:w-auto text-start group/dates flex flex-col justify-center md:h-full peer/dates peer-hover/loc:[&>.search-separator]:hidden">
+            <div className="relative px-6 py-3 md:py-0 hover:bg-muted md:rounded-full cursor-pointer text-start group/dates flex flex-col justify-center h-full peer/dates peer-hover/loc:[&>.search-separator]:hidden">
               <div className="search-separator hidden md:block absolute start-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/dates:hidden" />
-              <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/dates:text-foreground/80">
+              <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/dates:text-foreground/80 cursor-pointer">
                 {t("dates")}
               </label>
               <div
@@ -149,12 +156,12 @@ export function SearchBar() {
         </Popover>
 
         {/* Guests & Search Button */}
-        <div className="relative flex-[1.2] pe-2 py-2 md:py-0 hover:bg-muted md:rounded-full cursor-pointer flex items-center justify-between w-full md:w-auto group/guests md:h-full peer-hover/dates:[&>.search-separator]:hidden">
-          <div className="search-separator hidden md:block absolute start-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/guests:hidden" />
+        <div className="relative h-full peer-hover/dates:[&_.search-separator]:hidden">
           <Popover>
             <PopoverTrigger asChild>
-              <div className="flex-1 text-start px-6 h-full flex flex-col justify-center">
-                <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/guests:text-foreground/80">
+              <div className="w-full h-full py-3 md:py-0 px-6 pe-16 flex flex-col justify-center text-start outline-none hover:bg-muted md:rounded-full cursor-pointer group/guests relative">
+                <div className="search-separator hidden md:block absolute start-0 top-1/2 -translate-y-1/2 h-8 w-px bg-border group-hover/guests:hidden z-10" />
+                <label className="block text-xs font-bold text-foreground mb-0.5 group-hover/guests:text-foreground/80 cursor-pointer">
                   {t("who")}
                 </label>
                 <div
@@ -211,7 +218,7 @@ export function SearchBar() {
 
           <Button
             size="icon"
-            className="rounded-full h-12 w-12 shrink-0 ms-2 shadow-md hover:scale-105-transform"
+            className="absolute end-2 top-1/2 -translate-y-1/2 rounded-full h-12 w-12 shadow-md hover:scale-105-transform z-10"
             onClick={handleSearch}
           >
             <SearchIcon className="h-5 w-5" />
