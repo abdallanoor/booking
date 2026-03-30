@@ -42,6 +42,16 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-dot-pulse: dot-pulse 1.2s infinite ease-in-out;
+
+  @keyframes dot-pulse {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
 }
 
 :root {
